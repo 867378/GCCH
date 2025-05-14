@@ -78,7 +78,7 @@
             <ul class="popup-list">
               <li>3 new applicants this week</li>
               <li>Company profile approved</li>
-              <li>New feature: Analytics tab</li>
+              <li>New feature: Analytics tab leche leche</li>
             </ul>
             <button @click="toggleNotif">Close</button>
           </div>
