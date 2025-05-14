@@ -3,7 +3,7 @@
     <div class="sidebar">
       <img src="/public/gcchnobg.png" alt="GCCH Logo" class="logo" />
       <ul>
-        <li style="font-weight: bold">
+        <li>
           <router-link to="/CompanyDash" class="sidenav-text">
             <img src="/public/home.png" class="ikon" />
             HOME
@@ -26,7 +26,7 @@
             APPLICATIONS
           </router-link>
         </li>
-        <li>
+        <li style="font-weight: bold">
           <router-link to="/CompanyProfile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
             PROFILE
@@ -91,83 +91,85 @@
         </div>
       </div>
       <div class="content">
-        <div class="left-content">
-          <div class="post-box">
-            <h3 style="text-align: left; font-size: 30px">
-              What’s on your mind?
-            </h3>
-            <textarea
-              placeholder="Describe the advertisement of your company....."
-            ></textarea>
+        <div class="profile-wrapper">
+          <div class="profile-card">
+            <div class="form-group">
+              <label class="profile-avatar-label">
+                <img
+                  :src="profileImage || '/public/user.png'"
+                  alt="Profile"
+                  class="profile-avatar"
+                />
+                <input
+                  v-if="isEditing"
+                  type="file"
+                  accept="image/*"
+                  @change="onImageChange"
+                  style="display: none"
+                />
+              </label>
+            </div>
 
-            <input
-              type="file"
-              id="media-picker"
-              onchange="displayImage(this)"
-            />
-            <label for="media-picker">
-              <img src="/public/gallery.png" alt="upload icon" class="ikon" />
-              Upload Media
-            </label>
-            <button @click="postJob">POST</button>
-          </div>
-          <div class="cards">
-            <div class="card">
-              <p>
-                <strong>
-                  <img
-                    src="/public/people.png"
-                    alt="total clients Icon"
-                    class="ikon"
+            <div class="profile-form">
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" :readonly="!isEditing" v-model="fullName" />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Age</label>
+                  <select :disabled="!isEditing" v-model="age">
+                    <option disabled>Select age</option>
+                    <option v-for="n in 43" :key="n">{{ n + 17 }}</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Date of Birth</label>
+                  <input type="date" v-model="profile" :readonly="!isEditing" />
+                </div>
+
+                <div class="form-group">
+                  <label>Gender</label>
+                  <select v-model="profile" :disabled="!isEditing">
+                    <option>MALE</option>
+                    <option>FEMALE</option>
+                    <option>NON-BINARY</option>
+                    <option>PREFER NOT TO SAY</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Phone Number</label>
+                  <input
+                    type="text"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                    maxlength="11"
+                    :readonly="!isEditing"
+                    placeholder="Enter phone number"
                   />
-                  TOTAL CLIENTS</strong
-                >
-              </p>
-              <p>500</p>
-            </div>
-            <div class="card">
-              <p>
-                <strong>
-                  <img
-                    src="/public/checklist.png"
-                    alt="total job listings Icon"
-                    class="ikon"
+                </div>
+                <div class="form-group">
+                  <label>Email Address</label>
+                  <input
+                    type="email"
+                    :readonly="!isEditing"
+                    v-model="email"
+                    placeholder="Example@gmail.com"
                   />
-                  TOTAL JOB LISTINGS</strong
-                >
-              </p>
-              <p>500</p>
-            </div>
-            <div class="card">
-              <p>
-                <strong>
-                  <img
-                    src="/public/buffer.png"
-                    alt="pending applications Icon"
-                    class="ikon"
-                  />
-                  PENDING APPLICATION</strong
-                >
-              </p>
-              <p>500</p>
-            </div>
-          </div>
-        </div>
-        <div class="right-content">
-          <h3>UPDATES</h3>
-          <div class="updates-list">
-            <div
-              v-for="(update, index) in updates"
-              :key="index"
-              class="update-box"
-            >
-              <h2>
-                <span v-if="update.type === 'message'"></span>
-                <span v-if="update.type === 'applicant'"></span>
-                <span v-if="update.type === 'job_post'"></span>
-                {{ update.user }} {{ update.content }}
-              </h2>
-              <p>{{ update.time }}</p>
+                </div>
+              </div>
+              <div class="btn-group">
+                <button v-if="!isEditing" class="edit-btn" @click="toggleEdit">
+                  EDIT
+                </button>
+                <button v-if="isEditing" class="save-btn" @click="saveChanges">
+                  SAVE
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -185,28 +187,11 @@ export default {
       showSignOut: false,
       unreadMessages: 0,
       newNotifications: 0,
-      updates: [
-        {
-          type: "message",
-          user: "Jape",
-          time: "10:47 AM",
-          content: "sent you a message",
-        },
-        {
-          type: "applicant",
-          user: "Paulo",
-          time: "9:15 AM",
-          content: "submitted a resume",
-        },
-        {
-          type: "job_post",
-          user: "You",
-          time: "8:00 AM",
-          content: "posted a job ",
-        },
-      ],
+      profileImage: null,
+      isEditing: false,
     };
   },
+
   methods: {
     toggleMail() {
       this.showMail = !this.showMail;
@@ -227,26 +212,30 @@ export default {
       console.log("Signing out...");
       window.location.href = "/login";
     },
-    postJob() {
-      const text = document.querySelector("textarea").value;
-
-      fetch("/post-job", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: text }),
-      })
-        .then((response) => response.json())
-        .then((data) => console.log(data))
-        .catch((error) => console.error(error));
+    onImageChange(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          this.profileImage = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    toggleEdit() {
+      this.isEditing = !this.isEditing;
+    },
+    saveChanges() {
+      this.isEditing = false;
+      // Save logic here (e.g., send to backend)
     },
   },
+
   mounted() {
     setInterval(() => {
       this.unreadMessages += 1;
       this.newNotifications += 1;
-    }, 20000);
+    }, 10000);
   },
 };
 </script>
@@ -270,7 +259,9 @@ body,
   background: #fafafa;
   padding: 20px 0;
   border-right: 1px solid #ccc;
+  flex-shrink: 0;
 }
+
 .logo {
   height: 8vh;
   width: 14vh;
@@ -342,7 +333,18 @@ body,
   justify-content: flex-end;
   gap: 10px;
 }
+.signout-btn {
+  background-color: #d32f2f;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
+.signout-btn:hover {
+  background-color: #b71c1c;
+}
 .cancel-btn {
   background-color: gray;
   color: white;
@@ -356,19 +358,6 @@ body,
   background-color: #555;
 }
 
-.signout-btn {
-  background-color: #d32f2f;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.signout-btn:hover {
-  background-color: #b71c1c;
-}
-
 .ikon {
   width: 20px;
   height: 20px;
@@ -378,7 +367,8 @@ body,
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  background-color: #eaf4f2;
+  height: 100vh;
+  overflow: hidden;
 }
 .topbar {
   height: 60px;
@@ -388,6 +378,7 @@ body,
   justify-content: space-between;
   padding: 0 20px;
   border-bottom: 1px solid #ccc;
+  flex-shrink: 0;
 }
 .left-top {
   display: flex;
@@ -397,7 +388,7 @@ body,
 .avatar {
   width: 40px;
   height: 40px;
-  background: #f1f1f1;
+  background: #ffffff;
   border-radius: 50%;
 }
 .topbar input[type="text"] {
@@ -424,7 +415,8 @@ body,
   background: white;
   padding: 25px;
   border-radius: 15px;
-  width: 350px;
+  width: 25%;
+  margin-left: 10%;
   max-height: 400px;
   overflow-y: auto;
   text-align: left;
@@ -462,18 +454,9 @@ body,
   background-color: #033f3a;
 }
 
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 .content {
+  flex-grow: 1;
+  overflow-y: auto;
   padding: 20px;
   display: flex;
   gap: 20px;
@@ -481,85 +464,7 @@ body,
 .left-content {
   flex: 3;
 }
-.post-box {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  border-radius: 3vh;
-}
-.post-box textarea {
-  width: 100%;
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-top: 2vh;
-  border-radius: 5px;
-  height: 25vh;
-  resize: none;
-}
-.post-box button {
-  background: #00695c;
-  color: white;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 10px;
-  margin-top: 12px;
-  cursor: pointer;
-  transition: color 0.3s ease-in-out;
-}
-.post-box button:hover {
-  color: #045d56;
-  background: #f1f1f1;
-}
-#media-picker {
-  display: none;
-  transition: color 0.3s ease-in-out;
-}
 
-label {
-  background-color: #045d56;
-  color: #fff;
-  padding: 8px 10px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-right: 70%;
-  transition: color 0.5s ease-in-out;
-}
-
-label:hover {
-  background-color: #f1f1f1;
-  color: #045d56;
-}
-
-.cards {
-  display: flex;
-  gap: 15px;
-}
-.card {
-  background: white;
-  padding: 15px;
-  border-radius: 20px;
-  text-align: center;
-  flex: 1;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
-  cursor: pointer;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-.right-content {
-  flex: 1;
-  background: white;
-  border-radius: 10px;
-  padding: 20px;
-  height: fit-content;
-}
 .icons-right {
   display: flex;
   gap: 20px;
@@ -573,6 +478,7 @@ label:hover {
   width: 25px;
   height: 25px;
 }
+
 .icon span {
   font-size: 12px;
   position: absolute;
@@ -584,20 +490,157 @@ label:hover {
   padding: 2px 5px;
 }
 
-.update-box {
-  background-color: #f4f8fc;
-  border-bottom: 4px solid #045d56;
-  border-radius: 1vh;
-  padding: 20px;
-  font-size: 10px;
-  margin-top: 2vh;
-  margin-bottom: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.custom-dropdown {
+  position: absolute;
+  top: 30px;
+  right: 10%;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  display: none;
+  width: 200px;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.update-box:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+.custom-dropdown .dropdown-label {
+  padding: 8px 12px;
+  background-color: #045d56;
+  color: white;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  font-weight: bold;
+}
+
+.custom-dropdown .dropdown-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.custom-dropdown .dropdown-options li {
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.custom-dropdown .dropdown-options li:hover {
+  background-color: #e0f2f1;
+}
+
+.industry-dropdown:hover .custom-dropdown {
+  display: block;
+}
+
+.profile-wrapper {
+  justify-content: center;
+}
+
+.profile-card {
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  padding: 2rem;
+  height: 100%;
+  width: 100%;
+  margin-left: 28vh;
+  gap: 3rem;
+}
+
+.profile-avatar {
+  width: 30vh;
+  height: 30vh;
+  object-fit: cover;
+  margin-top: 2vh;
+  margin-left: 45vh;
+  margin-bottom: 3vh;
+  border-radius: 50%;
+  border: 4px solid #045d56;
+}
+
+.profile-avatar-label {
+  cursor: pointer;
+  display: inline-block;
+}
+
+.profile-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #4f46e5;
+  outline: none;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.form-row .form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.btn-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.edit-btn,
+.save-btn {
+  padding: 0.7rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.edit-btn {
+  background: #045d56;
+  color: #e0f2f1;
+}
+
+.edit-btn:hover {
+  background: #d1d5db;
+  color: #045d56;
+}
+
+.save-btn {
+  background: #045d56;
+  color: #e0f2f1;
+}
+
+.save-btn:hover {
+  background: #d1d5db;
+  color: #045d56;
 }
 </style>

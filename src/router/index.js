@@ -4,14 +4,13 @@ import CompanyDashboard from "@/views/CompanyDashboard.vue";
 import CompanyPost from "@/views/CompanyPost.vue";
 import CompanyMessage from "@/views/CompanyMessage.vue";
 import CompanyApplication from "@/views/CompanyApplication.vue";
+import CompanyProfile from "@/views/CompanyProfile.vue";
 import Applicantdash from "@/views/Applicantdash.vue";
 import Applicantmessage from "@/views/Applicantmessage.vue";
 import Applicantprofile from "@/views/Applicantprofile.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-
-
     {
       path: "/login",
       name: "login",
@@ -40,6 +39,12 @@ const router = createRouter({
       path: "/companyapplication",
       name: "companyapplication",
       component: CompanyApplication,
+    },
+
+   {
+      path: "/CompanyProfile",
+      name: "CompanyProfile",
+      component: CompanyProfile,
     },
 
     {

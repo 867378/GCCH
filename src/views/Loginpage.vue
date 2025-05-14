@@ -45,10 +45,8 @@
 
     <div class="overlay-modal" id="signupModal">
       <div class="signup-modal">
-        <span class="close-btn" id="closeModal">&times;</span>
         <div id="applicantFields">
-          <span class="close-btn" id="closeModal">&times;</span>
-          <h2>Create an Account</h2>
+          <h2>CREATE AN ACCOUNT</h2>
           <div class="signup-toggle">
             <button type="button" class="toggle-btn active" id="applicantBtn">
               Applicant
@@ -68,8 +66,7 @@
         </div>
 
         <div id="companyFields">
-          <span class="close-btn" id="closeModal">&times;</span>
-          <h2>Create an Account</h2>
+          <h2>CREATE AN ACCOUNT</h2>
           <div class="signup-toggle">
             <button type="button" class="toggle-btn active" id="applicantBtn2">
               Applicant
@@ -231,8 +228,7 @@ html {
   font-size: 4rem;
   font-weight: bold;
   color: #fff;
-  margin-top: 15vh;
-  margin-right: 85vh; /* Adjust space between the text and the login container */
+  margin-top: 5vh;
 }
 
 .welcome-text p {
@@ -325,33 +321,121 @@ section {
   transition: background 0.3s ease;
 }
 
-.auth-buttons {
-  flex-direction: column;
-  align-items: center;
-  width: 200vh;
+.signup-modal {
+  background: #ffffff;
+  padding: 2.5rem 3rem;
+  border-radius: 16px;
+  width: 70vh;
+  height: 32vh;
+  max-height: 65vh;
+  max-width: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  position: center;
+  margin-left: 67vh;
+  margin-top: 30vh;
+  border: 1px solid #e5e7eb;
+}
+
+.signup-modal h2 {
+  color: #045d56;
+  font-weight: 700;
+  font-size: 2.8rem;
+  margin: 0 0 1.5rem;
   text-align: center;
 }
 
-.auth-buttons button {
-  width: 100%;
+.signup-form button {
+  width: 12%;
+  min-width: 110px;
   padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 5px;
+  background: #045d56;
+  color: #ffffff;
   border: none;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  margin-bottom: 10px;
+  margin-top: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.separator {
-  font-weight: bold;
-  color: #999;
-  margin: 20px auto;
+.signup-form button:hover {
+  background-color: #045d56;
+  transform: translateY(-2px);
 }
+
+.google-btn {
+  background-color: #ffffff;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  transition: all 0.3s ease;
+}
+.google-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.signup-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.toggle-btn {
+  padding: 10px 24px;
+  background-color: #f3f4f6;
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #374151;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.toggle-btn.active {
+  background-color: #045d56;
+  color: #ffffff;
+}
+
+.auth-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.auth-buttons img {
+  width: 24px;
+  height: 24px;
+}
+
+.auth-buttons button {
+  width: 40vh;
+  max-width: 90%;
+  padding: 12px 24px;
+  font-size: 15px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  color: #111827;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.auth-buttons button:hover {
+  background-color: #045d56;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
 
 .login-container {
   position: absolute;
-  top: 55%;
-  left: 75%;
+  top: 66%;
+  left: 50%;
   transform: translate(-50%, -50%);
   background: #fff8f0;
   padding: 3rem;
@@ -558,103 +642,4 @@ section {
   background: rgba(0, 0, 0, 0.7);
 }
 
-.signup-modal {
-  background: #ffffff;
-  padding: 2rem;
-  border-radius: 15px;
-  height: 25vh;
-  width: 50vh;
-  max-width: 100%;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  position: center;
-  margin-left: 80vh;
-  margin-top: 25vh;
-  max-height: 65vh;
-}
-
-.signup-modal h2 {
-  color: #045d56;
-  font-weight: bold;
-  font-size: 2.5rem;
-  margin-top: -0.1rem;
-  margin-bottom: 1.5rem;
-}
-
-.signup-form button {
-  width: 20%;
-  display: block;
-  padding: 10px;
-  background: #f1f1f1;
-  color: #045d56;
-  border: none;
-  border-radius: 10px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 1rem;
-  justify-content: center;
-  transition: background 0.3s ease;
-}
-
-.signup-form button:hover {
-  background-color: #045d56;
-  color: #eaedea;
-}
-
-.auth-buttons {
-  margin-left: 5vh;
-}
-
-.google-btn {
-  background-color: #ffffff;
-  color: #333;
-  border: 1px solid #ddd;
-}
-
-.email-btn {
-  background-color: #f1f1f1;
-  color: #333;
-  width: 1vh;
-  border: 1px solid #ccc;
-}
-
-.facebook-btn {
-  background-color: #3b5998;
-  color: #ffffff;
-}
-
-.auth-buttons img {
-  width: 24px;
-  height: 24px;
-}
-
-.signup-toggle {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1rem;
-  gap: 1rem;
-}
-
-.toggle-btn {
-  padding: 10px 20px;
-  background-color: #e0e0e0;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.toggle-btn.active {
-  background-color: #045d56;
-  color: white;
-}
-
-.close-btn {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  font-size: 1.5rem;
-  font-weight: bold;
-  cursor: pointer;
-  color: #444;
-}
 </style>

@@ -26,6 +26,12 @@
             APPLICATIONS
           </router-link>
         </li>
+         <li>
+          <router-link to="/CompanyProfile" class="sidenav-text">
+            <img src="/public/user.png" class="ikon" />
+            PROFILE
+          </router-link>
+        </li>
       </ul>
       <button class="sign-out" @click="toggleSignOut">
         <img src="/public/logout.png" alt="Sign Out Icon" />
@@ -342,7 +348,7 @@ body,
   cursor: pointer;
   transition: transform 0.3s ease, background-color 0.3s ease;
   padding: 15px 20px;
-  margin-top: 22vh;
+  margin-top: 10vh;
   margin-left: 8.5vh;
   border-radius: 10px;
 }

@@ -48,19 +48,23 @@
           <div class="icon industry-dropdown">
             <img src="/public/search.png" />
             <div class="custom-dropdown">
+              <button @click="clearFilters" class="clear-btn">
+                Clear Filters
+              </button>
+
               <div class="dropdown-label">Industry</div>
               <ul class="dropdown-options">
-                <li @click="filterBy('Tech Field')">Tech Field</li>
-                <li @click="filterBy('Hospitality & Tourism Management')">
+                <li @click="selectIndustry('Techfield')">Tech Field</li>
+                <li @click="selectIndustry('Hospitality & Tourism Management')">
                   Hospitality & Tourism Management
                 </li>
-                <li @click="filterBy('Education, Arts & Sciences')">
+                <li @click="selectIndustry('Education, Arts & Sciences')">
                   Education, Arts & Sciences
                 </li>
-                <li @click="filterBy('Business & Accountancy')">
+                <li @click="selectIndustry('Business & Accountancy')">
                   Business & Accountancy
                 </li>
-                <li @click="filterBy('Health Profession')">
+                <li @click="selectIndustry('Health Profession')">
                   Health Profession
                 </li>
               </ul>
@@ -70,13 +74,21 @@
           <div class="icon industry-dropdown">
             <img src="/public/company.png" />
             <div class="custom-dropdown">
+                          <button @click="clearFilters" class="clear-btn">Clear Filters</button>
+
               <div class="dropdown-label">Company</div>
               <ul class="dropdown-options">
-                <li>Estaciong Co.</li>
-                <li>Barbatos Co.</li>
-                <li>Lopez Co.</li>
-                <li>Dior</li>
-                <li>Louis Vuitton</li>
+                <li @click="selectCompany('Tech Solutions Inc.')">
+                  Tech Solutions Inc.
+                </li>
+                <li @click="selectCompany('Tech Solutions Inc.')">
+                  Barbatos Co.
+                </li>
+                <li @click="selectCompany('Tech Solutions Inc.')">Lopez Co.</li>
+                <li @click="selectCompany('Tech Solutions Inc.')">Dior</li>
+                <li @click="selectCompany('Tech Solutions Inc.')">
+                  Louis Vuitton
+                </li>
               </ul>
             </div>
           </div>
@@ -117,38 +129,51 @@
       </div>
       <div class="content">
         <div class="left-content">
-          <div class="job-box" v-for="job in jobs" :key="job.id">
+          <div class="job-box" v-for="job in filteredJobs" :key="job.id">
+            <div class="job-card">
+              <!-- Header -->
+              <div class="job-header">
+                <img src="/public/user.png" class="ikon" />
+                <h3 class="company-name">{{ job.company }}</h3>
+                <!-- <button class="message-btn" @click="sendMessage(job.company)">
+                  Send Message
+                </button>
+                <button class="apply-btn" @click="applyToJob(job.id)">
+                  Apply
+                </button> -->
+              </div>
 
-            <!-- Top section -->
-            <div class="job-header">
-              <img src="/public/user.png" class="ikon" />
-              <h3 class="company-name">{{ job.company }}</h3>
-              <button class="apply-btn" @click="applyToJob(job.id)">
-                Apply
-              </button>
-            </div>
+              <!-- Move salary here BELOW description -->
+              <div class="job-info">
+                <div class="job-detail">
+                  <img src="/public/briefcase.png" class="ikon" />
+                  <span class="job-type">{{ job.type }}</span>
+                </div>
+              </div>
 
-            <!-- Job description -->
-            <p class="job-description">{{ job.description }}</p>
+              <div class="job-info">
+                <div class="job-detail">
+                  <img src="/public/money.png" class="ikon" />
+                  <span class="salary">₱{{ job.salary }}</span>
+                </div>
+              </div>
+              <!-- Job Description -->
+              <p class="job-description">{{ job.description }}</p>
 
-            <!-- Optional media -->
-            <div v-if="job.media">
-              <img :src="job.media" alt="Job Media" class="job-media" />
-            </div>
+              <!-- Optional Media -->
+              <div v-if="job.media" class="media-container">
+                <img :src="job.media" alt="Job Media" class="job-media" />
+              </div>
 
-            <!-- Bottom info -->
-            <div class="job-footer">
-              
-              <img src="/public/briefcase.png" class="ikon" />
-              <span class="job-type">{{ job.type }}</span>
-
-              <img src="/public/money.png" class="ikon" />
-              <span class="salary">₱{{ job.salary }}</span>
-
-              
-              <button class="message-btn" @click="sendMessage(job.company)">
-                Send Message
-              </button>
+              <!-- Apply and Message Buttons -->
+              <div class="job-actions">
+                <button class="message-btn" @click="sendMessage(job.company)">
+                  Send Message
+                </button>
+                <button class="apply-btn" @click="applyToJob(job.id)">
+                  Apply
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -174,7 +199,7 @@
       </div>
     </div>
   </div>
-  
+
   <div
     v-if="showApplyPopup"
     class="popup-overlay"
@@ -194,28 +219,28 @@
     </div>
   </div>
   <div
-      v-if="showMessagePopup"
-      class="popup-overlay"
-      @click.self="showMessagePopup = false"
-    >
-      <div class="popup">
-        <h3>✉️ Message to {{ selectedCompany }}</h3>
-        <textarea
-          v-model="messageContent"
-          placeholder="Type your message here..."
-          rows="5"
-          style="width: 100%; padding: 8px"
-        ></textarea>
-        <br /><br />
-        <button @click="sendActualMessage">Send</button>
-        <button
-          style="margin-left: 10px; background-color: gray"
-          @click="showMessagePopup = false"
-        >
-          Cancel
-        </button>
-      </div>
+    v-if="showMessagePopup"
+    class="popup-overlay"
+    @click.self="showMessagePopup = false"
+  >
+    <div class="popup">
+      <h3>✉️ Message to {{ selectedCompany }}</h3>
+      <textarea
+        v-model="messageContent"
+        placeholder="Type your message here..."
+        rows="5"
+        style="width: 100%; padding: 8px"
+      ></textarea>
+      <br /><br />
+      <button @click="sendActualMessage">Send</button>
+      <button
+        style="margin-left: 10px; background-color: gray"
+        @click="showMessagePopup = false"
+      >
+        Cancel
+      </button>
     </div>
+  </div>
 </template>
 
 <script>
@@ -231,6 +256,7 @@ export default {
       selectedJobId: null,
       resumeFile: null,
       showMessagePopup: false,
+      selectedIndustry: null,
       selectedCompany: null,
       messageContent: "",
 
@@ -239,8 +265,8 @@ export default {
           id: 1,
           company: "Tech Solutions Inc.",
           description:
-            "Looking for an experienced web developer to join our team...",
-          type: "Techfield",
+            "Hi idol! Walang signal dito sa bukid pero nung nalaman kong nag post ka dali dali akong bumaba ng bukid, tumawid ako ng tatlong ilog, tinumbok ko ang pitong bundok, at umutang ako ng perang pamasahe papuntang syudad at namalimos pa ako para may pang hulog sa pisonet para lang maka react sa post mo.",
+          type: "Education, Arts & Sciences",
           salary: "30,000 - 40,000",
           media: "/public/vincent.png",
         },
@@ -249,7 +275,7 @@ export default {
           company: "Green Valley Farms",
           description:
             "Hiring for a farm manager with experience in organic farming...",
-          type: "Techfield",
+          type: "Education, Arts & Sciences",
           salary: "20,000 - 25,000",
           media: "/public/vincent.png",
         },
@@ -284,6 +310,20 @@ export default {
         },
       ],
     };
+  },
+
+  computed: {
+    filteredJobs() {
+      return this.jobs.filter((job) => {
+        const matchesIndustry = this.selectedIndustry
+          ? job.type === this.selectedIndustry
+          : true;
+        const matchesCompany = this.selectedCompany
+          ? job.company === this.selectedCompany
+          : true;
+        return matchesIndustry && matchesCompany;
+      });
+    },
   },
 
   methods: {
@@ -361,7 +401,18 @@ export default {
       this.showMessagePopup = false;
       this.messageContent = "";
     },
+    selectIndustry(industry) {
+      this.selectedIndustry = industry;
+    },
+    selectCompany(company) {
+      this.selectedCompany = company;
+    },
+    clearFilters() {
+      this.selectedIndustry = null;
+      this.selectedCompany = null;
+    },
   },
+
   mounted() {
     setInterval(() => {
       this.unreadMessages += 1;
@@ -633,55 +684,11 @@ body,
   transform: scale(1.08);
 }
 
-.job-box {
-  border: 1px solid #ddd;
-  padding: 15px;
-  max-width: 100%;
-  margin-bottom: 20px;
-  border-radius: 12px;
-  background-color: #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
-.job-header {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
-
-.job-description {
-  word-wrap: break-word;
-  font-size: 15px;
-  margin: 15px 0;
-  font-size: 18px;
-}
-
-.job-media {
-  max-width: 100%;
-  max-height: 60vh;
-  margin-left:25vh ;
-  margin-bottom: 10px;
-}
-
-.job-footer {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  font-size: 15px;
-  margin-top: 10px;
-}
-
-.job-type,
-.salary {
-  font-weight: 500;
-  margin-right: 28%;
-}
-
 .message-btn {
   background-color: #045d56;
   color: #fff;
   width: 15%;
-  margin-left: auto;
+  margin-left: 55vh;
   border: none;
   padding: 6px 10px;
   border-radius: 6px;
@@ -694,6 +701,63 @@ body,
   background-color: #f1f1f1;
   color: #045d56;
   transform: scale(1.08);
+}
+.job-box {
+  border: 1px solid #ddd;
+  padding: 15px;
+  max-width: 100%;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+.job-card {
+  border: 1px solid #ddd;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  background-color: #fff;
+}
+.job-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.job-description {
+  word-wrap: break-word;
+  font-size: 15px;
+  margin-top: 3vh;
+  margin-bottom: 3vh;
+  margin-left: 10vh;
+  margin-right: 10vh;
+  line-height: 1.1;
+  font-size: 18px;
+  text-align: justify;
+  text-indent: 2em;
+}
+
+.job-media {
+  max-width: 100%;
+  max-height: 60vh;
+  margin-left: 25vh;
+  margin-bottom: 10px;
+}
+
+.job-type,
+.salary {
+  font-weight: 500;
+}
+.job-info {
+  display: flex;
+  margin-top: 10px;
+}
+
+.job-detail {
+  display: flex;
+  margin-right: 5vh;
+  align-items: center;
+  gap: 5px;
 }
 
 label {
