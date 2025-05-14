@@ -1,7 +1,7 @@
 <template>
   <div class="container-wrapper">
-    
     <!-- Login Section -->
+
     <section class="login-section" id="login">
       <div class="login-page">
         <nav class="navbar">
@@ -15,10 +15,15 @@
           </ul>
           <button class="sign-up">SIGN UP</button>
         </nav>
+        <div class="welcome-text">
+          WELCOME TO GCCH
+          <p>Explore New Career Opportunities and Build Your Future</p>
+        </div>
       </div>
+
       <div class="login-container">
         <form class="login-form">
-          <h2>Welcome To GCCH</h2>
+          <h2>LOGIN INTO YOUR ACCOUNT</h2>
           <p>E-mail Address:</p>
           <input
             type="text"
@@ -58,7 +63,6 @@
                 <img src="/public/google.png" alt="Google" />
                 Continue with Google
               </button>
-
             </div>
           </form>
         </div>
@@ -89,7 +93,7 @@
     <!-- About Us Section -->
     <section class="about-section" id="about">
       <div class="about-container">
-        <h1 class="about-title">About Us</h1>
+        <h1 class="about-title">About us</h1>
         <div class="about-content">
           <div class="about-gcch">
             <div class="about-heading">
@@ -214,7 +218,7 @@ html {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   overflow: auto;
   overflow-x: hidden;
 }
@@ -223,6 +227,19 @@ html {
   width: 100%;
 }
 
+.welcome-text {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #fff;
+  margin-top: 15vh;
+  margin-right: 85vh; /* Adjust space between the text and the login container */
+}
+
+.welcome-text p {
+  font-size: 1.5rem;
+  color: #fff;
+  margin-top: 1vh;
+}
 section {
   display: flex;
   flex-direction: column;
@@ -241,7 +258,7 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: url("/public/landingpage.png");
+  background: url("/public/bgtest.jpg") no-repeat center center fixed;
   background-size: cover;
   min-height: 100vh;
 }
@@ -252,7 +269,7 @@ section {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: .5rem 2rem;
+  padding: 0.5rem 2rem;
   background-color: #f1f6f3;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid #ddd;
@@ -280,13 +297,14 @@ section {
   color: #045d56;
   font-size: 1.2rem;
   padding: 10px 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .nav-links li a:hover {
-  background: #045d56;
-  border-radius: 20px;
-  color: #eaedea;
-  transition: background 0.3s ease;
+  transform: scale(1.1) translateY(-3px);
+  border-bottom: 2px solid #045d56;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  color: #033f3a;
 }
 
 .sign-up {
@@ -310,7 +328,7 @@ section {
 .auth-buttons {
   flex-direction: column;
   align-items: center;
-  width: 200vh; 
+  width: 200vh;
   text-align: center;
 }
 
@@ -323,7 +341,6 @@ section {
   cursor: pointer;
   margin-bottom: 10px;
 }
-
 
 .separator {
   font-weight: bold;
@@ -350,7 +367,7 @@ section {
 
 .login-form h2 {
   font-size: 5vh;
-  margin-top: -.5vh;
+  margin-top: -0.5vh;
   margin-bottom: 1.5 rem;
   font-family: "Arial", sans-serif;
   color: #17224d;
@@ -405,24 +422,6 @@ section {
   transition: background-color 0.3s ease;
 }
 
-.social-icons {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.social-icon {
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.social-icon:hover {
-  transform: scale(1.1);
-}
-
 .about-section {
   flex-grow: 1;
 }
@@ -431,80 +430,81 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 3rem;
   color: #374151;
-  background-color: #f8f9fa;
+  background: linear-gradient(to right, #e8f5f2, #cfeeea);
   min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .about-title {
-  font-size: 5.5rem;
+  font-size: 4.5rem;
   font-weight: 800;
   color: #045d56;
-  margin-top: 1rem;
-  margin-bottom: 4rem;
-  text-transform: uppercase;
-  letter-spacing: 5px;
+  margin-top: 5vh;
+  margin-bottom: 2vh;
   text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 3px;
 }
 
 .about-content {
   display: grid;
-  grid-template-columns: 1fr, 1fr;
-  gap: 20vh;
-  max-width: 60rem;
-  width: 150vh;
-}
-
-.about-mission-vision {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
   width: 100%;
-  max-width: 40rem;
+  max-width: 180vh;
 }
 
-.about-heading h2 {
-  font-size: 3.5rem;
-  font-weight: bold;
-  color: #045d56;
-  margin-bottom: 1rem;
-  text-align: center;
+.about-gcch {
+  background: #ffffff;
+  height: 61vh;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-.about-heading h3 {
-  font-size: 3.5rem;
-  font-weight: bold;
-  color: #045d56;
-  margin-top: -1rem;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-.about-heading h4 {
-  font-size: 3.5rem;
-  font-weight: bold;
-  color: #045d56;
-  margin-top: -1rem;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-.about-gcch p {
-  font-size: 1.2rem;
-  font-weight: 400;
-  line-height: 1.2;
-  color: #374151;
-  text-align: center;
+.about-mission,
+.about-vision {
+  background: #ffffff;
+  height: fit-content;
+  padding: 2rem;
+  height: 25vh;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .about-gcch:hover,
 .about-mission:hover,
 .about-vision:hover {
-  transform: scale(1.05);
-  box-shadow: 0 10px 20px rgba(4, 93, 86, 0.8);
-  transition: transform 0.6s ease-in-out, box-shadow 0.6s ease-in-out;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.about-heading h2,
+.about-heading h3,
+.about-heading h4 {
+  color: #045d56;
+  margin-top: -1vh;
+  margin-bottom: 1rem;
+  font-size: 3rem;
+  text-align: center;
+}
+
+.about-gcch p,
+.about-mission p,
+.about-vision p {
+  font-size: 1.3rem;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+.about-mission-vision {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .footer-section {
@@ -601,7 +601,7 @@ section {
 }
 
 .auth-buttons {
-margin-left: 5vh;
+  margin-left: 5vh;
 }
 
 .google-btn {

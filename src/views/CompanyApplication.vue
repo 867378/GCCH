@@ -310,7 +310,7 @@ body,
 .logo {
   height: 8vh;
   width: 14vh;
-  margin-right: 2.5vh;
+  margin-left: 5.5vh;
   margin-bottom: 15vh;
 }
 

@@ -23,7 +23,6 @@
       </ul>
       <button class="sign-out" @click="toggleSignOut">
         <img src="/public/logout.png" alt="Sign Out Icon" />
-        SIGN OUT
       </button>
 
       <div v-if="showSignOut" class="popup-overlay" @click.self="toggleSignOut">
@@ -377,7 +376,7 @@ body,
 .logo {
   height: 8vh;
   width: 14vh;
-  margin-right: 2.5vh;
+  margin-left: 5.5vh;
   margin-bottom: 15vh;
 }
 
@@ -416,14 +415,13 @@ body,
   transition: transform 0.3s ease, background-color 0.3s ease;
   padding: 15px 20px;
   margin-top: 32.5vh;
-  margin-left: 3.5vh;
+  margin-left: 8.5vh;
   border-radius: 10px;
 }
 
 .sign-out img {
   width: 20px;
   height: 20px;
-  margin-right: 10px;
 }
 
 .sign-out:hover {
@@ -655,8 +653,9 @@ body,
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 20px;
-  border-radius: 3vh;
-  width: 100%;
+  border-radius: 15px;
+  width: 95%;
+  margin-left: 3vh;
   max-height: 100%;
   overflow-y: auto;
   word-wrap: break-word;

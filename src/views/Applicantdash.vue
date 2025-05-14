@@ -23,7 +23,6 @@
       </ul>
       <button class="sign-out" @click="toggleSignOut">
         <img src="/public/logout.png" alt="Sign Out Icon" />
-        SIGN OUT
       </button>
 
       <div v-if="showSignOut" class="popup-overlay" @click.self="toggleSignOut">
@@ -241,7 +240,7 @@ export default {
           company: "Tech Solutions Inc.",
           description:
             "Looking for an experienced web developer to join our team...",
-          type: "Full-time",
+          type: "Techfield",
           salary: "30,000 - 40,000",
           media: "/public/vincent.png",
         },
@@ -250,7 +249,7 @@ export default {
           company: "Green Valley Farms",
           description:
             "Hiring for a farm manager with experience in organic farming...",
-          type: "Part-time",
+          type: "Techfield",
           salary: "20,000 - 25,000",
           media: "/public/vincent.png",
         },
@@ -258,7 +257,7 @@ export default {
           id: 3,
           company: "Creative Minds Agency",
           description: "Seeking a graphic designer with a strong portfolio...",
-          type: "Freelance",
+          type: "Techfield",
           salary: "15,000 - 20,000",
           media: "/public/vincent.png",
         },
@@ -397,7 +396,7 @@ body,
 .logo {
   height: 8vh;
   width: 14vh;
-  margin-right: 2.5vh;
+  margin-left: 5.5vh;
   margin-bottom: 15vh;
 }
 
@@ -436,14 +435,13 @@ body,
   transition: transform 0.3s ease, background-color 0.3s ease;
   padding: 15px 20px;
   margin-top: 32.5vh;
-  margin-left: 3.5vh;
+  margin-left: 8.5vh;
   border-radius: 10px;
 }
 
 .sign-out img {
   width: 20px;
   height: 20px;
-  margin-right: 10px;
 }
 
 .sign-out:hover {
@@ -661,6 +659,7 @@ body,
 .job-media {
   max-width: 100%;
   max-height: 60vh;
+  margin-left:25vh ;
   margin-bottom: 10px;
 }
 
