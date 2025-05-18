@@ -26,7 +26,7 @@
             APPLICATIONS
           </router-link>
         </li>
-         <li>
+        <li>
           <router-link to="/CompanyProfile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
             PROFILE
@@ -70,9 +70,7 @@
           <div class="popup">
             <h3>📬 Messages</h3>
             <ul class="popup-list">
-              <li>John: Interested in your post.</li>
-              <li>Jane: Sent a resume for the job.</li>
-              <li>Mark: Asking about job requirements.</li>
+              <li v-for="(msg, index) in messages" :key="index">{{ msg }}</li>
             </ul>
             <button @click="toggleMail">Close</button>
           </div>
@@ -82,9 +80,9 @@
           <div class="popup">
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
-              <li>3 new applicants this week</li>
-              <li>Job Posted</li>
-              <li></li>
+              <li v-for="(notif, index) in notifications" :key="index">
+                {{ notif }}
+              </li>
             </ul>
             <button @click="toggleNotif">Close</button>
           </div>
@@ -118,7 +116,11 @@
                     <option>Rejected</option>
                   </select>
 
-                  <button v-if="app.showSave" @click="saveStatus(app)" class="savebtn" >
+                  <button
+                    v-if="app.showSave"
+                    @click="saveStatus(app)"
+                    class="savebtn"
+                  >
                     Save
                   </button>
                 </div>
@@ -185,6 +187,14 @@ export default {
       selectedApplicant: null,
       selectedStatus: "",
       showSave: false,
+
+      messages: [
+        "Jape: Interested in your post.",
+        "Paulo: Sent a resume for the job.",
+        "Cj: Asking about job requirements.",
+      ],
+
+      notifications: ["3 new applicants this week", "Job Posted", "bengbeng"],
 
       updates: [
         {

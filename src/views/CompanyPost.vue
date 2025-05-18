@@ -26,7 +26,7 @@
             APPLICATIONS
           </router-link>
         </li>
-         <li>
+        <li>
           <router-link to="/CompanyProfile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
             PROFILE
@@ -70,9 +70,7 @@
           <div class="popup">
             <h3>📬 Messages</h3>
             <ul class="popup-list">
-              <li>John: Interested in your post.</li>
-              <li>Jane: Sent a resume for the job.</li>
-              <li>Mark: Asking about job requirements.</li>
+              <li v-for="(msg, index) in messages" :key="index">{{ msg }}</li>
             </ul>
             <button @click="toggleMail">Close</button>
           </div>
@@ -82,9 +80,9 @@
           <div class="popup">
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
-              <li>3 new applicants this week</li>
-              <li>Company profile approved</li>
-              <li>New feature: Analytics tab</li>
+              <li v-for="(notif, index) in notifications" :key="index">
+                {{ notif }}
+              </li>
             </ul>
             <button @click="toggleNotif">Close</button>
           </div>
@@ -188,7 +186,6 @@
               <h2>{{ job.title }}</h2>
               <p>{{ job.description }}</p>
               <small>{{ job.salary }}</small>
-
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
@@ -207,6 +204,14 @@ export default {
       showSignOut: false,
       unreadMessages: 0,
       newNotifications: 0,
+      messages: [
+        "Jape: Interested in your post.",
+        "Paulo: Sent a resume for the job.",
+        "Cj: Asking about job requirements.",
+      ],
+
+      notifications: ["3 new applicants this week", "Job Posted", "bengbeng"],
+
       postedJobs: [
         {
           title: "Tech Field",
@@ -220,18 +225,18 @@ export default {
             "We are seeking a junior web developer to join our startup team. You’ll be helping build scalable applications.",
           salary: "₱20,001 - ₱30,000",
         },
-          {
+        {
           title: "Tech Field",
           description:
             "We are seeking a junior web developer to join our startup team. You’ll be helping build scalable applications.",
           salary: "₱20,001 - ₱30,000",
         },
-          {
+        {
           title: "Tech Field",
           description:
             "We are seeking a junior web developer to join our startup team. You’ll be helping build scalable applications.",
           salary: "₱20,001 - ₱30,000",
-        },      
+        },
       ],
     };
   },
@@ -712,5 +717,4 @@ label:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
-
 </style>
