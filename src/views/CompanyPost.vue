@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="sidebar">
+    <div class="sidebar" :class="{ collapsed: !isSidenavOpen }">
       <img src="/public/gcchnobg.png" alt="GCCH Logo" class="logo" />
       <ul>
         <li>
@@ -53,6 +53,11 @@
     <div class="main">
       <div class="topbar">
         <div class="left-top">
+          <div class="hamburger" @click="isSidenavOpen = !isSidenavOpen">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
           <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
@@ -91,7 +96,7 @@
       <div class="content">
         <div class="left-content">
           <div class="post-box">
-            <h3 style="text-align: left; font-size: 30px">Job Description</h3>
+            <h3>Job Description</h3>
             <button @click="postJob">Post Job</button>
             <input
               type="text"
@@ -121,47 +126,6 @@
                 <option>Education, Arts & Sciences</option>
                 <option>Business & Accountancy</option>
                 <option>Health Profession</option>
-                <!-- 
-                  <option>Information Technology</option>
-                  <option>Healthcare</option>
-                  <option>Education</option>
-                  <option>Finance</option>
-                  <option>Construction</option>
-                  <option>Manufacturing</option>
-                  <option>Retail</option>
-                  <option>Hospitality</option>
-                  <option>Transportation</option>
-                  <option>Logistics</option>
-                  <option>Real Estate</option>
-                  <option>Marketing</option>
-                  <option>Telecommunications</option>
-                  <option>Media & Entertainment</option>
-                  <option>Engineering</option>
-                  <option>Legal Services</option>
-                  <option>Government</option>
-                  <option>Nonprofit</option>
-                  <option>Agriculture</option>
-                  <option>Automotive</option>
-                  <option>Food & Beverage</option>
-                  <option>Pharmaceuticals</option>
-                  <option>Energy</option>
-                  <option>Environmental Services</option>
-                  <option>Fashion</option>
-                  <option>Human Resources</option>
-                  <option>Business Consulting</option>
-                  <option>Arts & Design</option>
-                  <option>Customer Service</option>
-                  <option>Aerospace</option>
-                  <option>Insurance</option>
-                  <option>Security & Law Enforcement</option>
-                  <option>Mining & Metals</option>
-                  <option>Sports & Recreation</option>
-                  <option>Tourism & Travel</option>
-                  <option>E-commerce</option>
-                  <option>Utilities</option>
-                  <option>Publishing</option>
-                  <option>Petroleum & Gas</option>
-                  <option>Biotechnology</option> -->
               </select>
 
               <select class="job-form salary-range" id="salary-range">
@@ -204,6 +168,7 @@ export default {
       showSignOut: false,
       unreadMessages: 0,
       newNotifications: 0,
+      isSidenavOpen: false,
       messages: [
         "Jape: Interested in your post.",
         "Paulo: Sent a resume for the job.",
@@ -241,6 +206,9 @@ export default {
     };
   },
   methods: {
+    toggleSidenav() {
+      this.issidenavOpen = !this.issidenavOpen;
+    },
     toggleMail() {
       this.showMail = !this.showMail;
       if (this.showMail) {
@@ -420,8 +388,6 @@ body,
   display: flex;
   flex-direction: column;
   background-color: #eaf4f2;
-
-  /* background-image: url("/public/mainbg.png"); */
 }
 .topbar {
   height: 60px;
@@ -432,6 +398,25 @@ body,
   padding: 0 20px;
   border-bottom: 1px solid #ccc;
 }
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 25px;
+  height: 20px;
+  cursor: pointer;
+  margin: 0 10px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.hamburger span {
+  display: block;
+  height: 3px;
+  background-color: #333;
+  border-radius: 3px;
+}
+
 .left-top {
   display: flex;
   align-items: center;
@@ -542,6 +527,11 @@ body,
   font-size: 14px;
   resize: none;
   outline: none;
+}
+
+.post-box h3 {
+  text-align: left;
+  font-size: 30px;
 }
 .post-box button {
   background: #00695c;
@@ -716,5 +706,269 @@ label:hover {
 .posted-jobs-box:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.sidebar.collapsed {
+  width: 0px;
+  overflow: hidden;
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+  .content {
+    gap: 0;
+  }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .logo {
+    margin-top: 8vh;
+    margin-left: 4vh;
+    margin-bottom: 10vh;
+  }
+
+  .post-box {
+    border-radius: 3vh;
+    width: 95%;
+  }
+  .post-box textarea {
+    width: 100%;
+    margin-top: 2vh;
+    height: 25vh;
+  }
+
+  .right-content {
+    padding-top: 3vh;
+    margin-right: 1vh;
+    height: 85vh;
+    width: 50vh;
+    overflow: auto;
+  }
+
+  .posted-jobs-box {
+    margin-left: 2vh;
+    width: 25vh;
+    padding: 10px 20px;
+  }
+
+  .label {
+    padding: 10px 10px;
+    margin-right: 2vh;
+  }
+
+  .form-row {
+    gap: 10vh;
+  }
+  .sign-out {
+    margin-left: 7.5vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+  .content {
+    gap: 0;
+    padding: 10px;
+  }
+
+  .sidebar {
+    font-size: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .ikon {
+    height: 15px;
+    width: 15px;
+  }
+
+  .icon img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .logo {
+    height: 8vh;
+    width: 13vh;
+    margin-left: 4vh;
+    margin-bottom: 10vh;
+  }
+
+  .post-box {
+    border-radius: 3vh;
+    width: 95%;
+  }
+  .post-box textarea {
+    width: 100%;
+    margin-top: 1vh;
+    height: 20vh;
+  }
+
+  .right-content {
+    padding-top: 3vh;
+    height: 80vh;
+    overflow: auto;
+  }
+
+  .posted-jobs-box {
+    font-size: 10px;
+    width: 20vh;
+    padding: 10px 10px;
+  }
+
+  .upload-media,
+  .job-type,
+  .salary-range {
+    font-size: 10px;
+    padding: 8px 10px;
+  }
+
+  .form-row {
+    gap: 5vh;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 5.5vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+  .topbar {
+    height: 12.5vh;
+  }
+  .content {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .left-content {
+    padding-left: 3vh;
+    flex: 1;
+  }
+  .logo {
+    margin-left: 5vh;
+    margin-top: 5vh;
+    margin-bottom: 5vh;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .post-box {
+    width: 95%;
+    margin-bottom: 10px;
+    border-radius: 2vh;
+  }
+
+  .post-box button {
+    padding: 6px 10px;
+    margin-top: -5vh;
+  }
+
+  .right-content {
+    flex: 1;
+    margin-left: 7vh;
+    padding-top: 3vh;
+    height: auto;
+    overflow: auto;
+  }
+
+  .posted-jobs-box {
+    margin-left: 3vh;
+    font-size: 10px;
+    width: 40vh;
+    padding: 10px 10px;
+  }
+
+  .upload-media,
+  .job-type,
+  .salary-range {
+    font-size: 6px;
+    padding: 6px 8px;
+  }
+}
+@media (max-width: 385px) {
+  .sidebar {
+    width: 20vh;
+    font-size: 8px;
+  }
+  .logo {
+    height: 6vh;
+    width: 10vh;
+    margin-left: 3vh;
+    margin-bottom: 5vh;
+  }
+
+  .post-box {
+    margin-bottom: 5px;
+    border-radius: 2vh;
+  }
+  .post-box h3 {
+    font-size: 25px;
+  }
+  .post-box textarea {
+    margin-top: 2vh;
+    height: 12vh;
+  }
+  .post-box button {
+    font-size: 6px;
+    padding: 8px 10px;
+    margin-top: -4vh;
+  }
+  .right-content {
+    flex: 1;
+    margin-left: 3.5vh;
+    padding-top: 3vh;
+    height: auto;
+    overflow: auto;
+  }
 }
 </style>

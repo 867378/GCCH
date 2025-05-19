@@ -48,14 +48,6 @@
         <div class="signup-modal">
           <div id="applicantFields">
             <h2>CREATE AN ACCOUNT</h2>
-            <div class="signup-toggle">
-              <button type="button" class="toggle-btn active" id="applicantBtn">
-                Applicant
-              </button>
-              <button type="button" class="toggle-btn" id="companyBtn">
-                Company
-              </button>
-            </div>
             <form class="signup-form">
               <div class="auth-buttons">
                 <button class="google-btn">
@@ -68,14 +60,6 @@
 
           <div id="companyFields">
             <h2>CREATE AN ACCOUNT</h2>
-            <div class="signup-toggle">
-              <button type="button" class="toggle-btn active" id="applicantBtn2">
-                Applicant
-              </button>
-              <button type="button" class="toggle-btn" id="companyBtn2">
-                Company
-              </button>
-            </div>
             <form class="signup-form">
               <div class="auth-buttons">
                 <button class="google-btn">
@@ -335,15 +319,15 @@
 
   .signup-modal {
     background: #ffffff;
-    padding: 2.5rem 3rem;
+    padding: 2rem 2rem;
     border-radius: 16px;
-    width: 70vh;
-    height: 32vh;
+    width: 60vh;
+    height: 25vh;
     max-height: 65vh;
     max-width: 100%;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
     position: center;
-    margin-left: 67vh;
+    margin-left: 72vh;
     margin-top: 30vh;
     border: 1px solid #e5e7eb;
   }
@@ -351,7 +335,7 @@
   .signup-modal h2 {
     color: #045d56;
     font-weight: 700;
-    font-size: 2.8rem;
+    font-size: 2.1rem;
     margin: 0 0 1.5rem;
     text-align: center;
   }
@@ -386,29 +370,6 @@
   }
   .google-btn:hover {
     background-color: #f3f4f6;
-  }
-
-  .signup-toggle {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-    gap: 1rem;
-  }
-
-  .toggle-btn {
-    padding: 10px 24px;
-    background-color: #f3f4f6;
-    border: none;
-    border-radius: 9999px;
-    cursor: pointer;
-    font-weight: 600;
-    color: #374151;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-
-  .toggle-btn.active {
-    background-color: #045d56;
-    color: #ffffff;
   }
 
   .auth-buttons {

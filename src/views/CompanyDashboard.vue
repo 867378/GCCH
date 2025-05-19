@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="sidebar">
+    <div class="sidebar" :class="{ collapsed: !isSidenavOpen }">
       <img src="/public/gcchnobg.png" alt="GCCH Logo" class="logo" />
       <ul>
         <li style="font-weight: bold">
@@ -53,6 +53,12 @@
     <div class="main">
       <div class="topbar">
         <div class="left-top">
+          <div class="hamburger" @click="isSidenavOpen = !isSidenavOpen">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
           <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
@@ -121,7 +127,7 @@
                   TOTAL CLIENTS</strong
                 >
               </p>
-              <p>500</p>
+              <p>{{ totalClients }}</p>
             </div>
             <div class="card">
               <p>
@@ -134,7 +140,7 @@
                   TOTAL JOB LISTINGS</strong
                 >
               </p>
-              <p>500</p>
+              <p>{{ totalJobs }}</p>
             </div>
             <div class="card">
               <p>
@@ -147,7 +153,7 @@
                   PENDING APPLICATION</strong
                 >
               </p>
-              <p>500</p>
+              <p>{{ pendingApplications }}</p>
             </div>
           </div>
         </div>
@@ -183,13 +189,19 @@ export default {
       showSignOut: false,
       unreadMessages: 0,
       newNotifications: 0,
+      totalClients: 120,
+      totalJobs: 50,
+      pendingApplications: 10,
+      isSidenavOpen: false,
+
       messages: [
         "Jape: Interested in your post.",
         "Paulo: Sent a resume for the job.",
         "Cj: Asking about job requirements.",
       ],
+
       notifications: ["3 new applicants this week", "Job Posted", "bengbeng"],
-      
+
       updates: [
         {
           type: "message",
@@ -213,6 +225,9 @@ export default {
     };
   },
   methods: {
+    toggleSidenav() {
+      this.issidenavOpen = !this.issidenavOpen;
+    },
     toggleMail() {
       this.showMail = !this.showMail;
       if (this.showMail) {
@@ -394,6 +409,25 @@ body,
   padding: 0 20px;
   border-bottom: 1px solid #ccc;
 }
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 25px;
+  height: 20px;
+  cursor: pointer;
+  margin: 0 10px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.hamburger span {
+  display: block;
+  height: 3px;
+  background-color: #333;
+  border-radius: 3px;
+}
+
 .left-top {
   display: flex;
   align-items: center;
@@ -604,5 +638,190 @@ label:hover {
 .update-box:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar.collapsed {
+  width: 0px;
+  overflow: hidden;
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  .logo {
+    margin-top: 8vh;
+    margin-left: 4vh;
+    margin-bottom: 10vh;
+  }
+  label {
+    margin-right: 45vh;
+  }
+  .cards {
+    font-size: 10px;
+  }
+  .sign-out {
+    margin-left: 7.5vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+  .content {
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar {
+    font-size: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .ikon {
+    height: 15px;
+    width: 15px;
+  }
+  .logo {
+    height: 8vh;
+    width: 13vh;
+    margin-left: 4vh;
+    margin-bottom: 10vh;
+  }
+
+  .post-box {
+    margin-bottom: 15px;
+    border-radius: 2vh;
+  }
+  .post-box textarea {
+    margin-top: 2vh;
+    height: 20vh;
+  }
+  .post-box button {
+    padding: 6px 15px;
+    margin-top: 10px;
+  }
+
+  .icon img {
+    width: 20px;
+    height: 20px;
+  }
+  label {
+    padding: 6px 10px;
+    margin-right: 13vh;
+  }
+  .cards {
+    height: 9vh;
+    font-size: 8px;
+  }
+
+  .update-box {
+    border-radius: 1vh;
+    padding: 20px;
+    font-size: 7px;
+    margin-bottom: 20px;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 5.5vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+
+  .logo {
+    margin-left: 5vh;
+    margin-top: 5vh;
+    margin-bottom: 5vh;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .post-box {
+    margin-bottom: 10px;
+    border-radius: 2vh;
+  }
+  .post-box textarea {
+    margin-top: 2vh;
+    height: 15vh;
+  }
+  .post-box button {
+    padding: 6px 10px;
+    margin-top: 10px;
+  }
+}
+@media (max-width: 375px) {
+  .sidebar {
+    width: 20vh;
+  }
+  .logo {
+    height: 6vh;
+    width: 10vh;
+    margin-left: 3vh;
+    margin-bottom: 5vh;
+  }
+  .post-box {
+    margin-bottom: 5px;
+    border-radius: 2vh;
+  }
+  .post-box textarea {
+    margin-top: 2vh;
+    height: 12vh;
+  }
+  .post-box button {
+    padding: 6px 8px;
+    margin-top: 10px;
+  }
 }
 </style>
