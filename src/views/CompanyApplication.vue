@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="sidebar">
+    <div class="sidebar" :class="{ collapsed: !isSidenavOpen }">
       <img src="/public/gcchnobg.png" alt="GCCH Logo" class="logo" />
       <ul>
         <li>
@@ -53,6 +53,11 @@
     <div class="main">
       <div class="topbar">
         <div class="left-top">
+          <div class="hamburger" @click="isSidenavOpen = !isSidenavOpen">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
           <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
@@ -91,7 +96,7 @@
       <div class="content">
         <div class="left-content">
           <div class="resume-box">
-            <h3 style="text-align: left; font-size: 30px">Applications</h3>
+            <h3 class="resumeh3">Applications</h3>
             <div class="form-row">
               <div class="resume-list">
                 <div
@@ -187,6 +192,7 @@ export default {
       selectedApplicant: null,
       selectedStatus: "",
       showSave: false,
+      isSidenavOpen: false,
 
       messages: [
         "Jape: Interested in your post.",
@@ -251,6 +257,9 @@ export default {
     };
   },
   methods: {
+    toggleSidenav() {
+      this.issidenavOpen = !this.issidenavOpen;
+    },
     toggleMail() {
       this.showMail = !this.showMail;
       if (this.showMail) {
@@ -442,6 +451,30 @@ body,
   border-bottom: 1px solid #ccc;
   position: relative;
 }
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 25px;
+  height: 20px;
+  cursor: pointer;
+  margin: 0 10px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.hamburger span {
+  display: block;
+  height: 3px;
+  background-color: #333;
+  border-radius: 3px;
+}
+
+.sidebar.collapsed {
+  width: 0px;
+  overflow: hidden;
+  transition: width 0.3s ease;
+}
 .left-top {
   display: flex;
   align-items: center;
@@ -541,11 +574,15 @@ body,
   padding: 20px;
   margin-bottom: 10px;
   border-radius: 3vh;
-  width: 98%;
+  width: 100%;
   max-height: 85vh;
   overflow-y: auto;
 }
-
+.resumeh3 {
+  text-align: left;
+  font-size: 1.7rem;
+  margin-bottom: 2vh;
+}
 .resume-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -568,7 +605,7 @@ body,
   align-self: flex-start;
   border-left: 4px solid #045d56;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  max-width: 60%;
+  max-width: 58%;
   height: 100%;
   margin-left: 13vh;
   margin-bottom: 20px;
@@ -578,7 +615,8 @@ body,
   background-color: #045d56;
   color: white;
   border: none;
-  padding: 4px 14px;
+  margin-right: 1vh;
+  padding: 4px 12px;
   border-radius: 8px;
   font-size: 14px;
   margin-top: 10px;
@@ -751,5 +789,216 @@ body,
 .savebtn:hover {
   background-color: #033f3a;
   transform: translateY(-2px);
+}
+
+@media (max-width: 1024px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .logo {
+    margin-top: 8vh;
+    margin-left: 4vh;
+    margin-bottom: 10vh;
+  }
+
+  .resume-box {
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .resume-list {
+    margin-left: -5vh;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .sign-out {
+    margin-left: 7.5vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+  .content {
+    gap: 0;
+    padding: 10px;
+  }
+
+  .sidebar {
+    font-size: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .ikon {
+    height: 15px;
+    width: 15px;
+  }
+
+  .icon img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .logo {
+    height: 8vh;
+    width: 13vh;
+    margin-left: 4vh;
+    margin-bottom: 10vh;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
+  .resume-box {
+    width: 95%;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .resumeh3 {
+    font-size: 1.5rem;
+    margin-bottom: 2vh;
+  }
+  .resume-item {
+    font-size: 12px;
+    border-radius: 10px;
+    width: 80%;
+    position: relative;
+  }
+  .resume-item.received {
+    background-color: #f1f1f1;
+    align-self: flex-start;
+    border-left: 4px solid #045d56;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 80%;
+    height: 100%;
+    margin-left: 5vh;
+    margin-bottom: 20px;
+  }
+  .resume-item button {
+    font-size: 10px;
+    padding: 4px 10px;
+  }
+  .status-select {
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+  .update-box {
+    font-size: 8px;
+    padding: 10px;
+  }
+
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 5.5vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+
+  .content {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo {
+    margin-left: 5vh;
+    margin-top: 5vh;
+    margin-bottom: 5vh;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+  .resume-box {
+    overflow: auto;
+  }
+
+  .right-content {
+    overflow: auto;
+    width: 60vh;
+    margin-left: 1vh;
+    margin-bottom: 5vh;
+  }
+  .update-box {
+    font-size: 8px;
+    padding: 5px;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 385px) {
+
+  .sidebar {
+    width: 21vh;
+    font-size: 8px;
+  }
+  .logo {
+    height: 6vh;
+    width: 10vh;
+    margin-left: 3vh;
+    margin-bottom: 5vh;
+  }
+  .resume-box {
+    width: 95%;
+    max-height: 50vh;
+  }
+
+   .resume-list {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .left-content {
+    flex: 1;
+  }
+  .right-content {
+    width: 45vh;
+    margin-left: 5vh;
+    margin-bottom: 5vh;
+  }
 }
 </style>

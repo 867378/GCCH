@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="sidebar">
+    <div class="sidebar" :class="{ collapsed: !isSidenavOpen }">
       <img src="/public/gcchnobg.png" alt="GCCH Logo" class="logo" />
       <ul>
         <li>
@@ -53,6 +53,12 @@
     <div class="main">
       <div class="topbar">
         <div class="left-top">
+          <div class="hamburger" @click="isSidenavOpen = !isSidenavOpen">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
           <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
@@ -70,7 +76,7 @@
           <div class="popup">
             <h3>📬 Messages</h3>
             <ul class="popup-list">
-              <li v-for="(msg, index) in messages" :key="index">{{ msg }}</li>
+              <li v-for="(msg, index) in message" :key="index">{{ msg }}</li>
             </ul>
             <button @click="toggleMail">Close</button>
           </div>
@@ -186,7 +192,9 @@ export default {
       selectedUser: null,
       showMessagePopup: false,
       newReply: "",
-      messages: [
+      isSidenavOpen: false,
+
+      message: [
         "Jape: Interested in your post.",
         "Paulo: Sent a resume for the job.",
         "Cj: Asking about job requirements.",
@@ -261,6 +269,9 @@ export default {
     };
   },
   methods: {
+    toggleSidenav() {
+      this.issidenavOpen = !this.issidenavOpen;
+    },
     toggleMail() {
       this.showMail = !this.showMail;
       if (this.showMail) {
@@ -463,6 +474,31 @@ body,
   padding: 0 20px;
   border-bottom: 1px solid #ccc;
 }
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 25px;
+  height: 20px;
+  cursor: pointer;
+  margin: 0 10px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.hamburger span {
+  display: block;
+  height: 3px;
+  background-color: #333;
+  border-radius: 3px;
+}
+
+.sidebar.collapsed {
+  width: 0px;
+  overflow: hidden;
+  transition: width 0.3s ease;
+}
+
 .left-top {
   display: flex;
   align-items: center;
@@ -763,9 +799,194 @@ body,
   line-height: 1.4;
   font-family: inherit;
   font-size: 1rem;
-  max-height: 150px; /* limit the growth */
-  transition: height 0.2s ease; /* Smooth height adjustment */
+  max-height: 150px;
+  transition: height 0.2s ease;
   margin-top: 1vh;
   overflow-y: auto;
+}
+
+@media (max-width: 1024px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .logo {
+    margin-top: 8vh;
+    margin-left: 4vh;
+    margin-bottom: 10vh;
+  }
+
+  .sign-out {
+    margin-left: 7.5vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+  .content {
+    gap: 0;
+    padding: 10px;
+  }
+
+  .sidebar {
+    font-size: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .ikon {
+    height: 15px;
+    width: 15px;
+  }
+
+  .icon img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .logo {
+    height: 8vh;
+    width: 13vh;
+    margin-left: 4vh;
+    margin-bottom: 10vh;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .message-box {
+    width: 95%;
+  }
+  .message-item {
+    padding: 10px 5px;
+    font-size: 12px;
+  }
+  .message-item.received {
+    max-width: 90%;
+  }
+  .form-row {
+    margin-left: -10vh;
+  }
+
+  .right-content {
+    margin-right: 5vh;
+  }
+  .update-box {
+    font-size: 10px;
+    padding: 10px;
+  }
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 5.5vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+
+  .content {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo {
+    margin-left: 5vh;
+    margin-top: 5vh;
+    margin-bottom: 5vh;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .message-box {
+    width: 100%;
+  }
+  .message-item {
+    padding: 10px 5px;
+    font-size: 12px;
+  }
+  .message-item.received {
+    max-width: 90%;
+  }
+  .form-row {
+    margin-left: -16vh;
+  }
+
+  .right-content {
+    margin-left: 5vh;
+  }
+
+  .popup.chat-popup {
+    width: 60vh;
+  }
+  .popup.chat-popup .sent {
+    margin-left: 10vh;
+  }
+
+}
+@media (max-width: 385px) {
+  .sidebar {
+    width: 20vh;
+    font-size: 8px;
+  }
+  .logo {
+    height: 6vh;
+    width: 10vh;
+    margin-left: 3vh;
+    margin-bottom: 5vh;
+  }
+
+    .popup.chat-popup {
+    width: 50vh;
+  }
+  .popup.chat-popup .sent {
+    margin-left: 10vh;
+
+  }
 }
 </style>
