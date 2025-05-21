@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="sidebar">
+    <div class="sidebar" :class="{ collapsed: !isSidenavOpen }">
       <img src="/public/gcchnobg.png" alt="GCCH Logo" class="logo" />
       <ul>
         <li style="font-weight: bold">
@@ -41,6 +41,11 @@
     <div class="main">
       <div class="topbar">
         <div class="left-top">
+          <div class="hamburger" @click="isSidenavOpen = !isSidenavOpen">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
           <img class="avatar" src="/public/user.png" alt="Avatar" />
           <input type="text" placeholder="Search..." />
         </div>
@@ -74,7 +79,9 @@
           <div class="icon industry-dropdown">
             <img src="/public/company.png" />
             <div class="custom-dropdown">
-                          <button @click="clearFilters" class="clear-btn">Clear Filters</button>
+              <button @click="clearFilters" class="clear-btn">
+                Clear Filters
+              </button>
 
               <div class="dropdown-label">Company</div>
               <ul class="dropdown-options">
@@ -135,12 +142,12 @@
               <div class="job-header">
                 <img src="/public/user.png" class="ikon" />
                 <h3 class="company-name">{{ job.company }}</h3>
-                <!-- <button class="message-btn" @click="sendMessage(job.company)">
+                <button class="message-btn" @click="sendMessage(job.company)">
                   Send Message
                 </button>
                 <button class="apply-btn" @click="applyToJob(job.id)">
                   Apply
-                </button> -->
+                </button>
               </div>
 
               <!-- Move salary here BELOW description -->
@@ -166,14 +173,14 @@
               </div>
 
               <!-- Apply and Message Buttons -->
-              <div class="job-actions">
+              <!-- <div class="job-actions">
                 <button class="message-btn" @click="sendMessage(job.company)">
                   Send Message
                 </button>
                 <button class="apply-btn" @click="applyToJob(job.id)">
                   Apply
                 </button>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -259,6 +266,7 @@ export default {
       selectedIndustry: null,
       selectedCompany: null,
       messageContent: "",
+      isSidenavOpen: false,
 
       jobs: [
         {
@@ -327,6 +335,9 @@ export default {
   },
 
   methods: {
+    toggleSidenav() {
+      this.issidenavOpen = !this.issidenavOpen;
+    },
     toggleMail() {
       this.showMail = !this.showMail;
       if (this.showMail) {
@@ -564,6 +575,31 @@ body,
   border-bottom: 1px solid #ccc;
   flex-shrink: 0;
 }
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 25px;
+  height: 20px;
+  cursor: pointer;
+  margin: 0 10px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.hamburger span {
+  display: block;
+  height: 3px;
+  background-color: #333;
+  border-radius: 3px;
+}
+
+.sidebar.collapsed {
+  width: 0px;
+  overflow: hidden;
+  transition: width 0.3s ease;
+}
+
 .left-top {
   display: flex;
   align-items: center;
@@ -861,5 +897,208 @@ label {
 .update-box:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 1024px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .logo {
+    margin-top: 8vh;
+    margin-left: 4vh;
+    margin-bottom: 10vh;
+  }
+  .message-btn {
+    margin-left: 25vh;
+    font-size: 10px;
+  }
+  .apply-btn {
+    margin-left: 5vh;
+    font-size: 10px;
+  }
+
+  .job-media {
+    margin-left: 8vh;
+  }
+  .sign-out {
+    margin-left: 7.5vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+
+  .sidebar {
+    font-size: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .ikon {
+    height: 15px;
+    width: 15px;
+  }
+
+  .icon img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .logo {
+    height: 8vh;
+    width: 13vh;
+    margin-left: 4vh;
+    margin-bottom: 10vh;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
+  .popup {
+    width: 50%;
+  }
+  .topbar input[type="text"] {
+    width: 30vh;
+  }
+
+  .company-name {
+    font-size: 12px;
+  }
+
+  .message-btn {
+    margin-left: 25vh;
+    font-size: 6px;
+  }
+  .apply-btn {
+    margin-left: 5vh;
+    font-size: 6px;
+  }
+  .salary,
+  .job-type {
+    font-size: 10px;
+  }
+  .job-description {
+    font-size: 12px;
+    margin-left: 5vh;
+    margin-right: 5vh;
+  }
+  .job-media {
+    margin-left: 5vh;
+  }
+  .update-box {
+    font-size: 8px;
+    padding: 10px;
+  }
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 5.5vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+  }
+  .logo {
+    margin-left: 5vh;
+    margin-top: 5vh;
+    margin-bottom: 5vh;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 25vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+.popup {
+    width: 80%;
+  }
+  .topbar input[type="text"] {
+    width: 20vh;
+  }
+  .company-name {
+    font-size: 8px;
+  }
+
+  .message-btn {
+    margin-left: 15vh;
+    font-size: 4px;
+  }
+  .apply-btn {
+    margin-left: 3vh;
+    font-size: 4px;
+  }
+  .salary,
+  .job-type {
+    font-size: 8px;
+  }
+  .job-description {
+    font-size: 10px;
+    margin-left: 5vh;
+    margin-right: 5vh;
+  }
+  .job-media {
+    margin-left: 0vh;
+  }
+  .update-box {
+    font-size: 8px;
+    padding: 10px;
+  }
+}
+@media (max-width: 385px) {
+  .sidebar {
+    width: 20vh;
+    font-size: 8px;
+  }
+  .logo {
+    height: 6vh;
+    width: 10vh;
+    margin-left: 3vh;
+    margin-bottom: 5vh;
+  }
 }
 </style>
