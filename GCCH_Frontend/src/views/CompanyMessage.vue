@@ -237,6 +237,7 @@
     for (const msg of allMessages.value) {
       if (!map.has(msg.sender_id)) {
         map.set(msg.sender_id, msg);
+
       }
     }
     return Array.from(map.values());
