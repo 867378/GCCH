@@ -283,17 +283,22 @@
         </div>
 
 
-        <!-- JOB DISPLAY -->
+<!-- JOB DISPLAY -->
         <div class="right-content">
           <h3>POSTED JOBS</h3>
           <div class="posted-jobs">
             <div
-              v-for="notification in notifications"
-              :key="notification"
-              class="update-box"
+              class="posted-jobs-box"
+              v-for="(job, index) in postedJobs"
+              :key="index"
             >
-              <h2>{{ formatType(notification.type) }}</h2>
-              <p>{{ notification.content }}</p>
+              <h2>{{ job.job_title }}</h2>
+              <p>{{ job.job_description }}</p>
+              <p><strong>Location:</strong> {{ job.job_location }}</p>
+              <p><strong>Type:</strong> {{ job.job_type }}</p>
+              <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
+              <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
+              <p>Status: {{ job.status }}</p>
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
@@ -322,11 +327,9 @@ const pendingApplications = ref(10);
 const isSidenavOpen = ref(true);
 
 const messages = ref([]);
-
-const notifications = ref({});
-
+const notifications = ref([]);
 const updates = ref([]);
-
+const postedJobs = ref([]);
 
 const jobData = ref({
   job_title: "",

@@ -741,7 +741,8 @@ body,
   background-color: #045d56;
   color: #fff;
   width: 15%;
-  margin-left: 55vh;
+  margin-left: 88vh;
+  margin-right: 5vh;
   border: none;
   padding: 6px 10px;
   border-radius: 6px;
@@ -774,7 +775,7 @@ body,
 .job-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: left;
 }
 
 .job-description {

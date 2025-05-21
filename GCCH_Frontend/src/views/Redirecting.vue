@@ -1,5 +1,10 @@
 <template>
-  <div class="redirecting">Redirecting...</div>
+  <div class="redirect-container">
+    <div class="redirect-box">
+      <div class="spinner"></div>
+      <p>Redirecting, please wait...</p>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -15,6 +20,9 @@ onMounted(async () => {
     console.log(user);
 
     localStorage.setItem('user_id', user.id);
+
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
 
     if (!user.role) {
       router.push(`/signup/${user.id}`);
@@ -32,7 +40,40 @@ onMounted(async () => {
       }
     }
   } catch (e) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
     router.push('/login'); // fallback
   }
 });
 </script>
+
+<style scoped>
+.redirect-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f9fafb;
+}
+
+.redirect-box {
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.spinner {
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #045d56;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>

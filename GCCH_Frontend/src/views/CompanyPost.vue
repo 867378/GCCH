@@ -240,39 +240,6 @@ async function postJob() {
   }
 }
 
-async function postJob() {
-  try {
-    const response = await axios.post("/company/postjob", {
-      job_title: jobData.value.job_title,
-      job_description: jobData.value.job_description,
-      job_location: jobData.value.job_location,
-      monthly_salary: jobData.value.monthly_salary,
-      job_type: jobData.value.job_type,
-      recommended_course: jobData.value.recommended_course,
-      recommended_course_2: jobData.value.recommended_course_2 || null,
-      recommended_course_3: jobData.value.recommended_course_3 || null,
-    });
-    console.log("Job posted successfully:", response.data);
-    alert(response.data.message);
-
-    await fetchPostedJobs();
-
-    jobData.value = {
-      job_title: "",
-      job_description: "",
-      job_location: "",
-      monthly_salary: "",
-      job_type: "",
-      recommended_course: "",
-      recommended_course_2: null,
-      recommended_course_3: null,
-    };
-  } catch (error) {
-    console.error("Error posting job:", error);
-    alert(error);
-  }
-}
-
 
 async function fetchPostedJobs() {
   try {
@@ -288,7 +255,7 @@ onMounted(fetchPostedJobs);
 
 function selectJob(job) {
   selectedJob.value = job;
-  fetchApplicants(job.id); // assuming job.id is the unique identifier
+  fetchApplicants(job.id); 
 }
 
 </script>
