@@ -836,7 +836,7 @@ body,
   border: 1px solid #e0e6ed;
   border-radius: 16px;
   margin: 2vh;
-  width: 38vh;
+  width: 35vh;
   padding: 16px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;

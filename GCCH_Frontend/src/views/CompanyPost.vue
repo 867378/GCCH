@@ -93,9 +93,55 @@
           </div>
         </div>
       </div>
-      
 
-      <!-- blank dito lalagay -->
+      <!-- JOB POSTING -->
+      <div class="content">
+        <div class="left-content">
+          <div v-if="selectedJob" class="selected-job-box">
+            <h2>{{ selectedJob.job_title }}</h2>
+            <p>{{ selectedJob.job_description }}</p>
+            <p><strong>Location:</strong> {{ selectedJob.job_location }}</p>
+            <p><strong>Type:</strong> {{ selectedJob.job_type }}</p>
+            <p>
+              <strong>Monthly Salary:</strong> ₱{{ selectedJob.monthly_salary }}
+            </p>
+            <p><strong>Date Posted:</strong> {{ selectedJob.date_posted }}</p>
+            <p><strong>Status:</strong> {{ selectedJob.status }}</p>
+
+            <h3>Applicants</h3>
+            <ul>
+              <li v-for="(applicant, i) in jobApplicants" :key="i">
+                {{ applicant.name }} - {{ applicant.email }}
+              </li>
+            </ul>
+          </div>
+          <div v-else>
+            <p>Select a job to view details and applicants.</p>
+          </div>
+        </div>
+
+        <!-- JOB DISPLAY -->
+        <div class="right-content">
+          <h3>POSTED JOBS</h3>
+          <div class="posted-jobs">
+            <div
+              class="posted-jobs-box"
+              v-for="(job, index) in postedJobs"
+              :key="index"
+              @click="selectJob(job)"
+            >
+              <h2>{{ job.job_title }}</h2>
+              <p>{{ job.job_description }}</p>
+              <p><strong>Location:</strong> {{ job.job_location }}</p>
+              <p><strong>Type:</strong> {{ job.job_type }}</p>
+              <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
+              <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
+              <p>Status: {{ job.status }}</p>
+            </div>
+            <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -114,9 +160,22 @@ const unreadMessages = ref(0);
 const newNotifications = ref(0);
 const isSidenavOpen = ref(true);
 
+const selectedJob = ref(null);
+const jobApplicants = ref([]);
 const messages = ref([]);
 const notifications = ref([]);
+const postedJobs = ref([]);
 
+const jobData = ref({
+  job_title: "",
+  job_description: "",
+  job_location: "",
+  monthly_salary: "",
+  job_type: "",
+  recommended_course: "",
+  recommended_course_2: "",
+  recommended_course_3: "",
+});
 
 function toggleMail() {
   showMail.value = !showMail.value;
@@ -181,7 +240,40 @@ async function postJob() {
   }
 }
 
-//Fetch Posted Jobs
+async function postJob() {
+  try {
+    const response = await axios.post("/company/postjob", {
+      job_title: jobData.value.job_title,
+      job_description: jobData.value.job_description,
+      job_location: jobData.value.job_location,
+      monthly_salary: jobData.value.monthly_salary,
+      job_type: jobData.value.job_type,
+      recommended_course: jobData.value.recommended_course,
+      recommended_course_2: jobData.value.recommended_course_2 || null,
+      recommended_course_3: jobData.value.recommended_course_3 || null,
+    });
+    console.log("Job posted successfully:", response.data);
+    alert(response.data.message);
+
+    await fetchPostedJobs();
+
+    jobData.value = {
+      job_title: "",
+      job_description: "",
+      job_location: "",
+      monthly_salary: "",
+      job_type: "",
+      recommended_course: "",
+      recommended_course_2: null,
+      recommended_course_3: null,
+    };
+  } catch (error) {
+    console.error("Error posting job:", error);
+    alert(error);
+  }
+}
+
+
 async function fetchPostedJobs() {
   try {
     const response = await axios.get("/company/jobdisplay");
@@ -193,6 +285,11 @@ async function fetchPostedJobs() {
 }
 
 onMounted(fetchPostedJobs);
+
+function selectJob(job) {
+  selectedJob.value = job;
+  fetchApplicants(job.id); // assuming job.id is the unique identifier
+}
 
 </script>
 
@@ -489,7 +586,7 @@ body,
 }
 .form-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); 
+  grid-template-columns: repeat(3, 1fr);
   gap: 1vh;
   align-items: center;
   margin-top: 3vh;
@@ -646,7 +743,7 @@ label:hover {
   border: 1px solid #e0e6ed;
   border-radius: 16px;
   margin: 2vh;
-  width: 38vh;
+  width: 35vh;
   padding: 16px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
