@@ -192,7 +192,7 @@ export default {
       selectedApplicant: null,
       selectedStatus: "",
       showSave: false,
-      isSidenavOpen: false,
+      isSidenavOpen: true,
 
       messages: [
         "Jape: Interested in your post.",

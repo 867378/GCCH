@@ -93,171 +93,9 @@
           </div>
         </div>
       </div>
+      
 
-      <!-- JOB POSTING -->
-      <div class="content">
-        <div class="left-content">
-          <form @submit.prevent="postJob">
-            <div class="post-box">
-              <h3>Job Description</h3>
-              <button>Post Job</button>
-              <input
-                v-model="jobData.job_title"
-                type="text"
-                placeholder="Enter Job Title"
-                class="job-title"
-              />
-
-              <textarea
-                v-model="jobData.job_description"
-                placeholder="Describe the job description of your company....."
-              ></textarea>
-
-              <div class="form-row">
-                <select
-                  v-model="jobData.job_type"
-                  class="job-form job-type"
-                  id="job_type"
-                >
-                  <option disabled selected value="">Job Type</option>
-                  <option value="full_time">Full-time</option>
-                  <option value="part_time">Part-time</option>
-                  <option value="internship">Internship</option>
-                  <option value="contract">Contract</option>
-                </select>
-
-                <select
-                  v-model="jobData.recommended_course"
-                  class="job-form job-type"
-                  id="recommended_course"
-                >
-                  <option disabled selected value="">Recommended Course</option>
-                  <option value="BSIT">BSIT</option>
-                  <option value="BSCS">BSCS</option>
-                  <option value="BSEMC">BSEMC</option>
-                  <option value="BSN">BSN</option>
-                  <option value="BSM">BSM</option>
-                  <option value="BSA">BSA</option>
-                  <option value="BSBA-FM">BSBA-FM</option>
-                  <option value="BSBA-HRM">BSBA-HRM</option>
-                  <option value="BSBA-MM">BSBA-MM</option>
-                  <option value="BSCA">BSCA</option>
-                  <option value="BSHM">BSHM</option>
-                  <option value="BSTM">BSTM</option>
-                  <option value="BAComm">BAComm</option>
-                  <option value="BECEd">BECEd</option>
-                  <option value="BCAEd">BCAEd</option>
-                  <option value="BPEd">BPEd</option>
-                  <option value="BEED">BEED</option>
-                  <option value="BSEd-Eng">BSEd-Eng</option>
-                  <option value="BSEd-Math">BSEd-Math</option>
-                  <option value="BSEd-Fil">BSEd-Fil</option>
-                  <option value="BSEd-SS">BSEd-SS</option>
-                  <option value="BSEd-Sci">BSEd-Sci</option>
-                  <option value="Other">Other</option>
-                </select>
-
-                <select
-                  v-model="jobData.recommended_course_2"
-                  class="job-form job-type"
-                  id="recommended_course_2"
-                >
-                  <option disabled selected value="">Recommended Course 2</option>
-                  <option value="BSIT">BSIT</option>
-                  <option value="BSCS">BSCS</option>
-                  <option value="BSEMC">BSEMC</option>
-                  <option value="BSN">BSN</option>
-                  <option value="BSM">BSM</option>
-                  <option value="BSA">BSA</option>
-                  <option value="BSBA-FM">BSBA-FM</option>
-                  <option value="BSBA-HRM">BSBA-HRM</option>
-                  <option value="BSBA-MM">BSBA-MM</option>
-                  <option value="BSCA">BSCA</option>
-                  <option value="BSHM">BSHM</option>
-                  <option value="BSTM">BSTM</option>
-                  <option value="BAComm">BAComm</option>
-                  <option value="BECEd">BECEd</option>
-                  <option value="BCAEd">BCAEd</option>
-                  <option value="BPEd">BPEd</option>
-                  <option value="BEED">BEED</option>
-                  <option value="BSEd-Eng">BSEd-Eng</option>
-                  <option value="BSEd-Math">BSEd-Math</option>
-                  <option value="BSEd-Fil">BSEd-Fil</option>
-                  <option value="BSEd-SS">BSEd-SS</option>
-                  <option value="BSEd-Sci">BSEd-Sci</option>
-                  <option value="Other">Other</option>
-                </select>
-
-                <select
-                  v-model="jobData.recommended_course_3"
-                  class="job-form job-type"
-                  id="recommended_course_3"
-                >
-                  <option disabled selected value="">Recommended Course 3</option>
-                  <option value="BSIT">BSIT</option>
-                  <option value="BSCS">BSCS</option>
-                  <option value="BSEMC">BSEMC</option>
-                  <option value="BSN">BSN</option>
-                  <option value="BSM">BSM</option>
-                  <option value="BSA">BSA</option>
-                  <option value="BSBA-FM">BSBA-FM</option>
-                  <option value="BSBA-HRM">BSBA-HRM</option>
-                  <option value="BSBA-MM">BSBA-MM</option>
-                  <option value="BSCA">BSCA</option>
-                  <option value="BSHM">BSHM</option>
-                  <option value="BSTM">BSTM</option>
-                  <option value="BAComm">BAComm</option>
-                  <option value="BECEd">BECEd</option>
-                  <option value="BCAEd">BCAEd</option>
-                  <option value="BPEd">BPEd</option>
-                  <option value="BEED">BEED</option>
-                  <option value="BSEd-Eng">BSEd-Eng</option>
-                  <option value="BSEd-Math">BSEd-Math</option>
-                  <option value="BSEd-Fil">BSEd-Fil</option>
-                  <option value="BSEd-SS">BSEd-SS</option>
-                  <option value="BSEd-Sci">BSEd-Sci</option>
-                  <option value="Other">Other</option>
-                </select>
-
-                <input
-                  v-model="jobData.job_location"
-                  type="text"
-                  placeholder="Enter Job Location"
-                  class="job-input"
-                />
-
-                <input
-                  type="number"
-                  v-model="jobData.monthly_salary"
-                  placeholder="Enter Monthly Salary (in Php)"
-                  class="salary-input"
-                />
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <!-- JOB DISPLAY -->
-        <div class="right-content">
-          <h3>POSTED JOBS</h3>
-          <div class="posted-jobs">
-            <div
-              class="posted-jobs-box"
-              v-for="(job, index) in postedJobs"
-              :key="index"
-            >
-              <h2>{{ job.job_title }}</h2>
-              <p>{{ job.job_description }}</p>
-              <p><strong>Location:</strong> {{ job.job_location }}</p>
-              <p><strong>Type:</strong> {{ job.job_type }}</p>
-              <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
-              <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
-              <p>Status: {{ job.status }}</p>
-            </div>
-            <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
-          </div>
-        </div>
-      </div>
+      <!-- blank dito lalagay -->
     </div>
   </div>
 </template>
@@ -274,22 +112,11 @@ const showNotif = ref(false);
 const showSignOut = ref(false);
 const unreadMessages = ref(0);
 const newNotifications = ref(0);
-const isSidenavOpen = ref(false);
+const isSidenavOpen = ref(true);
 
 const messages = ref([]);
 const notifications = ref([]);
-const postedJobs = ref([]);
 
-const jobData = ref({
-  job_title: "",
-  job_description: "",
-  job_location: "",
-  monthly_salary: "",
-  job_type: "",
-  recommended_course: "",
-  recommended_course_2: "",
-  recommended_course_3: "",
-});
 
 function toggleMail() {
   showMail.value = !showMail.value;
@@ -321,50 +148,6 @@ function confirmSignOut() {
     });
 }
 
-async function postJob() {
-  try {
-    const response = await axios.post("/company/postjob", {
-      job_title: jobData.value.job_title,
-      job_description: jobData.value.job_description,
-      job_location: jobData.value.job_location,
-      monthly_salary: jobData.value.monthly_salary,
-      job_type: jobData.value.job_type,
-      recommended_course: jobData.value.recommended_course,
-      recommended_course_2: jobData.value.recommended_course_2 || null,
-      recommended_course_3: jobData.value.recommended_course_3 || null,
-    });
-    console.log("Job posted successfully:", response.data);
-    alert(response.data.message);
-
-    await fetchPostedJobs();
-
-    jobData.value = {
-      job_title: "",
-      job_description: "",
-      job_location: "",
-      monthly_salary: "",
-      job_type: "",
-      recommended_course: "",
-      recommended_course_2: null,
-      recommended_course_3: null,
-    };
-  } catch (error) {
-    console.error("Error posting job:", error);
-    alert(error);
-  }
-}
-
-async function fetchPostedJobs() {
-  try {
-    const response = await axios.get("/company/jobdisplay");
-    postedJobs.value = response.data.jobs;
-  } catch (error) {
-    console.error("Error fetching posted jobs:", error);
-    alert("Error fetching posted jobs");
-  }
-}
-
-onMounted(fetchPostedJobs);
 </script>
 
 <style scoped>
@@ -623,7 +406,7 @@ body,
   margin-bottom: 10px;
   border-radius: 3vh;
   margin-left: 4vh;
-  width: 130vh;
+  width: 10vh;
 }
 .post-box textarea {
   width: 100%;
@@ -658,11 +441,6 @@ body,
   color: #045d56;
   background: #f1f1f1;
 }
-
-input[type="file"] {
-  display: none;
-}
-
 .form-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr); 
@@ -789,8 +567,7 @@ label:hover {
   flex: 1;
   background: white;
   border-radius: 10px;
-  padding: 10px;
-  padding-top: 3vh;
+  padding: 20px;
   height: 85vh;
   overflow: auto;
 }
@@ -820,19 +597,20 @@ label:hover {
 
 .posted-jobs-box {
   background-color: #ffffff;
-  border: 1px solid #d0d7e1;
-  border-radius: 10px;
-  margin-top: 2vh;
-  margin-left: 4vh;
-  margin-bottom: 2vh;
-  width: 35vh;
-  padding: 10px 10px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #e0e6ed;
+  border-radius: 16px;
+  margin: 2vh;
+  width: 38vh;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  overflow: hidden;
 }
 
 .posted-jobs-box:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar.collapsed {

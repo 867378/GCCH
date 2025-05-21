@@ -193,7 +193,7 @@ export default {
       newNotifications: 0,
       profileImage: null,
       isEditing: false,
-      isSidenavOpen: false,
+      isSidenavOpen: true,
 
       messages: [
         "Jape: Interested in your post.",
