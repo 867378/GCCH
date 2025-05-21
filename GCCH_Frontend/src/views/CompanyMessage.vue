@@ -205,8 +205,8 @@
             </div>
           </div>
         </div>
-
       </div>
+      
     </div>
   </div>
 </template>
@@ -288,6 +288,15 @@
     await fetchConversation(senderId);
   }
 
+  async function markMessageAsRead(messageId){
+    try{
+      await axios.post(`/message/mark-as-read/${messageId}`);
+      console.log(`Message ${messageId} marked as read`);
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+    }
+  }
+
   async function fetchConversation(senderId) {
   try {
       const response = await axios.get(`/message/conversation/${senderId}`);
@@ -299,6 +308,13 @@
         from: msg.sender_id == currentUserId.value ? "You" : "Them",
         content: msg.message, // alias 'message' as 'content' for display if needed
       }));
+
+      for (const msg of data) {
+      if (msg.receiver_id == currentUserId.value && !msg.read_at) {
+        await markMessageAsRead(msg.id);
+      }
+    }
+      
     } catch (error) {
       console.error("Error fetching conversation:", error);
       conversation.value = [];

@@ -57,7 +57,7 @@ Route::middleware(['auth:sanctum','company'])->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/message/send', [MessageController::class, 'send'])->name('message.send');
     Route::get('/message/conversation/{userId}', [MessageController::class, 'conversation'])->name('message.conversation');
-    Route::post('/message/mark-as-read/{userId}', [MessageController::class, 'markAsRead'])->name('message.markAsRead');
+    Route::post('/message/mark-as-read/{messageId}', [MessageController::class, 'markAsRead'])->name('message.markAsRead');
 });
 
 //Notification routes

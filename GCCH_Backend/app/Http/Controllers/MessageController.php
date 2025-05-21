@@ -68,5 +68,5 @@ class MessageController extends Controller
         //broadcast(new MessageRead($message))->toOthers();
 
         return response()->json(['message' => 'Message marked as read'], 200);
-    }
+    }   
 }

@@ -104,10 +104,6 @@ class CompanyController extends Controller
 
             $applications = JobApplication::where('job_id', $job->id)->with(['applicant', 'resumeFile'])->get();
 
-            if ($applications->isEmpty()) {
-                return response()->json(['message' => 'No applications for this job.'], 404);
-            }
-
             $applicationsData = $applications->map(function ($application){
                 $embedUrl = null;
                 $resumeFile = $application->resumeFile;
