@@ -8,10 +8,11 @@ use App\Models\Notification;
 
 class NotificationController extends Controller
 {
-    public function notifyUser($userId, $content, $type)
+    public function notifyUser($userId, $content, $type, $senderId = null)
     {
         Notification::create([
             'user_id' => $userId,
+            'sender_id' => $senderId,
             'content' => $content,
             'type' => $type,
             'timestamp' => now(),

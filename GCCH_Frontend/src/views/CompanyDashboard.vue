@@ -4,30 +4,30 @@
       <img src="/public/gcchnobg.png" alt="GCCH Logo" class="logo" />
       <ul>
         <li style="font-weight: bold">
-          <router-link to="/CompanyDash" class="sidenav-text">
+          <router-link to="/companydash" class="sidenav-text">
             <img src="/public/home.png" class="ikon" />
             HOME
           </router-link>
         </li>
         <li>
-          <router-link to="/CompanyPost" class="sidenav-text">
+          <router-link to="/companypost" class="sidenav-text">
             <img src="/public/laptop.png" class="ikon" /> POSTED JOBS
           </router-link>
         </li>
         <li>
-          <router-link to="/CompanyMessage" class="sidenav-text">
+          <router-link to="/companymessage" class="sidenav-text">
             <img src="/public/message.png" class="ikon" />
             MESSAGES
           </router-link>
         </li>
         <li>
-          <router-link to="/CompanyApplication" class="sidenav-text">
+          <router-link to="/companyapplication" class="sidenav-text">
             <img src="/public/resume.png" class="ikon" />
             APPLICATIONS
           </router-link>
         </li>
         <li>
-          <router-link to="/CompanyProfile" class="sidenav-text">
+          <router-link to="/companyprofile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
             PROFILE
           </router-link>
@@ -157,24 +157,21 @@
             </div>
           </div>
         </div>
+        <!-- Notifications -->  
         <div class="right-content">
           <h3>UPDATES</h3>
           <div class="updates-list">
             <div
-              v-for="(update, index) in updates"
-              :key="index"
+              v-for="notification in notifications"
+              :key="notification"
               class="update-box"
             >
-              <h2>
-                <span v-if="update.type === 'message'"></span>
-                <span v-if="update.type === 'applicant'"></span>
-                <span v-if="update.type === 'job_post'"></span>
-                {{ update.user }} {{ update.content }}
-              </h2>
-              <p>{{ update.time }}</p>
+              <h2>{{ formatType(notification.type) }}</h2>
+              <p>{{ notification.content }}</p>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -197,38 +194,11 @@ const totalJobs = ref(50);
 const pendingApplications = ref(10);
 const isSidenavOpen = ref(false);
 
-const messages = ref([
-  "Jape: Interested in your post.",
-  "Paulo: Sent a resume for the job.",
-  "Cj: Asking about job requirements.",
-]);
+const messages = ref([]);
 
-const notifications = ref([
-  "3 new applicants this week",
-  "Job Posted",
-  "bengbeng",
-]);
+const notifications = ref({});
 
-const updates = ref([
-  {
-    type: "message",
-    user: "Jape",
-    time: "10:47 AM",
-    content: "sent you a message",
-  },
-  {
-    type: "applicant",
-    user: "Paulo",
-    time: "9:15 AM",
-    content: "submitted a resume",
-  },
-  {
-    type: "job_post",
-    user: "You",
-    time: "8:00 AM",
-    content: "posted a job ",
-  },
-]);
+const updates = ref([]);
 
 function toggleMail() {
   showMail.value = !showMail.value;
@@ -245,7 +215,7 @@ function toggleSignOut() {
 }
 
 function confirmSignOut() {
-  axios.post('logout')
+  axios.post('/logout')
     .then((response) => {
       console.log("Sign out successful:", response.data.message);
       router.push("/login");
@@ -270,11 +240,33 @@ function postJob() {
     .catch((error) => console.error(error));
 }
 
+// Notification Logic
+  async function fetchNotifications() {
+    try {
+      const response = await axios.get('/notifications');
+      notifications.value = response.data.notifications;
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  }
+
+  function formatType(type){
+    switch(type){
+      case "job_application":
+        return "Job Application";
+      case "inquiry":
+        return "Inquiry";
+      case "application_update":
+        return "Application Update";
+      case "message":
+        return "Inquiry";
+      case "other":
+        return "Other";
+    }
+  }
+
 onMounted(() => {
-  setInterval(() => {
-    unreadMessages.value += 1;
-    newNotifications.value += 1;
-  }, 10000);
+  fetchNotifications();
 });
 </script>
 

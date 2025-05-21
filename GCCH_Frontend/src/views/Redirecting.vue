@@ -14,6 +14,8 @@ onMounted(async () => {
     const { data: user } = await axios.get('/user');
     console.log(user);
 
+    localStorage.setItem('user_id', user.id);
+
     if (!user.role) {
       router.push(`/signup/${user.id}`);
     } else {
