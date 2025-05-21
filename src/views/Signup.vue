@@ -30,7 +30,7 @@
         <!-- APPLICANT FORM  -->
         <div v-else-if="currentStep === 'applicant'" class="form-view">
           <h2 class="title">Applicant Information</h2>
-          <form @submit.prevent>
+          <form @submit.prevent = "submitApplicantForm">
             <input placeholder="First Name" v-model="form.firstName" required />
             <input
               placeholder="Middle Name (optional)"
@@ -40,8 +40,9 @@
             <input type="date" v-model="form.birthday" required />
             <select v-model="form.gender" required>
               <option value="" disabled selected>Select Gender</option>
-              <option>Male</option>
-              <option>Female</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
             </select>
             <input
               placeholder="Phone Number"
@@ -51,7 +52,32 @@
               maxlength="13"
               @input="form.phone = form.phone.replace(/\D/g, '')"
             />
-            <input placeholder="Course" v-model="form.course" />
+            <select v-model="form.course" required>
+              <option value="" disabled selected>Select Course</option>
+              <option value="BSIT">BSIT</option>
+              <option value="BSCS">BSCS</option>
+              <option value="BSEMC">BSEMC</option>
+              <option value="BSN">BSN</option>
+              <option value="BSM">BSM</option>
+              <option value="BSA">BSA</option>
+              <option value="BSBA-FM">BSBA-FM</option>
+              <option value="BSBA-HRM">BSBA-HRM</option>
+              <option value="BSBA-MM">BSBA-MM</option>
+              <option value="BSCA">BSCA</option>
+              <option value="BSHM">BSHM</option>
+              <option value="BSTM">BSTM</option>
+              <option value="BAComm">BAComm</option>
+              <option value="BECEd">BECEd</option>
+              <option value="BCAEd">BCAEd</option>
+              <option value="BPEd">BPEd</option>
+              <option value="BEED">BEED</option>
+              <option value="BSEd-Eng">BSEd-Eng</option>
+              <option value="BSEd-Math">BSEd-Math</option>
+              <option value="BSEd-Fil">BSEd-Fil</option>
+              <option value="BSEd-SS">BSEd-SS</option>
+              <option value="BSEd-Sci">BSEd-Sci</option>
+              <option value="Other">Other</option>
+            </select>
 
             <div class="button-group">
               <button type="button" class="back-btn" @click="goBack">
@@ -65,7 +91,7 @@
         <!-- COMPANY FORM  -->
         <div v-else-if="currentStep === 'company'" class="form-view">
           <h2 class="title">Company Information</h2>
-          <form @submit.prevent>
+          <form @submit.prevent = "submitCompanyForm">
             <input
               placeholder="Company Name"
               v-model="form.companyName"
@@ -89,19 +115,11 @@
               required
             />
             <input placeholder="City" v-model="form.city" required />
-            <input
-              placeholder="Zip Code"
-              v-model="form.zip"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              maxlength="5"
-              @input="form.zip = form.zip.replace(/\D/g, '').slice(0, 4)"
-              required
-            />
+            <input placeholder="Province" v-model="form.province" required/>
             <input placeholder="Country" v-model="form.country" required />
             <input
               placeholder="Industry Type"
-              v-model="form.industry"
+              v-model="form.industry_type"
               required
             />
 
@@ -118,40 +136,95 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      selectedRole: "",
-      currentStep: "select",
-      form: {
-        // Common fields
-        firstName: "",
-        middleName: "",
-        lastName: "",
-        birthday: "",
-        gender: "",
-        phone: "",
-        course: "",
-        companyName: "",
-        telephone: "",
-        address: "",
-        city: "",
-        zip: "",
-        country: "",
-        industry: "",
-      },
-    };
-  },
-  methods: {
-    continueAction() {
-      this.currentStep = this.selectedRole;
-    },
-    goBack() {
-      this.currentStep = "select";
-    },
-  },
-};
+<script setup>
+import { ref,onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import axios from "axios";
+
+const route = useRoute();
+const router = useRouter();
+const userId = route.params.userId;
+const currentStep = ref("select");
+const selectedRole = ref("");
+const form = ref({
+  firstName: "",
+  middleName: "",
+  lastName: "",
+  birthday: "",
+  gender: "",
+  phone: "",
+  course: "",
+  companyName: "",
+  telephone: "",
+  address: "",
+  city: "",
+  province: "",
+  country: "",
+  industry_type: "", 
+})
+
+if (!userId) {
+  alert("User ID not found. Please log in again.");
+  router.push("/login");
+}
+
+const continueAction = async() => {
+  try {
+    await axios.post(`user/set-role/${userId}`, {
+      role: selectedRole.value,
+    }, {withCredentials: true});
+
+    currentStep.value = selectedRole.value;
+  } catch (error) {
+    console.error("Error setting role:", error);
+    alert(error.response.data.message || "An error occurred");
+  }
+}
+const goBack = () => {
+  currentStep.value = "select";
+}
+
+const submitApplicantForm = async() => {
+  try {
+    const response = await axios.post(`user/applicant/profile/${userId}`,{
+      first_name: form.value.firstName,
+      middle_name: form.value.middleName,
+      last_name: form.value.lastName,
+      date_of_birth: form.value.birthday,
+      gender: form.value.gender,
+      phone_number: form.value.phone,
+      course: form.value.course,
+    });
+
+    console.log(response.data);
+
+    router.push("/applicantdash");
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    alert(error.response.data.message || "An error occurred");
+  }
+}
+
+const submitCompanyForm = async() => {
+  try {
+    const response = await axios.post(`user/company/profile/${userId}`,{
+      company_name: form.value.companyName,
+      company_telephone: form.value.telephone,
+      street_address: form.value.address,
+      city: form.value.city,
+      province: form.value.province,
+      country: form.value.country,
+      industry_type: form.value.industry_type,
+    });
+
+    console.log(response.data);
+
+    router.push("/companydash");
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    alert(error.response.data.message);
+  }
+}
 </script>
 
 <style scoped>

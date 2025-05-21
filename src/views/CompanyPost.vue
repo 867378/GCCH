@@ -93,52 +93,125 @@
           </div>
         </div>
       </div>
+
+      <!-- JOB POSTING -->
       <div class="content">
         <div class="left-content">
-          <div class="post-box">
-            <h3>Job Description</h3>
-            <button @click="postJob">Post Job</button>
-            <input
-              type="text"
-              placeholder="Enter Job Title"
-              class="job-title"
-            />
-            <textarea
-              placeholder="Describe the job description of your company....."
-            ></textarea>
-            <div class="form-row">
-              <div class="upload-media">
-                <input type="file" id="media-picker" />
-                <label for="media-picker">
-                  <img
-                    src="/public/gallery.png"
-                    alt="upload icon"
-                    class="ikon"
-                  />
-                  Upload Media
-                </label>
+          <form @submit.prevent="postJob">
+            <div class="post-box">
+              <h3>Job Description</h3>
+              <button>Post Job</button> 
+              <input
+                v-model="jobData.job_title"
+                type="text"
+                placeholder="Enter Job Title"
+                class="job-title"
+              />
+
+              <textarea
+                v-model="jobData.job_description"
+                placeholder="Describe the job description of your company....."
+              ></textarea>
+
+              <div class="form-row">
+                <input v-model="jobData.job_location" type="text" placeholder="Enter Job Location" />
+
+                <select v-model="jobData.job_type" class="job-form job-type" id="job_type">
+                  <option disabled selected>Job Type</option>
+                  <option value="full_time">Full-time</option>
+                  <option value="part_time">Part-time</option>
+                  <option value="internship">Internship</option>
+                  <option value="contract">Contract</option>
+                </select>
+
+                <select v-model="jobData.recommended_course" class="job-form job-type" id="recommended_course">
+                  <option disabled selected>Recommended Course</option>
+                  <option value="BSIT">BSIT</option>
+                  <option value="BSCS">BSCS</option>
+                  <option value="BSEMC">BSEMC</option>
+                  <option value="BSN">BSN</option>
+                  <option value="BSM">BSM</option>
+                  <option value="BSA">BSA</option>
+                  <option value="BSBA-FM">BSBA-FM</option>
+                  <option value="BSBA-HRM">BSBA-HRM</option>
+                  <option value="BSBA-MM">BSBA-MM</option>
+                  <option value="BSCA">BSCA</option>
+                  <option value="BSHM">BSHM</option>
+                  <option value="BSTM">BSTM</option>
+                  <option value="BAComm">BAComm</option>
+                  <option value="BECEd">BECEd</option>
+                  <option value="BCAEd">BCAEd</option>
+                  <option value="BPEd">BPEd</option>
+                  <option value="BEED">BEED</option>
+                  <option value="BSEd-Eng">BSEd-Eng</option>
+                  <option value="BSEd-Math">BSEd-Math</option>
+                  <option value="BSEd-Fil">BSEd-Fil</option>
+                  <option value="BSEd-SS">BSEd-SS</option>
+                  <option value="BSEd-Sci">BSEd-Sci</option>
+                  <option value="Other">Other</option>
+                </select>
+
+                <select v-model="jobData.recommended_course_2" class="job-form job-type" id="recommended_course_2">
+                  <option :value="null">Recommended Course 2</option>
+                  <option value="BSIT">BSIT</option>
+                  <option value="BSCS">BSCS</option>
+                  <option value="BSEMC">BSEMC</option>
+                  <option value="BSN">BSN</option>
+                  <option value="BSM">BSM</option>
+                  <option value="BSA">BSA</option>
+                  <option value="BSBA-FM">BSBA-FM</option>
+                  <option value="BSBA-HRM">BSBA-HRM</option>
+                  <option value="BSBA-MM">BSBA-MM</option>
+                  <option value="BSCA">BSCA</option>
+                  <option value="BSHM">BSHM</option>
+                  <option value="BSTM">BSTM</option>
+                  <option value="BAComm">BAComm</option>
+                  <option value="BECEd">BECEd</option>
+                  <option value="BCAEd">BCAEd</option>
+                  <option value="BPEd">BPEd</option>
+                  <option value="BEED">BEED</option>
+                  <option value="BSEd-Eng">BSEd-Eng</option>
+                  <option value="BSEd-Math">BSEd-Math</option>
+                  <option value="BSEd-Fil">BSEd-Fil</option>
+                  <option value="BSEd-SS">BSEd-SS</option>
+                  <option value="BSEd-Sci">BSEd-Sci</option>
+                  <option value="Other">Other</option>
+                </select>
+
+                <select v-model="jobData.recommended_course_3" class="job-form job-type" id="recommended_course_3">
+                  <option :value="null">Recommended Course 3</option>
+                  <option value="BSIT">BSIT</option>
+                  <option value="BSCS">BSCS</option>
+                  <option value="BSEMC">BSEMC</option>
+                  <option value="BSN">BSN</option>
+                  <option value="BSM">BSM</option>
+                  <option value="BSA">BSA</option>
+                  <option value="BSBA-FM">BSBA-FM</option>
+                  <option value="BSBA-HRM">BSBA-HRM</option>
+                  <option value="BSBA-MM">BSBA-MM</option>
+                  <option value="BSCA">BSCA</option>
+                  <option value="BSHM">BSHM</option>
+                  <option value="BSTM">BSTM</option>
+                  <option value="BAComm">BAComm</option>
+                  <option value="BECEd">BECEd</option>
+                  <option value="BCAEd">BCAEd</option>
+                  <option value="BPEd">BPEd</option>
+                  <option value="BEED">BEED</option>
+                  <option value="BSEd-Eng">BSEd-Eng</option>
+                  <option value="BSEd-Math">BSEd-Math</option>
+                  <option value="BSEd-Fil">BSEd-Fil</option>
+                  <option value="BSEd-SS">BSEd-SS</option>
+                  <option value="BSEd-Sci">BSEd-Sci</option>
+                  <option value="Other">Other</option>
+                </select>
+
+                <input type="number" v-model="jobData.monthly_salary" placeholder="Enter Monthly Salary (in Php)" />
               </div>
-
-              <select class="job-form job-type" id="job-type">
-                <option disabled selected>Industry</option>
-                <option>Tech Field</option>
-                <option>Hospitality & Tourism Management</option>
-                <option>Education, Arts & Sciences</option>
-                <option>Business & Accountancy</option>
-                <option>Health Profession</option>
-              </select>
-
-              <select class="job-form salary-range" id="salary-range">
-                <option disabled selected>Salary</option>
-                <option>₱0 - ₱10,000</option>
-                <option>₱10,000 - ₱20,000</option>
-                <option>₱20,001 - ₱30,000</option>
-                <option>₱30,001 - ₱40,000</option>
-                <option>₱40,001+</option>
-              </select>
             </div>
-          </div>
+          </form>
         </div>
+        
+        <!-- JOB DISPLAY -->
         <div class="right-content">
           <h3>POSTED JOBS</h3>
           <div class="posted-jobs">
@@ -147,117 +220,129 @@
               v-for="(job, index) in postedJobs"
               :key="index"
             >
-              <h2>{{ job.title }}</h2>
-              <p>{{ job.description }}</p>
-              <small>{{ job.salary }}</small>
+            <h2>{{ job.job_title }}</h2>
+            <p>{{ job.job_description }}</p>
+            <p><strong>Location:</strong> {{ job.job_location }}</p>
+            <p><strong>Type:</strong> {{ job.job_type }}</p>
+            <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
+            <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
+            <p>Status: {{ job.status }}</p>
+
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      showMail: false,
-      showNotif: false,
-      showSignOut: false,
-      unreadMessages: 0,
-      newNotifications: 0,
-      isSidenavOpen: false,
-      messages: [
-        "Jape: Interested in your post.",
-        "Paulo: Sent a resume for the job.",
-        "Cj: Asking about job requirements.",
-      ],
+<script setup>
+import { ref,onMounted } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
-      notifications: ["3 new applicants this week", "Job Posted", "bengbeng"],
+const router = useRouter();
 
-      postedJobs: [
-        {
-          title: "Tech Field",
-          description:
-            "We are seeking a junior web developer to join our startup team. You’ll be helping build scalable applications.",
-          salary: "₱20,001 - ₱30,000",
-        },
-        {
-          title: "Tech Field",
-          description:
-            "We are seeking a junior web developer to join our startup team. You’ll be helping build scalable applications.",
-          salary: "₱20,001 - ₱30,000",
-        },
-        {
-          title: "Tech Field",
-          description:
-            "We are seeking a junior web developer to join our startup team. You’ll be helping build scalable applications.",
-          salary: "₱20,001 - ₱30,000",
-        },
-        {
-          title: "Tech Field",
-          description:
-            "We are seeking a junior web developer to join our startup team. You’ll be helping build scalable applications.",
-          salary: "₱20,001 - ₱30,000",
-        },
-      ],
-    };
-  },
-  methods: {
-    toggleSidenav() {
-      this.issidenavOpen = !this.issidenavOpen;
-    },
-    toggleMail() {
-      this.showMail = !this.showMail;
-      if (this.showMail) {
-        this.unreadMessages = 0;
-      }
-    },
-    toggleNotif() {
-      this.showNotif = !this.showNotif;
-      if (this.showNotif) {
-        this.newNotifications = 0;
-      }
-    },
-    toggleSignOut() {
-      this.showSignOut = !this.showSignOut;
-    },
-    confirmSignOut() {
-      console.log("Signing out...");
-      window.location.href = "/login";
-    },
-    postJob() {
-      const text = document.querySelector("textarea").value;
-      const industry = document.getElementById("job-type").value;
-      const salary = document.getElementById("salary-range").value;
+const showMail = ref(false);
+const showNotif = ref(false);
+const showSignOut = ref(false);
+const unreadMessages = ref(0);
+const newNotifications = ref(0);
+const isSidenavOpen = ref(false);
 
-      if (!text || industry === "Industry" || salary === "Salary") {
-        alert("Please complete all fields before posting.");
-        return;
-      }
+const messages = ref([]);
+const notifications = ref([]);
+const postedJobs = ref([]);
 
-      const job = {
-        title: industry,
-        description: text,
-        salary: salary,
-      };
+const jobData = ref({
+    job_title:"",
+    job_description:"",
+    job_location:"",
+    monthly_salary:"",
+    job_type:"",
+    recommended_course:"", 
+    recommended_course_2:"", 
+    recommended_course_3:"",
+});
 
-      this.postedJobs.push(job);
+function toggleMail() {
+  showMail.value = !showMail.value;
+  if (showMail.value) {
+    unreadMessages.value = 0;
+  }
+}
 
-      document.querySelector("textarea").value = "";
-      document.getElementById("job-type").selectedIndex = 0;
-      document.getElementById("salary-range").selectedIndex = 0;
-    },
-  },
-  mounted() {
-    setInterval(() => {
-      this.unreadMessages += 1;
-      this.newNotifications += 1;
-    }, 20000);
-  },
+function toggleNotif() {
+  showNotif.value = !showNotif.value;
+  if (showNotif.value) {
+    newNotifications.value = 0;
+  }
+}
+
+function toggleSignOut() {
+  showSignOut.value = !showSignOut.value;
+}
+
+function confirmSignOut() {
+  axios.post('logout')
+    .then((response) => {
+      console.log("Sign out successful:", response.data.message);
+      router.push("/login");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+    });
 };
+
+async function postJob() {
+  try {
+    const response = await axios.post("/company/postjob", {
+        job_title: jobData.value.job_title,
+        job_description: jobData.value.job_description,
+        job_location: jobData.value.job_location,
+        monthly_salary: jobData.value.monthly_salary,
+        job_type: jobData.value.job_type,
+        recommended_course: jobData.value.recommended_course,
+        recommended_course_2: jobData.value.recommended_course_2 || null,
+        recommended_course_3: jobData.value.recommended_course_3 || null,
+      });
+    console.log("Job posted successfully:", response.data);
+    alert(response.data.message);
+
+    await fetchPostedJobs();
+
+    jobData.value = {
+      job_title: "",
+      job_description: "",
+      job_location: "",
+      monthly_salary: "",
+      job_type: "",
+      recommended_course: "",
+      recommended_course_2: null,
+      recommended_course_3: null,
+    };
+
+  } catch (error) {
+    console.error("Error posting job:", error);
+    alert(error);
+  }
+}
+
+async function fetchPostedJobs() {
+  try {
+    const response = await axios.get("/company/jobdisplay");
+    postedJobs.value = response.data.jobs;
+  } catch (error) {
+    console.error("Error fetching posted jobs:", error);
+    alert("Error fetching posted jobs");
+  }
+}
+
+onMounted(fetchPostedJobs)
+
+
 </script>
 
 <style scoped>
