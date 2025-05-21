@@ -250,52 +250,56 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      showMail: false,
-      showNotif: false,
-      showSignOut: false,
-      unreadMessages: 0,
-      newNotifications: 0,
-      showApplyPopup: false,
-      selectedJobId: null,
-      resumeFile: null,
-      showMessagePopup: false,
-      selectedIndustry: null,
-      selectedCompany: null,
-      messageContent: "",
-      isSidenavOpen: false,
+<script setup>
+import { ref, reactive, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 
-      jobs: [
-        {
-          id: 1,
-          company: "Tech Solutions Inc.",
-          description:
-            "Hi idol! Walang signal dito sa bukid pero nung nalaman kong nag post ka dali dali akong bumaba ng bukid, tumawid ako ng tatlong ilog, tinumbok ko ang pitong bundok, at umutang ako ng perang pamasahe papuntang syudad at namalimos pa ako para may pang hulog sa pisonet para lang maka react sa post mo.",
-          type: "Education, Arts & Sciences",
-          salary: "30,000 - 40,000",
-          media: "/public/vincent.png",
-        },
-        {
-          id: 2,
-          company: "Green Valley Farms",
-          description:
-            "Hiring for a farm manager with experience in organic farming...",
-          type: "Education, Arts & Sciences",
-          salary: "20,000 - 25,000",
-          media: "/public/vincent.png",
-        },
-        {
-          id: 3,
-          company: "Creative Minds Agency",
-          description: "Seeking a graphic designer with a strong portfolio...",
-          type: "Techfield",
-          salary: "15,000 - 20,000",
-          media: "/public/vincent.png",
-        },
-      ],
+const router = useRouter();
+
+// Reactive state variables
+const showMail = ref(false);
+const showNotif = ref(false);
+const showSignOut = ref(false);
+const unreadMessages = ref(0);
+const newNotifications = ref(0);
+const showApplyPopup = ref(false);
+const selectedJobId = ref(null);
+const resumeFile = ref(null);
+const showMessagePopup = ref(false);
+const selectedIndustry = ref(null);
+const selectedCompany = ref(null);
+const messageContent = ref("");
+
+// Jobs data
+const jobs = reactive([
+  {
+    id: 1,
+    company: "Tech Solutions Inc.",
+    description:
+      "Hi idol! Walang signal dito sa bukid pero nung nalaman kong nag post ka dali dali akong bumaba ng bukid, tumawid ako ng tatlong ilog, tinumbok ko ang pitong bundok, at umutang ako ng perang pamasahe papuntang syudad at namalimos pa ako para may pang hulog sa pisonet para lang maka react sa post mo.",
+    type: "Education, Arts & Sciences",
+    salary: "30,000 - 40,000",
+    media: "/public/vincent.png",
+  },
+  {
+    id: 2,
+    company: "Green Valley Farms",
+    description:
+      "Hiring for a farm manager with experience in organic farming...",
+    type: "Education, Arts & Sciences",
+    salary: "20,000 - 25,000",
+    media: "/public/vincent.png",
+  },
+  {
+    id: 3,
+    company: "Creative Minds Agency",
+    description: "Seeking a graphic designer with a strong portfolio...",
+    type: "Techfield",
+    salary: "15,000 - 20,000",
+    media: "/public/vincent.png",
+  },
+]);
 
       updates: [
         {
@@ -335,9 +339,6 @@ export default {
   },
 
   methods: {
-    toggleSidenav() {
-      this.issidenavOpen = !this.issidenavOpen;
-    },
     toggleMail() {
       this.showMail = !this.showMail;
       if (this.showMail) {
@@ -383,55 +384,64 @@ export default {
         return;
       }
 
-      console.log("Applying to job ID:", this.selectedJobId);
-      console.log("Resume file:", this.resumeFile.name);
+  console.log("Applying to job ID:", selectedJobId.value);
+  console.log("Resume file:", resumeFile.value.name);
 
-      const formData = new FormData();
-      formData.append("resume", this.resumeFile);
-      formData.append("jobId", this.selectedJobId);
+  const formData = new FormData();
+  formData.append("resume", resumeFile.value);
+  formData.append("jobId", selectedJobId.value);
 
-      this.showApplyPopup = false;
-      this.resumeFile = null;
-      this.selectedJobId = null;
-    },
-    handleFileUpload(event) {
-      this.resumeFile = event.target.files[0];
-    },
-    closeApplyPopup() {
-      this.showApplyPopup = false;
-      this.resumeFile = null;
-      this.selectedJobId = null;
-    },
-    sendMessage(company) {
-      this.selectedCompany = company;
-      this.showMessagePopup = true;
-    },
-    sendActualMessage() {
-      console.log("Sending message to", this.selectedCompany);
-      console.log("Message content:", this.messageContent);
-      this.showMessagePopup = false;
-      this.messageContent = "";
-    },
-    selectIndustry(industry) {
-      this.selectedIndustry = industry;
-    },
-    selectCompany(company) {
-      this.selectedCompany = company;
-    },
-    clearFilters() {
-      this.selectedIndustry = null;
-      this.selectedCompany = null;
-    },
-  },
+  // You can add fetch or axios call here to submit formData to server
 
-  mounted() {
-    setInterval(() => {
-      this.unreadMessages += 1;
-      this.newNotifications += 1;
-    }, 20000);
-  },
-};
+  showApplyPopup.value = false;
+  resumeFile.value = null;
+  selectedJobId.value = null;
+}
+
+function handleFileUpload(event) {
+  resumeFile.value = event.target.files[0];
+}
+
+function closeApplyPopup() {
+  showApplyPopup.value = false;
+  resumeFile.value = null;
+  selectedJobId.value = null;
+}
+
+function sendMessage(company) {
+  selectedCompany.value = company;
+  showMessagePopup.value = true;
+}
+
+function sendActualMessage() {
+  console.log("Sending message to", selectedCompany.value);
+  console.log("Message content:", messageContent.value);
+  showMessagePopup.value = false;
+  messageContent.value = "";
+}
+
+function selectIndustry(industry) {
+  selectedIndustry.value = industry;
+}
+
+function selectCompany(company) {
+  selectedCompany.value = company;
+}
+
+function clearFilters() {
+  selectedIndustry.value = null;
+  selectedCompany.value = null;
+}
+
+// Lifecycle hook
+onMounted(() => {
+  setInterval(() => {
+    unreadMessages.value += 1;
+    newNotifications.value += 1;
+  }, 20000);
+});
 </script>
+
 
 <style scoped>
 * {

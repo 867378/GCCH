@@ -9,68 +9,76 @@ import CompanyProfile from "@/views/CompanyProfile.vue";
 import Applicantdash from "@/views/Applicantdash.vue";
 import Applicantmessage from "@/views/Applicantmessage.vue";
 import Applicantprofile from "@/views/Applicantprofile.vue";
+import Redirecting from "@/views/Redirecting.vue";
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/login",
-      name: "login",
+      name: "Login",
       component: Loginpage,
     },
 
     {
-      path: "/Signup",
+      path: `/signup/:userId`,
       name: "Signup",
       component: Signup,
     },
 
     {
       path: "/companydash",
-      name: "companydash",
+      name: "CompanyDash",
       component: CompanyDashboard,
     },
 
     {
       path: "/companypost",
-      name: "companypost",
+      name: "CompanyPost",
       component: CompanyPost,
     },
 
     {
       path: "/companymessage",
-      name: "companymessage",
+      name: "CompanyMessage",
       component: CompanyMessage,
     },
 
     {
       path: "/companyapplication",
-      name: "companyapplication",
+      name: "CompanyApplication",
       component: CompanyApplication,
     },
 
    {
-      path: "/CompanyProfile",
+      path: "/companyprofile",
       name: "CompanyProfile",
       component: CompanyProfile,
     },
 
     {
-      path: "/Applicantdash",
-      name: "Applicantdash",
+      path: "/applicantdash",
+      name: "ApplicantDash",
       component: Applicantdash,
     },
 
     {
-      path: "/Applicantmessage",
-      name: "Applicantmessage",
+      path: "/applicantmessage",
+      name: "ApplicantMessage",
       component: Applicantmessage,
     },
 
     {
-      path: "/Applicantprofile",
-      name: "Applicantprofile",
+      path: "/applicantprofile",
+      name: "ApplicantProfile",
       component: Applicantprofile,
     },
+
+    {
+      path: "/redirecting",
+      name: "Redirecting",
+      component: Redirecting,
+    }
   ],
 });
 
