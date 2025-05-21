@@ -192,7 +192,7 @@ export default {
       selectedUser: null,
       showMessagePopup: false,
       newReply: "",
-      isSidenavOpen: false,
+      isSidenavOpen: true,
 
       message: [
         "Jape: Interested in your post.",
