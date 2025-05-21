@@ -93,6 +93,8 @@
           </div>
         </div>
       </div>
+
+      <!-- Job Applications for Applicants -->
       <div class="content">
         <div class="left-content">
           <div class="resume-box">
@@ -115,8 +117,8 @@
                     class="status-select"
                   >
                     <option disabled value="">Select status</option>
-                    <option>Pending</option>
-                    <option>Interview</option>
+                    <option>Ongoing Assessment</option>
+                    <option>For Interview</option>
                     <option>Accepted</option>
                     <option>Rejected</option>
                   </select>
@@ -156,160 +158,132 @@
             </div>
           </div>
         </div>
+        <!-- Notifications -->
         <div class="right-content">
           <h3>UPDATES</h3>
           <div class="updates-list">
             <div
-              v-for="(update, index) in updates"
-              :key="index"
+              v-for="notification in notifications"
+              :key="notification"
               class="update-box"
             >
-              <h2>
-                <span v-if="update.type === 'message'"></span>
-                <span v-if="update.type === 'applicant'"></span>
-                <span v-if="update.type === 'job_post'"></span>
-                {{ update.user }} {{ update.content }}
-              </h2>
-              <p>{{ update.time }}</p>
+              <h2>{{ formatType(notification.type) }}</h2>
+              <p>{{ notification.content }}</p>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      showMail: false,
-      showNotif: false,
-      showSignOut: false,
-      unreadMessages: 0,
-      newNotifications: 0,
-      selectedUser: null,
-      selectedApplicant: null,
-      selectedStatus: "",
-      showSave: false,
-      isSidenavOpen: true,
 
-      messages: [
-        "Jape: Interested in your post.",
-        "Paulo: Sent a resume for the job.",
-        "Cj: Asking about job requirements.",
-      ],
+<script setup>
+import { ref,onMounted } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
-      notifications: ["3 new applicants this week", "Job Posted", "bengbeng"],
+const isSidenavOpen = ref(false);
+const showMail = ref(false);
+const showNotif = ref(false);
+const showSignOut = ref(false);
+const unreadMessages = ref(0);
+const newNotifications = ref(0);
+const selectedUserId = ref(null);
+const selectedApplicant = ref(null);
+const selectedStatus = ref("");
+const showSave = ref(false);
+const showResumeModal = ref(false);
 
-      updates: [
-        {
-          type: "message",
-          user: "Jape",
-          time: "10:47 AM",
-          content: "sent you a message",
-        },
-        {
-          type: "applicant",
-          user: "Paulo",
-          time: "9:15 AM",
-          content: "submitted a resume",
-        },
-        {
-          type: "job_post",
-          user: "You",
-          time: "8:00 AM",
-          content: "posted a job ",
-        },
-      ],
-      applications: [
-        {
-          name: "Paulo Cordova",
-          resume: "/vincent.pdf",
-          message:
-            "I am interested in the posted job. My resume is below for your review.",
-          status: "",
-        },
-        {
-          name: "Prince Epal",
-          resume: "/vincent.pdf",
-          message:
-            "Hello, I’d love to apply for this position. Please see my resume below.",
-          status: "",
-        },
-        {
-          name: "Jasper Espinoza",
-          resume: "/vincent.pdf",
-          message:
-            "I’m excited to be considered for this opportunity. Resume is below.",
-          status: "",
-        },
-        {
-          name: "CJ Castillejo",
-          resume: "/vincent.pdf",
-          message:
-            "I’m excited to be considered for this opportunity. Resume is below.",
-          status: "",
-        },
-      ],
-      showResumeModal: false,
-      selectedResume: "",
-    };
-  },
-  methods: {
-    toggleSidenav() {
-      this.issidenavOpen = !this.issidenavOpen;
-    },
-    toggleMail() {
-      this.showMail = !this.showMail;
-      if (this.showMail) {
-        this.unreadMessages = 0;
-      }
-    },
-    toggleNotif() {
-      this.showNotif = !this.showNotif;
-      if (this.showNotif) {
-        this.newNotifications = 0;
-      }
-    },
-    toggleSignOut() {
-      this.showSignOut = !this.showSignOut;
-    },
-    confirmSignOut() {
-      console.log("Signing out...");
-      window.location.href = "/login";
-    },
-    viewResume(resumeLink, applicant) {
-      this.selectedResume = resumeLink;
-      this.selectedApplicant = applicant;
-      this.showResumeModal = true;
-    },
-    closeResume() {
-      this.showResumeModal = false;
-      this.selectedResume = null;
-      this.selectedApplicant = null;
-    },
-  },
-  saveStatus(applicant) {
-    console.log(`Status for ${applicant.name} saved: ${applicant.status}`);
-    this.updates.unshift({
-      type: "status_update",
-      user: "You",
-      time: new Date().toLocaleTimeString(),
-      content: `set ${applicant.name}'s application to "${applicant.status}"`,
+const updates = ref([]);
+const messages = ref ([]);
+const notifications = ref([]);
+const applications = ref([]);
+
+const router = useRouter();
+
+//Methods for Nav Bars
+function toggleMail() {
+  showMail.value = !showMail.value;
+  if (showMail.value) {
+    unreadMessages.value = 0;
+  }
+}
+function toggleNotif() {
+  showNotif.value = !showNotif.value;
+  if (showNotif.value) {
+    newNotifications.value = 0;
+  }
+}
+function toggleSignOut() {
+  showSignOut.value = !showSignOut.value;
+}
+
+function confirmSignOut() {
+  axios.post('/logout')
+    .then((response) => {
+      console.log("Sign out successful:", response.data.message);
+      router.push("/login");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+
     });
-    this.newNotifications++;
+}
 
-    applicant.showSave = false;
-  },
+//Notification Logic
+async function fetchNotifications() {
+  try {
+    const response = await axios.get('/notifications');
+    notifications.value = response.data.notifications;
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+  }
+}
 
-  mounted() {
-    setInterval(() => {
-      this.unreadMessages += 1;
-      this.newNotifications += 1;
-    }, 20000);
-  },
-};
+function formatType(type){
+  switch(type){
+    case "job_application":
+      return "Job Application";
+    case "inquiry":
+      return "Inquiry";
+    case "application_update":
+      return "Application Update";
+    case "message":
+      return "Message";
+    case "other":
+      return "Other";
+  }
+}
+
+function viewResume(resumeLink, applicant) {
+  selectedResume.value = resumeLink;
+  selectedApplicant.value = applicant;
+  showResumeModal.value = true;
+}
+
+function closeResume() {
+  showResumeModal.value = false;
+  selectedResume.value = null;
+  selectedApplicant.value = null;
+}
+
+function saveStatus(){
+
+}
+
+onMounted(() => {
+  fetchNotifications();
+});
+
+//   mounted() {
+//     setInterval(() => {
+//       this.unreadMessages += 1;
+//       this.newNotifications += 1;
+//     }, 20000);
+//   },
+// };
 </script>
 
 <style scoped>

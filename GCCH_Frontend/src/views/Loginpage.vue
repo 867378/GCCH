@@ -25,7 +25,9 @@
         <div class="login-container">
           <form class="login-form">
             <h2>LOGIN INTO YOUR ACCOUNT</h2>
-            <a href="http://localhost:8000/auth/google/redirect">Google Login</a>
+            <button type="button" @click="redirectToGoogle" class="google-login-btn">
+              Login with Google
+            </button>
           </form>
         </div>
       </section>
@@ -124,9 +126,11 @@
     </div>
   </template>
 
-  <script>
-
-  /*
+  <script setup>
+  function redirectToGoogle() {
+    window.location.href = "http://localhost:8000/auth/google/redirect";
+  }
+  
   document.addEventListener("DOMContentLoaded", function () {
     const signUpBtn = document.querySelector(".sign-up");
     const signupModal = document.getElementById("signupModal");
@@ -180,7 +184,7 @@
     companyBtn.addEventListener("click", showCompanyForm);
     companyBtn2.addEventListener("click", showCompanyForm);
   });
-  */
+  
   </script>
 
   <style>

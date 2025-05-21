@@ -41,7 +41,7 @@ class MessageController extends Controller
         }
 
         //Notifies the receiver
-        $notifier->notifyUser($request->receiver_id, 'You have received a message from ' . $senderName, 'message');
+        $notifier->notifyUser($request->receiver_id, 'You have received a message from ' . $senderName, 'message', $senderId);
 
         return response()->json($message, 200);
     }
