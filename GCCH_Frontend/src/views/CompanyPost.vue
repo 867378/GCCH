@@ -100,7 +100,7 @@
           <form @submit.prevent="postJob">
             <div class="post-box">
               <h3>Job Description</h3>
-              <button>Post Job</button> 
+              <button>Post Job</button>
               <input
                 v-model="jobData.job_title"
                 type="text"
@@ -114,18 +114,24 @@
               ></textarea>
 
               <div class="form-row">
-                <input v-model="jobData.job_location" type="text" placeholder="Enter Job Location" />
-
-                <select v-model="jobData.job_type" class="job-form job-type" id="job_type">
-                  <option disabled selected>Job Type</option>
+                <select
+                  v-model="jobData.job_type"
+                  class="job-form job-type"
+                  id="job_type"
+                >
+                  <option disabled selected value="">Job Type</option>
                   <option value="full_time">Full-time</option>
                   <option value="part_time">Part-time</option>
                   <option value="internship">Internship</option>
                   <option value="contract">Contract</option>
                 </select>
 
-                <select v-model="jobData.recommended_course" class="job-form job-type" id="recommended_course">
-                  <option disabled selected>Recommended Course</option>
+                <select
+                  v-model="jobData.recommended_course"
+                  class="job-form job-type"
+                  id="recommended_course"
+                >
+                  <option disabled selected value="">Recommended Course</option>
                   <option value="BSIT">BSIT</option>
                   <option value="BSCS">BSCS</option>
                   <option value="BSEMC">BSEMC</option>
@@ -151,8 +157,12 @@
                   <option value="Other">Other</option>
                 </select>
 
-                <select v-model="jobData.recommended_course_2" class="job-form job-type" id="recommended_course_2">
-                  <option :value="null">Recommended Course 2</option>
+                <select
+                  v-model="jobData.recommended_course_2"
+                  class="job-form job-type"
+                  id="recommended_course_2"
+                >
+                  <option disabled selected value="">Recommended Course 2</option>
                   <option value="BSIT">BSIT</option>
                   <option value="BSCS">BSCS</option>
                   <option value="BSEMC">BSEMC</option>
@@ -178,8 +188,12 @@
                   <option value="Other">Other</option>
                 </select>
 
-                <select v-model="jobData.recommended_course_3" class="job-form job-type" id="recommended_course_3">
-                  <option :value="null">Recommended Course 3</option>
+                <select
+                  v-model="jobData.recommended_course_3"
+                  class="job-form job-type"
+                  id="recommended_course_3"
+                >
+                  <option disabled selected value="">Recommended Course 3</option>
                   <option value="BSIT">BSIT</option>
                   <option value="BSCS">BSCS</option>
                   <option value="BSEMC">BSEMC</option>
@@ -205,12 +219,24 @@
                   <option value="Other">Other</option>
                 </select>
 
-                <input type="number" v-model="jobData.monthly_salary" placeholder="Enter Monthly Salary (in Php)" />
+                <input
+                  v-model="jobData.job_location"
+                  type="text"
+                  placeholder="Enter Job Location"
+                  class="job-input"
+                />
+
+                <input
+                  type="number"
+                  v-model="jobData.monthly_salary"
+                  placeholder="Enter Monthly Salary (in Php)"
+                  class="salary-input"
+                />
               </div>
             </div>
           </form>
         </div>
-        
+
         <!-- JOB DISPLAY -->
         <div class="right-content">
           <h3>POSTED JOBS</h3>
@@ -220,26 +246,24 @@
               v-for="(job, index) in postedJobs"
               :key="index"
             >
-            <h2>{{ job.job_title }}</h2>
-            <p>{{ job.job_description }}</p>
-            <p><strong>Location:</strong> {{ job.job_location }}</p>
-            <p><strong>Type:</strong> {{ job.job_type }}</p>
-            <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
-            <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
-            <p>Status: {{ job.status }}</p>
-
+              <h2>{{ job.job_title }}</h2>
+              <p>{{ job.job_description }}</p>
+              <p><strong>Location:</strong> {{ job.job_location }}</p>
+              <p><strong>Type:</strong> {{ job.job_type }}</p>
+              <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
+              <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
+              <p>Status: {{ job.status }}</p>
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref,onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 
@@ -257,14 +281,14 @@ const notifications = ref([]);
 const postedJobs = ref([]);
 
 const jobData = ref({
-    job_title:"",
-    job_description:"",
-    job_location:"",
-    monthly_salary:"",
-    job_type:"",
-    recommended_course:"", 
-    recommended_course_2:"", 
-    recommended_course_3:"",
+  job_title: "",
+  job_description: "",
+  job_location: "",
+  monthly_salary: "",
+  job_type: "",
+  recommended_course: "",
+  recommended_course_2: "",
+  recommended_course_3: "",
 });
 
 function toggleMail() {
@@ -286,7 +310,8 @@ function toggleSignOut() {
 }
 
 function confirmSignOut() {
-  axios.post('logout')
+  axios
+    .post("logout")
     .then((response) => {
       console.log("Sign out successful:", response.data.message);
       router.push("/login");
@@ -294,20 +319,20 @@ function confirmSignOut() {
     .catch((error) => {
       console.error("Error signing out:", error);
     });
-};
+}
 
 async function postJob() {
   try {
     const response = await axios.post("/company/postjob", {
-        job_title: jobData.value.job_title,
-        job_description: jobData.value.job_description,
-        job_location: jobData.value.job_location,
-        monthly_salary: jobData.value.monthly_salary,
-        job_type: jobData.value.job_type,
-        recommended_course: jobData.value.recommended_course,
-        recommended_course_2: jobData.value.recommended_course_2 || null,
-        recommended_course_3: jobData.value.recommended_course_3 || null,
-      });
+      job_title: jobData.value.job_title,
+      job_description: jobData.value.job_description,
+      job_location: jobData.value.job_location,
+      monthly_salary: jobData.value.monthly_salary,
+      job_type: jobData.value.job_type,
+      recommended_course: jobData.value.recommended_course,
+      recommended_course_2: jobData.value.recommended_course_2 || null,
+      recommended_course_3: jobData.value.recommended_course_3 || null,
+    });
     console.log("Job posted successfully:", response.data);
     alert(response.data.message);
 
@@ -323,7 +348,6 @@ async function postJob() {
       recommended_course_2: null,
       recommended_course_3: null,
     };
-
   } catch (error) {
     console.error("Error posting job:", error);
     alert(error);
@@ -340,9 +364,7 @@ async function fetchPostedJobs() {
   }
 }
 
-onMounted(fetchPostedJobs)
-
-
+onMounted(fetchPostedJobs);
 </script>
 
 <style scoped>
@@ -598,8 +620,10 @@ body,
   background: white;
   padding: 20px;
   border-radius: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   border-radius: 3vh;
+  margin-left: 4vh;
+  width: 130vh;
 }
 .post-box textarea {
   width: 100%;
@@ -640,8 +664,9 @@ input[type="file"] {
 }
 
 .form-row {
-  display: flex;
-  gap: 20vh;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 1vh;
   align-items: center;
   margin-top: 3vh;
 }
@@ -656,11 +681,12 @@ input[type="file"] {
 .job-form {
   flex: 1;
   position: relative;
-  padding: 10px 15px;
+  padding: 10px 6px;
+  margin-left: 3vh;
   border-radius: 2vh;
   background-color: #045d56;
   color: #e0f2f1;
-  font-size: 16px;
+  font-size: 14px;
   transition: background-color 0.3s ease-in-out;
   z-index: 1;
 }
@@ -698,7 +724,23 @@ input[type="file"] {
   box-shadow: 0 0 0 2px #00bfa5;
   color: #000;
 }
-
+.job-input {
+  width: 32vh;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  color: #333;
+  margin-left: 2.5vh;
+}
+.salary-input {
+  width: 32vh;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  margin-left: 2.5vh;
+}
 .job-type {
   background-color: #045d56;
   color: #ffffff;
@@ -712,7 +754,7 @@ input[type="file"] {
 .job-type,
 .salary-range {
   display: block;
-  width: 100%;
+  width: 70%;
 }
 
 .job-type option,
