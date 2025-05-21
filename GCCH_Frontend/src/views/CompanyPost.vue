@@ -4,30 +4,30 @@
       <img src="/public/gcchnobg.png" alt="GCCH Logo" class="logo" />
       <ul>
         <li>
-          <router-link to="/CompanyDash" class="sidenav-text">
+          <router-link to="/companydash" class="sidenav-text">
             <img src="/public/home.png" class="ikon" />
             HOME
           </router-link>
         </li>
         <li style="font-weight: bold">
-          <router-link to="/CompanyPost" class="sidenav-text">
+          <router-link to="/companypost" class="sidenav-text">
             <img src="/public/laptop.png" class="ikon" /> POSTED JOBS
           </router-link>
         </li>
         <li>
-          <router-link to="/CompanyMessage" class="sidenav-text">
+          <router-link to="/companymessage" class="sidenav-text">
             <img src="/public/message.png" class="ikon" />
             MESSAGES
           </router-link>
         </li>
         <li>
-          <router-link to="/CompanyApplication" class="sidenav-text">
+          <router-link to="/companyapplication" class="sidenav-text">
             <img src="/public/resume.png" class="ikon" />
             APPLICATIONS
           </router-link>
         </li>
         <li>
-          <router-link to="/CompanyProfile" class="sidenav-text">
+          <router-link to="/companyprofile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
             PROFILE
           </router-link>
@@ -137,16 +137,62 @@ function toggleSignOut() {
 }
 
 function confirmSignOut() {
-  axios
-    .post("logout")
-    .then((response) => {
-      console.log("Sign out successful:", response.data.message);
-      router.push("/login");
-    })
-    .catch((error) => {
-      console.error("Error signing out:", error);
+    axios.post('/logout')
+      .then((response) => {
+        console.log("Sign out successful:", response.data.message);
+        router.push("/login");
+      })
+      .catch((error) => {
+        console.error("Error signing out:", error);
+      });
+  };
+
+// Job Posting Logic
+async function postJob() {
+  try {
+    const response = await axios.post("/company/postjob", {
+      job_title: jobData.value.job_title,
+      job_description: jobData.value.job_description,
+      job_location: jobData.value.job_location,
+      monthly_salary: jobData.value.monthly_salary,
+      job_type: jobData.value.job_type,
+      recommended_course: jobData.value.recommended_course,
+      recommended_course_2: jobData.value.recommended_course_2 || null,
+      recommended_course_3: jobData.value.recommended_course_3 || null,
     });
+    console.log("Job posted successfully:", response.data);
+    alert(response.data.message);
+
+    await fetchPostedJobs();
+
+    jobData.value = {
+      job_title: "",
+      job_description: "",
+      job_location: "",
+      monthly_salary: "",
+      job_type: "",
+      recommended_course: "",
+      recommended_course_2: null,
+      recommended_course_3: null,
+    };
+  } catch (error) {
+    console.error("Error posting job:", error);
+    alert(error);
+  }
 }
+
+//Fetch Posted Jobs
+async function fetchPostedJobs() {
+  try {
+    const response = await axios.get("/company/jobdisplay");
+    postedJobs.value = response.data.jobs;
+  } catch (error) {
+    console.error("Error fetching posted jobs:", error);
+    alert("Error fetching posted jobs");
+  }
+}
+
+onMounted(fetchPostedJobs);
 
 </script>
 

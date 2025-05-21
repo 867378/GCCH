@@ -76,7 +76,10 @@
           <div class="popup">
             <h3>📬 Messages</h3>
             <ul class="popup-list">
-              <li v-for="(msg, index) in message" :key="index">{{ msg }}</li>
+              <li v-for="(notif, index) in notifications" :key="index">
+                <strong>{{ formatType(notif.type) }}</strong>: {{ notif.content }}
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
+              </li>
             </ul>
             <button @click="toggleMail">Close</button>
           </div>
@@ -87,13 +90,16 @@
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
               <li v-for="(notif, index) in notifications" :key="index">
-                {{ notif }}
+                <strong>{{ formatType(notif.type) }}</strong>: {{ notif.content }}
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
               </li>
             </ul>
             <button @click="toggleNotif">Close</button>
           </div>
         </div>
       </div>
+
+      <!-- CHATS -->
       <div class="content">
         <div class="left-content">
           <div class="message-box">
@@ -101,24 +107,50 @@
             <div class="form-row">
               <div class="messages-list">
                 <div
-                  v-for="(msgs, user) in messages"
-                  :key="user"
+                  v-for="(msg, index) in uniqueConversations" 
+                  :key="index"
                   class="message-item received"
-                  @click="openChat(user)"
+                  @click="openChat({ sender_id: msg.sender_id })"
                   style="cursor: pointer"
                 >
                   <p>
-                    <strong>{{ user }}:</strong>
-                    {{ msgs[msgs.length - 1].text }}
+                    <strong>{{ msg.from }}:</strong>
+                    {{ msg.content }}
                   </p>
                   <span class="timestamp">{{
-                    msgs[msgs.length - 1].time
+                    new Date(msg.created_at).toLocaleString()
                   }}</span>
                 </div>
               </div>
             </div>
           </div>
-          <div
+
+          <!-- Current Chat -->
+          <div v-if="conversation.length" class="chat-box">
+            <h3>Conversation</h3>
+            <div style="max-height: 400px; overflow-y: auto; margin-bottom: 1rem">
+              <div
+                v-for="(msg, index) in conversation"
+                :key="index"
+                :class="['message-item', msg.from === 'You' ? 'sent' : 'received']"
+              >
+                <p><strong>{{ msg.from }}:</strong> {{ msg.content }}</p>
+                <span class="timestamp">{{ new Date(msg.created_at).toLocaleString() }}</span>
+              </div>
+            </div>
+            
+            <div class="reply-box">
+              <textarea
+                v-model="newReply"
+                placeholder="Type your message..."
+                @keyup="handleKeyUp"
+                @keydown.enter.prevent="sendReply"
+                class="expanding-textarea"
+              ></textarea>
+              <button @click="sendReply">Send</button>
+            </div>
+          </div>
+          <!-- <div
             v-if="showMessagePopup"
             class="popup-overlay"
             @click.self="closeChat"
@@ -154,187 +186,192 @@
               </div>
               <button @click="closeChat">Close</button>
             </div>
-          </div>
+          </div> -->
         </div>
 
+        <!-- Notifications -->
         <div class="right-content">
           <h3>UPDATES</h3>
           <div class="updates-list">
             <div
-              v-for="(update, index) in updates"
+              v-for="(notif, index) in filteredNotifications"
               :key="index"
+              @click="openChat(notif)"
+              style="cursor: pointer;"
               class="update-box"
             >
-              <h2>
-                <span v-if="update.type === 'message'"></span>
-                <span v-if="update.type === 'applicant'"></span>
-                <span v-if="update.type === 'job_post'"></span>
-                {{ update.user }} {{ update.content }}
-              </h2>
-              <p>{{ update.time }}</p>
+              <h2>{{ formatType(notif.type) }}</h2>
+              <p>{{ notif.content }}</p>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      showMail: false,
-      showNotif: false,
-      showSignOut: false,
-      unreadMessages: 0,
-      newNotifications: 0,
-      selectedUser: null,
-      showMessagePopup: false,
-      newReply: "",
-      isSidenavOpen: true,
+<script setup>
+  import { ref, onMounted, computed } from "vue";
+  import { useRouter } from "vue-router";
+  import axios from "axios";
 
-      message: [
-        "Jape: Interested in your post.",
-        "Paulo: Sent a resume for the job.",
-        "Cj: Asking about job requirements.",
-      ],
+  const router = useRouter();
 
-      notifications: ["3 new applicants this week", "Job Posted", "bengbeng"],
+  const unreadMessages = ref(0);
+  const newNotifications = ref(0);
+  const isSidenavOpen = ref(false);
 
-      updates: [
-        {
-          type: "message",
-          user: "Jape",
-          time: "10:47 AM",
-          content: "sent you a message",
-        },
-        {
-          type: "applicant",
-          user: "Paulo",
-          time: "9:15 AM",
-          content: "submitted a resume",
-        },
-        {
-          type: "job_post",
-          user: "You",
-          time: "8:00 AM",
-          content: "posted a job ",
-        },
-      ],
-      messages: {
-        Jape: [
-          {
-            from: "Jane",
-            text: "Hello! I'm interested in the job post.",
-            time: "10:45 AM",
-          },
-          {
-            from: "You",
-            text: "Thank you! Please send your resume.",
-            time: "10:46 AM",
-          },
-          {
-            from: "Jane",
-            text: "I just sent it. Let me know if received!",
-            time: "10:47 AM",
-          },
-        ],
-        Paulo: [
-          {
-            from: "Mark",
-            text: "Can I apply without experience?",
-            time: "9:15 AM",
-          },
-          {
-            from: "You",
-            text: "Yes, feel free to send your resume.",
-            time: "9:17 AM",
-          },
-        ],
+  const showMail = ref(false);
+  const showNotif = ref(false);
+  const showSignOut = ref(false);
 
-        Aaron: [
-          {
-            from: "Mark",
-            text: "Can I apply without experience?",
-            time: "9:15 AM",
-          },
-          {
-            from: "You",
-            text: "Yes, feel free to send your resume.",
-            time: "9:17 AM",
-          },
-        ],
-      },
-    };
-  },
-  methods: {
-    toggleSidenav() {
-      this.issidenavOpen = !this.issidenavOpen;
-    },
-    toggleMail() {
-      this.showMail = !this.showMail;
-      if (this.showMail) {
-        this.unreadMessages = 0;
+  const selectedUserId = ref(null);
+  const newReply = ref("");
+
+  const currentUserId = ref(localStorage.getItem("user_id"));
+  const allMessages = ref([]);
+  const conversation = ref([]);
+  const uniqueConversations = computed(() => {
+    const map = new Map();
+    for (const msg of allMessages.value) {
+      if (!map.has(msg.sender_id)) {
+        map.set(msg.sender_id, msg);
+
       }
-    },
-    toggleNotif() {
-      this.showNotif = !this.showNotif;
-      if (this.showNotif) {
-        this.newNotifications = 0;
-      }
-    },
-    toggleSignOut() {
-      this.showSignOut = !this.showSignOut;
-    },
-    confirmSignOut() {
-      console.log("Signing out...");
-      window.location.href = "/login";
-    },
-    openChat(user) {
-      this.selectedUser = user;
-      this.showMessagePopup = true;
-    },
-    closeChat() {
-      this.showMessagePopup = false;
-      this.selectedUser = null;
-    },
+    }
+    return Array.from(map.values());
+  })
 
-    handleKeyUp(event) {
-      const textarea = event.target;
+  const notifications = ref([]);
+  const filteredNotifications = computed(() => 
+    notifications.value.filter(
+      notif => notif && ["message", "inquiry"].includes(notif.type)
+    )
+  );
 
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
+  function toggleMail() {
+    showMail.value = !showMail.value;
+    if (showMail.value) {
+      unreadMessages.value = 0;
+    }
+  }
 
-      if (event.key === "Enter" && !event.shiftKey) {
-        this.sendReply();
-      }
-    },
-    sendReply() {
-      if (this.newReply.trim() && this.selectedUser) {
-        const now = new Date();
-        const time = now.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+  function toggleNotif() {
+    showNotif.value = !showNotif.value;
+    if (showNotif.value) {
+      newNotifications.value = 0;
+    }
+  }
 
-        this.messages[this.selectedUser].push({
-          from: "You",
-          text: this.newReply,
-          time: time,
-        });
-        this.newReply = "";
-      }
-    },
-  },
-  mounted() {
-    setInterval(() => {
-      this.unreadMessages += 1;
-      this.newNotifications += 1;
-    }, 20000);
-  },
-};
-</script>
+  function toggleSignOut() {
+    showSignOut.value = !showSignOut.value;
+  }
+
+  function confirmSignOut() {
+    axios.post('/logout')
+      .then(() => {
+        router.push("/login");
+      })
+      .catch(console.error);
+  }
+
+  async function openChat(obj) {
+    const senderId = obj.sender_id;
+
+    if(!senderId){
+      console.warn("No sender ID found in notification:", obj);
+      return;
+    }
+
+    selectedUserId.value = senderId;
+    await fetchConversation(senderId);
+  }
+
+  async function fetchConversation(senderId) {
+  try {
+      const response = await axios.get(`/message/conversation/${senderId}`);
+      const data = Array.isArray(response.data) ? response.data : [];
+
+      // Format the conversation with "You" or "Them"
+      conversation.value = data.map(msg => ({
+        ...msg,
+        from: msg.sender_id == currentUserId.value ? "You" : "Them",
+        content: msg.message, // alias 'message' as 'content' for display if needed
+      }));
+    } catch (error) {
+      console.error("Error fetching conversation:", error);
+      conversation.value = [];
+    }
+  }
+
+  async function sendReply() {
+    if (!newReply.value.trim()) return;
+    try {
+      await axios.post("/message/send", {
+        receiver_id: selectedUserId.value,
+        message: newReply.value.trim(),
+      });
+      conversation.value.push({
+        sender_id: currentUserId.value,
+        receiver_id: selectedUserId.value,
+        message: newReply.value.trim(),
+        from: "You",
+        content: newReply.value.trim(),
+        created_at: new Date().toISOString(),
+      });
+      newReply.value = "";
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  }
+
+  // function closeChat() {
+  //   showMessagePopup.value = false;
+  //   selectedUserId.value = null;
+  //   messages.value = [];
+  // }
+
+  // function handleKeyUp(event) {
+  //   const textarea = event.target;
+  //   textarea.style.height = "auto";
+  //   textarea.style.height = `${textarea.scrollHeight}px`;
+  //   if (event.key === "Enter" && !event.shiftKey) {
+  //     event.preventDefault();
+  //     sendReply();
+  //   }
+  // }
+
+  async function fetchNotifications() {
+    try {
+      const response = await axios.get('/notifications');
+      console.log("Fetched notifications:", response.data);
+
+      notifications.value = response.data.notifications || []; // or adjust based on actual structure
+      newNotifications.value = notifications.value.filter(
+        notif => notif && ['message', 'inquiry'].includes(notif.type)
+      ).length;
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  }
+
+
+  function formatType(type) {
+    switch (type) {
+      case "job_application": return "Job Application";
+      case "inquiry": return "Inquiry";
+      case "application_update": return "Application Update";
+      case "message": return "Message";
+      case "other": return "Other";
+      default: return type;
+    }
+  }
+
+  onMounted(() => {
+    fetchNotifications();
+  });
+  </script>
 
 <style scoped>
 * {

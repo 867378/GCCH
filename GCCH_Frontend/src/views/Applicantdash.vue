@@ -134,79 +134,76 @@
           </div>
         </div>
       </div>
+
       <div class="content">
         <div class="left-content">
-          <div class="job-box" v-for="job in filteredJobs" :key="job.id">
+          <h3>RECOMMENDED JOBS</h3>
+          <div class="job-box" v-for="matchedJob in recommendedJobs" :key="matchedJob.id">
             <div class="job-card">
               <!-- Header -->
               <div class="job-header">
                 <img src="/public/user.png" class="ikon" />
-                <h3 class="company-name">{{ job.company }}</h3>
-                <button class="message-btn" @click="sendMessage(job.company)">
+                <h3 class="company-name">{{ matchedJob.job_title }}</h3>
+                <!-- <button class="message-btn" @click="sendMessage()">
                   Send Message
                 </button>
-                <button class="apply-btn" @click="applyToJob(job.id)">
+                <button class="apply-btn" @click="applyToJob()"> 
                   Apply
-                </button>
+                </button> -->
               </div>
 
               <!-- Move salary here BELOW description -->
               <div class="job-info">
                 <div class="job-detail">
                   <img src="/public/briefcase.png" class="ikon" />
-                  <span class="job-type">{{ job.type }}</span>
+                  <span class="job-type">{{ matchedJob.job_type }}</span>
                 </div>
               </div>
 
               <div class="job-info">
                 <div class="job-detail">
                   <img src="/public/money.png" class="ikon" />
-                  <span class="salary">₱{{ job.salary }}</span>
+                  <span class="salary">₱{{ matchedJob.monthly_salary }}</span>
                 </div>
               </div>
               <!-- Job Description -->
-              <p class="job-description">{{ job.description }}</p>
-
-              <!-- Optional Media -->
-              <div v-if="job.media" class="media-container">
-                <img :src="job.media" alt="Job Media" class="job-media" />
-              </div>
+              <p class="job-description">{{ matchedJob.job_description }}</p>
 
               <!-- Apply and Message Buttons -->
-              <!-- <div class="job-actions">
-                <button class="message-btn" @click="sendMessage(job.company)">
+              <div class="job-actions">
+                <button class="message-btn" @click="sendMessage(matchedJob.company_id)">
                   Send Message
                 </button>
-                <button class="apply-btn" @click="applyToJob(job.id)">
+                <button class="apply-btn" @click="applyToJob(matchedJob.id)">
                   Apply
                 </button>
-              </div> -->
+              </div>
             </div>
+
           </div>
         </div>
 
+        <!-- Notifications -->  
         <div class="right-content">
           <h3>CHECK THIS OUT</h3>
           <div class="updates-list">
             <div
-              v-for="(update, index) in updates"
-              :key="index"
+              v-for="notification in notifications"
+              :key="notification"
               class="update-box"
+              @click="handleNotificationClick(notification)"
             >
-              <h2>
-                <span v-if="update.type === 'message'"></span>
-                <span v-if="update.type === 'applicant'"></span>
-                <span v-if="update.type === 'job_post'"></span>
-                {{ update.user }} {{ update.content }}
-              </h2>
-              <p>{{ update.time }}</p>
+              <h2>{{ formatType(notification.type) }}</h2>
+              <p>{{ notification.content }}</p>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 
+  <!-- Job Application Pop up -->
   <div
     v-if="showApplyPopup"
     class="popup-overlay"
@@ -214,8 +211,10 @@
   >
     <div class="popup">
       <h3>📄 Upload Your Resume</h3>
-      <input type="file" @change="handleFileUpload" accept=".pdf,.doc,.docx" />
+      <input type="file" @change="handleFileUpload" accept=".pdf" />
       <br /><br />
+      <input type="text" v-model="coverLetter" placeholder="Cover Letter" />
+      <br /><br /> 
       <button @click="submitApplication">Apply</button>
       <button
         style="margin-left: 10px; background-color: gray"
@@ -225,13 +224,15 @@
       </button>
     </div>
   </div>
+
+  <!-- Message Function -->
   <div
     v-if="showMessagePopup"
     class="popup-overlay"
     @click.self="showMessagePopup = false"
   >
     <div class="popup">
-      <h3>✉️ Message to {{ selectedCompany }}</h3>
+      <h3>✉️ Message </h3>
       <textarea
         v-model="messageContent"
         placeholder="Type your message here..."
@@ -251,7 +252,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref,onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -264,173 +265,188 @@ const showSignOut = ref(false);
 const unreadMessages = ref(0);
 const newNotifications = ref(0);
 const showApplyPopup = ref(false);
-const selectedJobId = ref(null);
-const resumeFile = ref(null);
+const isSidenavOpen = ref(true);
+
+//for Message Popup
 const showMessagePopup = ref(false);
-const selectedIndustry = ref(null);
-const selectedCompany = ref(null);
+const selectedCompanyId = ref(null);
 const messageContent = ref("");
 
-// Jobs data
-const jobs = reactive([
-  {
-    id: 1,
-    company: "Tech Solutions Inc.",
-    description:
-      "Hi idol! Walang signal dito sa bukid pero nung nalaman kong nag post ka dali dali akong bumaba ng bukid, tumawid ako ng tatlong ilog, tinumbok ko ang pitong bundok, at umutang ako ng perang pamasahe papuntang syudad at namalimos pa ako para may pang hulog sa pisonet para lang maka react sa post mo.",
-    type: "Education, Arts & Sciences",
-    salary: "30,000 - 40,000",
-    media: "/public/vincent.png",
-  },
-  {
-    id: 2,
-    company: "Green Valley Farms",
-    description:
-      "Hiring for a farm manager with experience in organic farming...",
-    type: "Education, Arts & Sciences",
-    salary: "20,000 - 25,000",
-    media: "/public/vincent.png",
-  },
-  {
-    id: 3,
-    company: "Creative Minds Agency",
-    description: "Seeking a graphic designer with a strong portfolio...",
-    type: "Techfield",
-    salary: "15,000 - 20,000",
-    media: "/public/vincent.png",
-  },
-]);
+//for Apply Popup
+const selectedJobId = ref(null);
+const resumeFile = ref(null);
+const coverLetter = ref("");
 
-// Updates data
-const updates = reactive([
-  {
-    type: "message",
-    user: "Jape",
-    time: "10:47 AM",
-    content: "sent you a message",
-  },
-  {
-    type: "applicant",
-    user: "Paulo",
-    time: "9:15 AM",
-    content: "submitted a resume",
-  },
-  {
-    type: "job_post",
-    user: "You",
-    time: "8:00 AM",
-    content: "posted a job ",
-  },
-]);
+//for Job Listings
+const recommendedJobs = ref([]);
+const otherJobs = ref([]);
 
-// Computed properties
-const filteredJobs = computed(() => {
-  return jobs.filter((job) => {
-    const matchesIndustry = selectedIndustry.value
-      ? job.type === selectedIndustry.value
-      : true;
-    const matchesCompany = selectedCompany.value
-      ? job.company === selectedCompany.value
-      : true;
-    return matchesIndustry && matchesCompany;
-  });
-});
+//For Notifications
+const notifications = ref([]);
 
-// Methods
-function toggleMail() {
-  showMail.value = !showMail.value;
-  if (showMail.value) {
-    unreadMessages.value = 0;
+// NavBar Logic
+  function toggleMail() {
+    showMail.value = !showMail.value;
+    if (showMail.value) {
+      unreadMessages.value = 0;
+    }
   }
-}
-function toggleNotif() {
-  showNotif.value = !showNotif.value;
-  if (showNotif.value) {
-    newNotifications.value = 0;
+  function toggleNotif() {
+    showNotif.value = !showNotif.value;
+    if (showNotif.value) {
+      newNotifications.value = 0;
+    }
   }
-}
-function toggleSignOut() {
-  showSignOut.value = !showSignOut.value;
-}
-function confirmSignOut() {
-  console.log("Signing out...");
-  window.location.href = "/login";
-}
-function postJob() {
-  const text = document.querySelector("textarea").value;
-  fetch("/post-job", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ text: text }),
-  })
-    .then((response) => response.json())
-    .then((data) => console.log(data))
-    .catch((error) => console.error(error));
-}
-function filterBy(industry) {
-  console.log("Selected Industry:", industry);
-}
-function applyToJob(jobId) {
-  selectedJobId.value = jobId;
-  showApplyPopup.value = true;
-}
-function submitApplication() {
-  if (!resumeFile.value) {
-    alert("Please upload your resume.");
-    return;
+  function toggleSignOut() {
+    showSignOut.value = !showSignOut.value;
+  }
+  function confirmSignOut() {
+    axios.post('/logout')
+      .then((response) => {
+        console.log("Sign out successful:", response.data.message);
+        router.push("/login");
+      })
+      .catch((error) => {
+        console.error("Error signing out:", error);
+      });
   }
 
-  console.log("Applying to job ID:", selectedJobId.value);
-  console.log("Resume file:", resumeFile.value.name);
+// Job Listings Logic
+  async function fetchJobs() {
+    try {
+      const response = await axios.get('/applicant/jobdisplay');
 
-  const formData = new FormData();
-  formData.append("resume", resumeFile.value);
-  formData.append("jobId", selectedJobId.value);
+      console.log(response.data);
 
-  // You can add fetch or axios call here to submit formData to server
+      recommendedJobs.value=response.data.matchedjobs;
+      otherJobs.value=response.data.otherjobs;
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      alert("Failed to fetch jobs. Please try again later.");
+    }
+  }
 
-  showApplyPopup.value = false;
-  resumeFile.value = null;
-  selectedJobId.value = null;
-}
-function handleFileUpload(event) {
-  resumeFile.value = event.target.files[0];
-}
-function closeApplyPopup() {
-  showApplyPopup.value = false;
-  resumeFile.value = null;
-  selectedJobId.value = null;
-}
-function sendMessage(company) {
-  selectedCompany.value = company;
+// Job Application Logic
+  function applyToJob(jobId) {
+    selectedJobId.value = jobId;
+    showApplyPopup.value = true;
+  }
+
+  async function submitApplication() {
+    if (!coverLetter.value) {
+      alert("Please include a cover letter.");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("job_id", selectedJobId.value);
+    formData.append("cover_letter", coverLetter.value);
+
+    if (resumeFile.value) {
+      formData.append("resume", resumeFile.value);
+    }
+
+    try{
+      const response = await axios.post('/applicant/jobapply', formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      alert(response.data.message);
+      closeApplyPopup();
+      console.log("Application submitted successfully:", response.data);
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      alert(error.response.data.error);
+    }
+
+  }
+  function handleFileUpload(event) {
+    resumeFile.value = event.target.files[0];
+  }
+
+  function closeApplyPopup() {
+    showApplyPopup.value = false;
+    resumeFile.value = null;
+    selectedJobId.value = null;
+    coverLetter.value = "";
+  }
+
+// Notification Logic
+  async function fetchNotifications() {
+    try {
+      const response = await axios.get('/notifications');
+      notifications.value = response.data.notifications;
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  }
+
+  function formatType(type){
+    switch(type){
+      case "job_application":
+        return "Job Application";
+      case "inquiry":
+        return "Inquiry";
+      case "application_update":
+        return "Application Update";
+      case "message":
+        return "Message";
+      case "other":
+        return "Other";
+    }
+  }
+
+// Message Logic
+function sendMessage(companyId) {
+  selectedCompanyId.value = companyId;
   showMessagePopup.value = true;
 }
-function sendActualMessage() {
-  console.log("Sending message to", selectedCompany.value);
-  console.log("Message content:", messageContent.value);
-  showMessagePopup.value = false;
-  messageContent.value = "";
-}
-function selectIndustry(industry) {
-  selectedIndustry.value = industry;
-}
-function selectCompany(company) {
-  selectedCompany.value = company;
-}
-function clearFilters() {
-  selectedIndustry.value = null;
-  selectedCompany.value = null;
+
+async function sendActualMessage(){
+  try {
+    const response = await axios.post('/message/send', {
+      receiver_id: selectedCompanyId.value,
+      message: messageContent.value,
+    });
+
+    showMessagePopup.value = false;
+    messageContent.value = "";
+    
+  } catch (error) {
+    console.error("Error sending message:", error);
+    alert("Failed to send message. Please try again later.");
+  }
 }
 
-// Lifecycle hook
 onMounted(() => {
-  setInterval(() => {
-    unreadMessages.value += 1;
-    newNotifications.value += 1;
-  }, 20000);
+  fetchJobs();
+  fetchNotifications();
 });
+
+
+// function selectIndustry(industry) {
+//   selectedIndustry.value = industry;
+// }
+// function selectCompany(company) {
+//   selectedCompany.value = company;
+// }
+// function clearFilters() {
+//   selectedIndustry.value = null;
+//   selectedCompany.value = null;
+// }
+
+// function filterBy(course) {
+//   console.log("Selected Course:", course);
+// }
+
+// // Lifecycle hook
+// onMounted(() => {
+//   setInterval(() => {
+//     unreadMessages.value += 1;
+//     newNotifications.value += 1;
+//   }, 20000);
+// });
 </script>
 
 
