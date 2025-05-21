@@ -180,95 +180,102 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      showMail: false,
-      showNotif: false,
-      showSignOut: false,
-      unreadMessages: 0,
-      newNotifications: 0,
-      totalClients: 120,
-      totalJobs: 50,
-      pendingApplications: 10,
-      isSidenavOpen: false,
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 
-      messages: [
-        "Jape: Interested in your post.",
-        "Paulo: Sent a resume for the job.",
-        "Cj: Asking about job requirements.",
-      ],
+const router = useRouter();
 
-      notifications: ["3 new applicants this week", "Job Posted", "bengbeng"],
+const showMail = ref(false);
+const showNotif = ref(false);
+const showSignOut = ref(false);
+const unreadMessages = ref(0);
+const newNotifications = ref(0);
+const totalClients = ref(120);
+const totalJobs = ref(50);
+const pendingApplications = ref(10);
+const isSidenavOpen = ref(false);
 
-      updates: [
-        {
-          type: "message",
-          user: "Jape",
-          time: "10:47 AM",
-          content: "sent you a message",
-        },
-        {
-          type: "applicant",
-          user: "Paulo",
-          time: "9:15 AM",
-          content: "submitted a resume",
-        },
-        {
-          type: "job_post",
-          user: "You",
-          time: "8:00 AM",
-          content: "posted a job ",
-        },
-      ],
-    };
+const messages = ref([
+  "Jape: Interested in your post.",
+  "Paulo: Sent a resume for the job.",
+  "Cj: Asking about job requirements.",
+]);
+
+const notifications = ref([
+  "3 new applicants this week",
+  "Job Posted",
+  "bengbeng",
+]);
+
+const updates = ref([
+  {
+    type: "message",
+    user: "Jape",
+    time: "10:47 AM",
+    content: "sent you a message",
   },
-  methods: {
-    toggleSidenav() {
-      this.issidenavOpen = !this.issidenavOpen;
-    },
-    toggleMail() {
-      this.showMail = !this.showMail;
-      if (this.showMail) {
-        this.unreadMessages = 0;
-      }
-    },
-    toggleNotif() {
-      this.showNotif = !this.showNotif;
-      if (this.showNotif) {
-        this.newNotifications = 0;
-      }
-    },
-    toggleSignOut() {
-      this.showSignOut = !this.showSignOut;
-    },
-    confirmSignOut() {
-      console.log("Signing out...");
-      window.location.href = "/login";
-    },
-    postJob() {
-      const text = document.querySelector("textarea").value;
+  {
+    type: "applicant",
+    user: "Paulo",
+    time: "9:15 AM",
+    content: "submitted a resume",
+  },
+  {
+    type: "job_post",
+    user: "You",
+    time: "8:00 AM",
+    content: "posted a job ",
+  },
+]);
 
-      fetch("/post-job", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: text }),
-      })
-        .then((response) => response.json())
-        .then((data) => console.log(data))
-        .catch((error) => console.error(error));
-    },
-  },
-  mounted() {
-    setInterval(() => {
-      this.unreadMessages += 1;
-      this.newNotifications += 1;
-    }, 10000);
-  },
+function toggleMail() {
+  showMail.value = !showMail.value;
+  if (showMail.value) unreadMessages.value = 0;
+}
+
+function toggleNotif() {
+  showNotif.value = !showNotif.value;
+  if (showNotif.value) newNotifications.value = 0;
+}
+
+function toggleSignOut() {
+  showSignOut.value = !showSignOut.value;
+}
+
+function confirmSignOut() {
+  axios.post('logout')
+    .then((response) => {
+      console.log("Sign out successful:", response.data.message);
+      router.push("/login");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+    });
 };
+
+function postJob() {
+  const text = document.querySelector("textarea").value;
+
+  fetch("/post-job", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text }),
+  })
+    .then((response) => response.json())
+    .then((data) => console.log(data))
+    .catch((error) => console.error(error));
+}
+
+onMounted(() => {
+  setInterval(() => {
+    unreadMessages.value += 1;
+    newNotifications.value += 1;
+  }, 10000);
+});
 </script>
 
 <style scoped>

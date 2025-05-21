@@ -25,21 +25,7 @@
         <div class="login-container">
           <form class="login-form">
             <h2>LOGIN INTO YOUR ACCOUNT</h2>
-            <p>E-mail Address:</p>
-            <input
-              type="text"
-              class="login-input"
-              placeholder="sample@gmail.com"
-              required
-            />
-            <p>Password:</p>
-            <input
-              type="password"
-              class="login-input"
-              placeholder="Password"
-              required
-            />
-            <button type="submit" class="login-btn">Login</button>
+            <a href="http://localhost:8000/auth/google/redirect">Google Login</a>
           </form>
         </div>
       </section>
@@ -139,6 +125,8 @@
   </template>
 
   <script>
+
+  /*
   document.addEventListener("DOMContentLoaded", function () {
     const signUpBtn = document.querySelector(".sign-up");
     const signupModal = document.getElementById("signupModal");
@@ -192,6 +180,7 @@
     companyBtn.addEventListener("click", showCompanyForm);
     companyBtn2.addEventListener("click", showCompanyForm);
   });
+  */
   </script>
 
   <style>

@@ -243,184 +243,209 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      showMail: false,
-      showNotif: false,
-      showSignOut: false,
-      unreadMessages: 0,
-      newNotifications: 0,
-      showApplyPopup: false,
-      selectedJobId: null,
-      resumeFile: null,
-      showMessagePopup: false,
-      selectedIndustry: null,
-      selectedCompany: null,
-      messageContent: "",
+<script setup>
+import { ref, reactive, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 
-      jobs: [
-        {
-          id: 1,
-          company: "Tech Solutions Inc.",
-          description:
-            "Hi idol! Walang signal dito sa bukid pero nung nalaman kong nag post ka dali dali akong bumaba ng bukid, tumawid ako ng tatlong ilog, tinumbok ko ang pitong bundok, at umutang ako ng perang pamasahe papuntang syudad at namalimos pa ako para may pang hulog sa pisonet para lang maka react sa post mo.",
-          type: "Education, Arts & Sciences",
-          salary: "30,000 - 40,000",
-          media: "/public/vincent.png",
-        },
-        {
-          id: 2,
-          company: "Green Valley Farms",
-          description:
-            "Hiring for a farm manager with experience in organic farming...",
-          type: "Education, Arts & Sciences",
-          salary: "20,000 - 25,000",
-          media: "/public/vincent.png",
-        },
-        {
-          id: 3,
-          company: "Creative Minds Agency",
-          description: "Seeking a graphic designer with a strong portfolio...",
-          type: "Techfield",
-          salary: "15,000 - 20,000",
-          media: "/public/vincent.png",
-        },
-      ],
+const router = useRouter();
 
-      updates: [
-        {
-          type: "message",
-          user: "Jape",
-          time: "10:47 AM",
-          content: "sent you a message",
-        },
-        {
-          type: "applicant",
-          user: "Paulo",
-          time: "9:15 AM",
-          content: "submitted a resume",
-        },
-        {
-          type: "job_post",
-          user: "You",
-          time: "8:00 AM",
-          content: "posted a job ",
-        },
-      ],
-    };
+// Reactive state variables
+const showMail = ref(false);
+const showNotif = ref(false);
+const showSignOut = ref(false);
+const unreadMessages = ref(0);
+const newNotifications = ref(0);
+const showApplyPopup = ref(false);
+const selectedJobId = ref(null);
+const resumeFile = ref(null);
+const showMessagePopup = ref(false);
+const selectedIndustry = ref(null);
+const selectedCompany = ref(null);
+const messageContent = ref("");
+
+// Jobs data
+const jobs = reactive([
+  {
+    id: 1,
+    company: "Tech Solutions Inc.",
+    description:
+      "Hi idol! Walang signal dito sa bukid pero nung nalaman kong nag post ka dali dali akong bumaba ng bukid, tumawid ako ng tatlong ilog, tinumbok ko ang pitong bundok, at umutang ako ng perang pamasahe papuntang syudad at namalimos pa ako para may pang hulog sa pisonet para lang maka react sa post mo.",
+    type: "Education, Arts & Sciences",
+    salary: "30,000 - 40,000",
+    media: "/public/vincent.png",
   },
-
-  computed: {
-    filteredJobs() {
-      return this.jobs.filter((job) => {
-        const matchesIndustry = this.selectedIndustry
-          ? job.type === this.selectedIndustry
-          : true;
-        const matchesCompany = this.selectedCompany
-          ? job.company === this.selectedCompany
-          : true;
-        return matchesIndustry && matchesCompany;
-      });
-    },
+  {
+    id: 2,
+    company: "Green Valley Farms",
+    description:
+      "Hiring for a farm manager with experience in organic farming...",
+    type: "Education, Arts & Sciences",
+    salary: "20,000 - 25,000",
+    media: "/public/vincent.png",
   },
-
-  methods: {
-    toggleMail() {
-      this.showMail = !this.showMail;
-      if (this.showMail) {
-        this.unreadMessages = 0;
-      }
-    },
-    toggleNotif() {
-      this.showNotif = !this.showNotif;
-      if (this.showNotif) {
-        this.newNotifications = 0;
-      }
-    },
-    toggleSignOut() {
-      this.showSignOut = !this.showSignOut;
-    },
-    confirmSignOut() {
-      console.log("Signing out...");
-      window.location.href = "/login";
-    },
-    postJob() {
-      const text = document.querySelector("textarea").value;
-      fetch("/post-job", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: text }),
-      })
-        .then((response) => response.json())
-        .then((data) => console.log(data))
-        .catch((error) => console.error(error));
-    },
-    filterBy(industry) {
-      console.log("Selected Industry:", industry);
-    },
-    applyToJob(jobId) {
-      this.selectedJobId = jobId;
-      this.showApplyPopup = true;
-    },
-    submitApplication() {
-      if (!this.resumeFile) {
-        alert("Please upload your resume.");
-        return;
-      }
-
-      console.log("Applying to job ID:", this.selectedJobId);
-      console.log("Resume file:", this.resumeFile.name);
-
-      const formData = new FormData();
-      formData.append("resume", this.resumeFile);
-      formData.append("jobId", this.selectedJobId);
-
-      this.showApplyPopup = false;
-      this.resumeFile = null;
-      this.selectedJobId = null;
-    },
-    handleFileUpload(event) {
-      this.resumeFile = event.target.files[0];
-    },
-    closeApplyPopup() {
-      this.showApplyPopup = false;
-      this.resumeFile = null;
-      this.selectedJobId = null;
-    },
-    sendMessage(company) {
-      this.selectedCompany = company;
-      this.showMessagePopup = true;
-    },
-    sendActualMessage() {
-      console.log("Sending message to", this.selectedCompany);
-      console.log("Message content:", this.messageContent);
-      this.showMessagePopup = false;
-      this.messageContent = "";
-    },
-    selectIndustry(industry) {
-      this.selectedIndustry = industry;
-    },
-    selectCompany(company) {
-      this.selectedCompany = company;
-    },
-    clearFilters() {
-      this.selectedIndustry = null;
-      this.selectedCompany = null;
-    },
+  {
+    id: 3,
+    company: "Creative Minds Agency",
+    description: "Seeking a graphic designer with a strong portfolio...",
+    type: "Techfield",
+    salary: "15,000 - 20,000",
+    media: "/public/vincent.png",
   },
+]);
 
-  mounted() {
-    setInterval(() => {
-      this.unreadMessages += 1;
-      this.newNotifications += 1;
-    }, 20000);
+// Updates data
+const updates = reactive([
+  {
+    type: "message",
+    user: "Jape",
+    time: "10:47 AM",
+    content: "sent you a message",
   },
+  {
+    type: "applicant",
+    user: "Paulo",
+    time: "9:15 AM",
+    content: "submitted a resume",
+  },
+  {
+    type: "job_post",
+    user: "You",
+    time: "8:00 AM",
+    content: "posted a job ",
+  },
+]);
+
+// Computed filteredJobs
+const filteredJobs = computed(() => {
+  return jobs.filter((job) => {
+    const matchesIndustry = selectedIndustry.value
+      ? job.type === selectedIndustry.value
+      : true;
+    const matchesCompany = selectedCompany.value
+      ? job.company === selectedCompany.value
+      : true;
+    return matchesIndustry && matchesCompany;
+  });
+});
+
+// Methods (just normal functions now)
+function toggleMail() {
+  showMail.value = !showMail.value;
+  if (showMail.value) {
+    unreadMessages.value = 0;
+  }
+}
+
+function toggleNotif() {
+  showNotif.value = !showNotif.value;
+  if (showNotif.value) {
+    newNotifications.value = 0;
+  }
+}
+
+function toggleSignOut() {
+  showSignOut.value = !showSignOut.value;
+}
+
+function confirmSignOut() {
+  axios.post('logout')
+    .then((response) => {
+      console.log("Sign out successful:", response.data.message);
+      router.push("/login");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+    });
 };
+
+function postJob() {
+  const text = document.querySelector("textarea").value;
+  fetch("/post-job", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text }),
+  })
+    .then((response) => response.json())
+    .then((data) => console.log(data))
+    .catch((error) => console.error(error));
+}
+
+function filterBy(industry) {
+  console.log("Selected Industry:", industry);
+}
+
+function applyToJob(jobId) {
+  selectedJobId.value = jobId;
+  showApplyPopup.value = true;
+}
+
+function submitApplication() {
+  if (!resumeFile.value) {
+    alert("Please upload your resume.");
+    return;
+  }
+
+  console.log("Applying to job ID:", selectedJobId.value);
+  console.log("Resume file:", resumeFile.value.name);
+
+  const formData = new FormData();
+  formData.append("resume", resumeFile.value);
+  formData.append("jobId", selectedJobId.value);
+
+  // You can add fetch or axios call here to submit formData to server
+
+  showApplyPopup.value = false;
+  resumeFile.value = null;
+  selectedJobId.value = null;
+}
+
+function handleFileUpload(event) {
+  resumeFile.value = event.target.files[0];
+}
+
+function closeApplyPopup() {
+  showApplyPopup.value = false;
+  resumeFile.value = null;
+  selectedJobId.value = null;
+}
+
+function sendMessage(company) {
+  selectedCompany.value = company;
+  showMessagePopup.value = true;
+}
+
+function sendActualMessage() {
+  console.log("Sending message to", selectedCompany.value);
+  console.log("Message content:", messageContent.value);
+  showMessagePopup.value = false;
+  messageContent.value = "";
+}
+
+function selectIndustry(industry) {
+  selectedIndustry.value = industry;
+}
+
+function selectCompany(company) {
+  selectedCompany.value = company;
+}
+
+function clearFilters() {
+  selectedIndustry.value = null;
+  selectedCompany.value = null;
+}
+
+// Lifecycle hook
+onMounted(() => {
+  setInterval(() => {
+    unreadMessages.value += 1;
+    newNotifications.value += 1;
+  }, 20000);
+});
 </script>
+
 
 <style scoped>
 * {
