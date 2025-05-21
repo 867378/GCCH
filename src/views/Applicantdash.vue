@@ -301,88 +301,86 @@ const jobs = reactive([
   },
 ]);
 
-      updates: [
-        {
-          type: "message",
-          user: "Jape",
-          time: "10:47 AM",
-          content: "sent you a message",
-        },
-        {
-          type: "applicant",
-          user: "Paulo",
-          time: "9:15 AM",
-          content: "submitted a resume",
-        },
-        {
-          type: "job_post",
-          user: "You",
-          time: "8:00 AM",
-          content: "posted a job ",
-        },
-      ],
-    };
+// Updates data
+const updates = reactive([
+  {
+    type: "message",
+    user: "Jape",
+    time: "10:47 AM",
+    content: "sent you a message",
   },
-
-  computed: {
-    filteredJobs() {
-      return this.jobs.filter((job) => {
-        const matchesIndustry = this.selectedIndustry
-          ? job.type === this.selectedIndustry
-          : true;
-        const matchesCompany = this.selectedCompany
-          ? job.company === this.selectedCompany
-          : true;
-        return matchesIndustry && matchesCompany;
-      });
-    },
+  {
+    type: "applicant",
+    user: "Paulo",
+    time: "9:15 AM",
+    content: "submitted a resume",
   },
+  {
+    type: "job_post",
+    user: "You",
+    time: "8:00 AM",
+    content: "posted a job ",
+  },
+]);
 
-  methods: {
-    toggleMail() {
-      this.showMail = !this.showMail;
-      if (this.showMail) {
-        this.unreadMessages = 0;
-      }
+// Computed properties
+const filteredJobs = computed(() => {
+  return jobs.filter((job) => {
+    const matchesIndustry = selectedIndustry.value
+      ? job.type === selectedIndustry.value
+      : true;
+    const matchesCompany = selectedCompany.value
+      ? job.company === selectedCompany.value
+      : true;
+    return matchesIndustry && matchesCompany;
+  });
+});
+
+// Methods
+function toggleMail() {
+  showMail.value = !showMail.value;
+  if (showMail.value) {
+    unreadMessages.value = 0;
+  }
+}
+function toggleNotif() {
+  showNotif.value = !showNotif.value;
+  if (showNotif.value) {
+    newNotifications.value = 0;
+  }
+}
+function toggleSignOut() {
+  showSignOut.value = !showSignOut.value;
+}
+function confirmSignOut() {
+  console.log("Signing out...");
+  window.location.href = "/login";
+}
+function postJob() {
+  const text = document.querySelector("textarea").value;
+  fetch("/post-job", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
     },
-    toggleNotif() {
-      this.showNotif = !this.showNotif;
-      if (this.showNotif) {
-        this.newNotifications = 0;
-      }
-    },
-    toggleSignOut() {
-      this.showSignOut = !this.showSignOut;
-    },
-    confirmSignOut() {
-      console.log("Signing out...");
-      window.location.href = "/login";
-    },
-    postJob() {
-      const text = document.querySelector("textarea").value;
-      fetch("/post-job", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: text }),
-      })
-        .then((response) => response.json())
-        .then((data) => console.log(data))
-        .catch((error) => console.error(error));
-    },
-    filterBy(industry) {
-      console.log("Selected Industry:", industry);
-    },
-    applyToJob(jobId) {
-      this.selectedJobId = jobId;
-      this.showApplyPopup = true;
-    },
-    submitApplication() {
-      if (!this.resumeFile) {
-        alert("Please upload your resume.");
-        return;
-      }
+    body: JSON.stringify({ text: text }),
+  })
+    .then((response) => response.json())
+    .then((data) => console.log(data))
+    .catch((error) => console.error(error));
+}
+function filterBy(industry) {
+  console.log("Selected Industry:", industry);
+}
+function applyToJob(jobId) {
+  selectedJobId.value = jobId;
+  showApplyPopup.value = true;
+}
+function submitApplication() {
+  if (!resumeFile.value) {
+    alert("Please upload your resume.");
+    return;
+  }
 
   console.log("Applying to job ID:", selectedJobId.value);
   console.log("Resume file:", resumeFile.value.name);
@@ -397,37 +395,30 @@ const jobs = reactive([
   resumeFile.value = null;
   selectedJobId.value = null;
 }
-
 function handleFileUpload(event) {
   resumeFile.value = event.target.files[0];
 }
-
 function closeApplyPopup() {
   showApplyPopup.value = false;
   resumeFile.value = null;
   selectedJobId.value = null;
 }
-
 function sendMessage(company) {
   selectedCompany.value = company;
   showMessagePopup.value = true;
 }
-
 function sendActualMessage() {
   console.log("Sending message to", selectedCompany.value);
   console.log("Message content:", messageContent.value);
   showMessagePopup.value = false;
   messageContent.value = "";
 }
-
 function selectIndustry(industry) {
   selectedIndustry.value = industry;
 }
-
 function selectCompany(company) {
   selectedCompany.value = company;
 }
-
 function clearFilters() {
   selectedIndustry.value = null;
   selectedCompany.value = null;
