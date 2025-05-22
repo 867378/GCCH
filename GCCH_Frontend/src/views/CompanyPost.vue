@@ -249,6 +249,7 @@ async function fetchPostedJobs() {
 }
 
 async function assessApplication(applicationId, status, scheduleAt = null, comment = ''){
+
   try {
     const payload = {
       status,
@@ -271,7 +272,7 @@ onMounted(fetchPostedJobs);
 
 function selectJob(job) {
   selectedJob.value = job;
-  fetchApplicants(job.id); // assuming job.id is the unique identifier
+  fetchApplicants(job.id); 
 }
 
 function scheduleInterview(applicationId) {
