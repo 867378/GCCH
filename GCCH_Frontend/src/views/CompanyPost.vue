@@ -110,32 +110,68 @@
 
             <h3>Applicants</h3>
             <ul v-if="jobApplicants.length > 0">
-              <li v-for="application in jobApplicants" :key="application.id" class="mb-4">
-                <strong>{{ application.applicant.first_name }} {{ application.applicant.last_name }}</strong><br>
-                <span><strong>Course:</strong> {{ application.applicant.course }}</span><br>
-                <span><strong>Phone:</strong> {{ application.applicant.phone_number }}</span><br>
-                <span><strong>Cover Letter:</strong> {{ application.cover_letter }}</span><br>
-                <span><strong>Date Applied:</strong> {{ application.date_applied }}</span><br>
-                <span><strong>Status:</strong> {{ application.status }}</span><br>
-                <span><strong>Schedule: </strong>{{ application.scheduled_at }}</span><br>
+              <li
+                v-for="application in jobApplicants"
+                :key="application.id"
+                class="mb-4"
+              >
+                <strong
+                  >{{ application.applicant.first_name }}
+                  {{ application.applicant.last_name }}</strong
+                ><br />
+                <span
+                  ><strong>Course:</strong>
+                  {{ application.applicant.course }}</span
+                ><br />
+                <span
+                  ><strong>Phone:</strong>
+                  {{ application.applicant.phone_number }}</span
+                ><br />
+                <span
+                  ><strong>Cover Letter:</strong>
+                  {{ application.cover_letter }}</span
+                ><br />
+                <span
+                  ><strong>Date Applied:</strong>
+                  {{ application.date_applied }}</span
+                ><br />
+                <span><strong>Status:</strong> {{ application.status }}</span
+                ><br />
+                <span
+                  ><strong>Schedule: </strong
+                  >{{ application.scheduled_at }}</span
+                ><br />
 
                 <div v-if="application.resume">
-                  <a :href="application.resume.embed_url" target="_blank">📄 View Resume</a>
+                  <a :href="application.resume.embed_url" target="_blank"
+                    >📄 View Resume</a
+                  >
                 </div>
 
                 <div>
-                  <button @click="assessApplication(application.id, 'accepted')">✅ Accept</button>
-                  <button @click="assessApplication(application.id, 'rejected')">❌ Reject</button>
-                  <button @click="scheduleInterview(application.id)">📅 Schedule Interview</button>
-                  <button @click="scheduleAssessment(application.id)">📝 Schedule Assessment</button>
+                  <button
+                    @click="assessApplication(application.id, 'accepted')"
+                  >
+                    ✅ Accept
+                  </button>
+                  <button
+                    @click="assessApplication(application.id, 'rejected')"
+                  >
+                    ❌ Reject
+                  </button>
+                  <button @click="scheduleInterview(application.id)">
+                    📅 Schedule Interview
+                  </button>
+                  <button @click="scheduleAssessment(application.id)">
+                    📝 Schedule Assessment
+                  </button>
                 </div>
 
-                <hr>
+                <hr />
               </li>
             </ul>
 
             <p v-else>No applicants have applied yet.</p>
-            
           </div>
           <div v-else>
             <p>Select a job to view details and applicants.</p>
@@ -207,22 +243,23 @@ function toggleSignOut() {
 }
 
 function confirmSignOut() {
-    axios.post('/logout')
-      .then((response) => {
-        console.log("Sign out successful:", response.data.message);
-        router.push("/login");
-      })
-      .catch((error) => {
-        console.error("Error signing out:", error);
-      });
-  };
+  axios
+    .post("/logout")
+    .then((response) => {
+      console.log("Sign out successful:", response.data.message);
+      router.push("/login");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+    });
+}
 
 //Get Applicants of a Certain Job
-  async function fetchApplicants(jobId) {
-  try{
+async function fetchApplicants(jobId) {
+  try {
     const response = await axios.get(`/job/${jobId}/applications`);
     jobApplicants.value = response.data.applications;
-    console.log(response.data)
+    console.log(response.data);
   } catch (error) {
     console.error("Failed to fetch applicants", error);
     jobApplicants.value = [];
@@ -234,7 +271,7 @@ async function fetchPostedJobs() {
   try {
     const response = await axios.get("/company/jobdisplay");
     postedJobs.value = response.data.jobs;
-    console.log(response.data)
+    console.log(response.data);
 
     if (postedJobs.value.length > 0) {
       selectedJob.value = postedJobs.value[0]; // or let user pick
@@ -242,29 +279,37 @@ async function fetchPostedJobs() {
     } else {
       jobApplicants.value = [];
     }
-
   } catch (error) {
     console.error("Error fetching posted jobs:", error);
   }
 }
 
-async function assessApplication(applicationId, status, scheduleAt = null, comment = ''){
-
+async function assessApplication(
+  applicationId,
+  status,
+  scheduleAt = null,
+  comment = ""
+) {
   try {
     const payload = {
       status,
       scheduled_at: scheduleAt,
-      comment
+      comment,
     };
 
-    const response = await axios.post(`/company/job-applications/${applicationId}/assess`, payload);
-    console.log ("Assessment Successful:", response.data);
+    const response = await axios.post(
+      `/company/job-applications/${applicationId}/assess`,
+      payload
+    );
+    console.log("Assessment Successful:", response.data);
 
     await fetchApplicants(selectedJob.value.id);
-
   } catch (error) {
-    console.error("Error updating application status:", error.response?.data || error);
-    alert(error.response?.data?.error || 'Failed to update application');
+    console.error(
+      "Error updating application status:",
+      error.response?.data || error
+    );
+    alert(error.response?.data?.error || "Failed to update application");
   }
 }
 
@@ -272,20 +317,20 @@ onMounted(fetchPostedJobs);
 
 function selectJob(job) {
   selectedJob.value = job;
-  fetchApplicants(job.id); 
+  fetchApplicants(job.id);
 }
 
 function scheduleInterview(applicationId) {
   const date = prompt("Enter interview date (YYYY-MM-DD HH:MM:SS):");
   if (date) {
-    assessApplication(applicationId, 'interview', date);
+    assessApplication(applicationId, "interview", date);
   }
 }
 
 function scheduleAssessment(applicationId) {
   const date = prompt("Enter assessment date (YYYY-MM-DD HH:MM:SS):");
   if (date) {
-    assessApplication(applicationId, 'assessment', date);
+    assessApplication(applicationId, "assessment", date);
   }
 }
 </script>
@@ -539,168 +584,93 @@ body,
 .left-content {
   flex: 3;
 }
-.post-box {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  border-radius: 3vh;
-  margin-left: 4vh;
-  width: 10vh;
-}
-.post-box textarea {
-  width: 100%;
-  background-color: #f1f1f1;
-  padding: 10px 15px;
-  margin-top: 2vh;
-  border-radius: 13px;
-  height: 30vh;
-  border: none;
-  font-size: 14px;
-  resize: none;
-  outline: none;
-}
 
-.post-box h3 {
-  text-align: left;
-  font-size: 30px;
-}
-.post-box button {
-  background: #00695c;
-  color: white;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 10px;
-  margin-top: -30px;
-  margin-bottom: 5px;
-  cursor: pointer;
-  transition: color 0.3s ease-in-out;
-  float: right;
-}
-.post-box button:hover {
-  color: #045d56;
-  background: #f1f1f1;
-}
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1vh;
-  align-items: center;
-  margin-top: 3vh;
-}
-
-.upload-media {
-  display: flex;
-  align-items: center;
-  border-radius: 2vh;
-  cursor: pointer;
-}
-
-.job-form {
-  flex: 1;
-  position: relative;
-  padding: 10px 6px;
-  margin-left: 3vh;
-  border-radius: 2vh;
-  background-color: #045d56;
-  color: #e0f2f1;
-  font-size: 14px;
-  transition: background-color 0.3s ease-in-out;
-  z-index: 1;
-}
-
-.job-form:hover {
-  background-color: #e0f2f1;
-  color: #045d56;
-}
-
-.job-form:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px #80cbc4;
-}
-
-.job-title {
-  width: 100%;
-  padding: 10px 15px;
-  border: none;
+.selected-job-box {
+  background-color: #fff;
+  padding: 24px;
+  margin-top: 0vh;
+  margin-left: 5vh;
   border-radius: 12px;
-  background-color: #f1f1f1;
-  font-size: 14px;
-  color: #333;
-  transition: all 0.3s ease-in-out;
-  box-shadow: inset 0 0 0 1px transparent;
-  outline: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 120vh;
+  max-width: 120vh;
+  max-height: 100vh;
+  transition: all 0.3s ease;
+  overflow: auto;
 }
 
-.job-title:hover {
-  background-color: #e0f2f1;
-  color: #045d56;
+.selected-job-box h2 {
+  margin-top: 0;
+  font-size: 30px;
+  font-weight: bold;
+  color: #151718;
 }
 
-.job-title:focus {
-  background-color: #ffffff;
-  box-shadow: 0 0 0 2px #00bfa5;
-  color: #000;
-}
-.job-input {
-  width: 32vh;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  color: #333;
-  margin-left: 2.5vh;
-}
-.salary-input {
-  width: 32vh;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  margin-left: 2.5vh;
-}
-.job-type {
-  background-color: #045d56;
-  color: #ffffff;
+.selected-job-box h3 {
+  margin-top: 3vh;
+  margin-bottom: 3vh;
+  font-size: 20px;
+  color: #151718;
 }
 
-.salary-range {
-  background-color: #045d56;
-  color: #ffffff;
+.selected-job-box p {
+  margin: 8px 0;
+  color: #151718;
 }
 
-.job-type,
-.salary-range {
-  display: block;
-  width: 70%;
+.selected-job-box ul {
+  list-style: none;
+  padding: 10px;
 }
 
-.job-type option,
-.salary-range option {
-  background-color: white;
-  color: black;
-}
-
-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #045d56;
-  color: #fff;
-  padding: 8px 10px;
+.selected-job-box li {
+  background-color: #f9f9f9;
+  padding: 16px;
   border-radius: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+.selected-job-box button {
+  margin: 6px 6px 6px 0;
+  padding: 8px 14px;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
+  transition: background-color 0.2s ease;
 }
 
-label:hover {
-  background-color: #f1f1f1;
-  color: #045d56;
+.selected-job-box button:hover {
+  opacity: 0.9;
 }
 
-.label:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px #80cbc4;
+.selected-job-box button:nth-child(1) {
+  background-color: #2ecc71; /* Accept */
+  color: white;
+}
+
+.selected-job-box button:nth-child(2) {
+  background-color: #e74c3c; /* Reject */
+  color: white;
+}
+
+.selected-job-box button:nth-child(3) {
+  background-color: #3498db; /* Schedule Interview */
+  color: white;
+}
+
+.selected-job-box button:nth-child(4) {
+  background-color: #f39c12; /* Schedule Assessment */
+  color: white;
+}
+
+.selected-job-box a {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.selected-job-box a:hover {
+  text-decoration: underline;
 }
 
 .right-content {

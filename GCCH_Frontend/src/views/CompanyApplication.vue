@@ -184,7 +184,7 @@ import { ref,onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 
-const isSidenavOpen = ref(false);
+const isSidenavOpen = ref(true);
 const showMail = ref(false);
 const showNotif = ref(false);
 const showSignOut = ref(false);

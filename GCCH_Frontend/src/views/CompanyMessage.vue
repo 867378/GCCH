@@ -220,7 +220,7 @@
 
   const unreadMessages = ref(0);
   const newNotifications = ref(0);
-  const isSidenavOpen = ref(false);
+  const isSidenavOpen = ref(true);
 
   const showMail = ref(false);
   const showNotif = ref(false);
