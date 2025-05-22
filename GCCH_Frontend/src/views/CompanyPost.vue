@@ -288,7 +288,6 @@ function scheduleAssessment(applicationId) {
     assessApplication(applicationId, 'assessment', date);
   }
 }
-
 </script>
 
 <style scoped>

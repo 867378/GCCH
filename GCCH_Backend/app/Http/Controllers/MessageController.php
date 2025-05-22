@@ -64,6 +64,7 @@ class MessageController extends Controller
         $message = Message::where('id', $messageId)
             ->where('receiver_id', Auth::id())
             ->firstOrFail();
+            
 
         //broadcast(new MessageRead($message))->toOthers();
 

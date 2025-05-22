@@ -151,6 +151,7 @@ class CompanyController extends Controller
             $user = Auth::user();
             $company = $user->company;
 
+            
 
             if (!$company || $application->job->company_id !== $company->id) {
                 return response()->json(['error' => 'Unauthorized'], 403);

@@ -329,9 +329,7 @@ const pendingApplications = ref(10);
 const isSidenavOpen = ref(true);
 
 const messages = ref([]);
-
 const notifications = ref({});
-
 const postedJobs = ref([]);
 
 
