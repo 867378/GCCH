@@ -20,12 +20,7 @@
             MESSAGES
           </router-link>
         </li>
-        <li>
-          <router-link to="/CompanyApplication" class="sidenav-text">
-            <img src="/public/resume.png" class="ikon" />
-            APPLICATIONS
-          </router-link>
-        </li>
+
         <li style="font-weight: bold">
           <router-link to="/CompanyProfile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />

@@ -4,7 +4,6 @@ import Signup from "@/views/Signup.vue";
 import CompanyDashboard from "@/views/CompanyDashboard.vue";
 import CompanyPost from "@/views/CompanyPost.vue";
 import CompanyMessage from "@/views/CompanyMessage.vue";
-import CompanyApplication from "@/views/CompanyApplication.vue";
 import CompanyProfile from "@/views/CompanyProfile.vue";
 import Applicantdash from "@/views/Applicantdash.vue";
 import Applicantmessage from "@/views/Applicantmessage.vue";
@@ -43,12 +42,6 @@ const router = createRouter({
       path: "/companymessage",
       name: "CompanyMessage",
       component: CompanyMessage,
-    },
-
-    {
-      path: "/companyapplication",
-      name: "CompanyApplication",
-      component: CompanyApplication,
     },
 
    {
