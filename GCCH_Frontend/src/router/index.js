@@ -9,6 +9,7 @@ import CompanyProfile from "@/views/CompanyProfile.vue";
 import Applicantdash from "@/views/Applicantdash.vue";
 import Applicantmessage from "@/views/Applicantmessage.vue";
 import Applicantprofile from "@/views/Applicantprofile.vue";
+import Application from "@/views/Application.vue";
 import Redirecting from "@/views/Redirecting.vue";
 
 const router = createRouter({
@@ -72,6 +73,12 @@ const router = createRouter({
       path: "/applicantprofile",
       name: "ApplicantProfile",
       component: Applicantprofile,
+    },
+    
+    {
+      path: "/application",
+      name: "Application",
+      component: Application,
     },
 
     {

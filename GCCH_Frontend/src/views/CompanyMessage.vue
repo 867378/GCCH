@@ -157,7 +157,7 @@
 
         <!-- Notifications -->
         <div class="right-content">
-          <h3>Contacts</h3>
+          <h3>CONTACTS</h3>
             <div class="updates-list">
               <div
                 v-for="(notif, index) in filteredNotifications"
@@ -637,7 +637,7 @@ body,
   gap: 20px;
 }
 .left-content {
-  flex: 1;
+  flex: 3;
 }
 .message-box {
   background: white;
@@ -645,8 +645,10 @@ body,
   border-radius: 10px;
   margin-bottom: 20px;
   border-radius: 3vh;
-  width: 150vh;
-  height: 75vh;
+  width: 95%;
+  height: 80vh;
+  margin-left: 3vh;
+  overflow-y: auto;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -703,8 +705,7 @@ body,
   background: white;
   border-radius: 10px;
   padding: 20px;
-  height: 80vh;
-  overflow:auto;
+  height: fit-content;
 }
 .icons-right {
   display: flex;

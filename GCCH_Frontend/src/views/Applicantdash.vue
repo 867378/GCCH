@@ -15,6 +15,11 @@
           </router-link>
         </li>
         <li>
+          <router-link to="/Application" class="sidenav-text">
+            <img src="/public/resume.png" class="ikon" /> APPLICATION
+          </router-link>
+        </li>
+        <li>
           <router-link to="/Applicantprofile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
             PROFILE
@@ -138,7 +143,11 @@
       <div class="content">
         <div class="left-content">
           <h3>RECOMMENDED JOBS</h3>
-          <div class="job-box" v-for="matchedJob in recommendedJobs" :key="matchedJob.id">
+          <div
+            class="job-box"
+            v-for="matchedJob in recommendedJobs"
+            :key="matchedJob.id"
+          >
             <div class="job-card">
               <!-- Header -->
               <div class="job-header">
@@ -171,7 +180,10 @@
 
               <!-- Apply and Message Buttons -->
               <div class="job-actions">
-                <button class="message-btn" @click="sendMessage(matchedJob.company_id)">
+                <button
+                  class="message-btn"
+                  @click="sendMessage(matchedJob.company_id)"
+                >
                   Send Message
                 </button>
                 <button class="apply-btn" @click="applyToJob(matchedJob.id)">
@@ -179,35 +191,31 @@
                 </button>
               </div>
             </div>
-
           </div>
         </div>
 
-        <!-- Notifications -->  
+        <!-- Notifications -->
         <div class="right-content">
           <h3>CHECK THIS OUT</h3>
-            <div class="updates-list">
-              <div
-                v-for="(notif, index) in filteredNotifications"
-                :key="index"
-                @click="openChat(notif)"
-                style="cursor: pointer;"
-                class="update-box"
-              >
-              
-                <h2>{{ formatType(notif.type) }}</h2>
-                <p>
-                  {{ notif.latestContent }}
-                  <span v-if="notif.count > 1">
-                    ({{ notif.count }} new {{ pluralizeType(notif.type, notif.count) }})
-                  </span>
-                </p>
-
-              </div>
+          <div class="updates-list">
+            <div
+              v-for="(notif, index) in filteredNotifications"
+              :key="index"
+              @click="openChat(notif)"
+              style="cursor: pointer"
+              class="update-box"
+            >
+              <h2>{{ formatType(notif.type) }}</h2>
+              <p>
+                {{ notif.latestContent }}
+                <span v-if="notif.count > 1">
+                  ({{ notif.count }} new
+                  {{ pluralizeType(notif.type, notif.count) }})
+                </span>
+              </p>
             </div>
-
+          </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -223,7 +231,7 @@
       <input type="file" @change="handleFileUpload" accept=".pdf" />
       <br /><br />
       <input type="text" v-model="coverLetter" placeholder="Cover Letter" />
-      <br /><br /> 
+      <br /><br />
       <button @click="submitApplication">Apply</button>
       <button
         style="margin-left: 10px; background-color: gray"
@@ -241,7 +249,7 @@
     @click.self="showMessagePopup = false"
   >
     <div class="popup">
-      <h3>✉️ Message </h3>
+      <h3>✉️ Message</h3>
       <textarea
         v-model="messageContent"
         placeholder="Type your message here..."
@@ -261,9 +269,9 @@
 </template>
 
 <script setup>
-import { ref,onMounted,computed } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
 const router = useRouter();
 
@@ -293,157 +301,155 @@ const otherJobs = ref([]);
 //For Notifications
 const notifications = ref([]);
 
-
 // NavBar Logic
-  function toggleMail() {
-    showMail.value = !showMail.value;
-    if (showMail.value) {
-      unreadMessages.value = 0;
-    }
+function toggleMail() {
+  showMail.value = !showMail.value;
+  if (showMail.value) {
+    unreadMessages.value = 0;
   }
-  function toggleNotif() {
-    showNotif.value = !showNotif.value;
-    if (showNotif.value) {
-      newNotifications.value = 0;
-    }
+}
+function toggleNotif() {
+  showNotif.value = !showNotif.value;
+  if (showNotif.value) {
+    newNotifications.value = 0;
   }
-  function toggleSignOut() {
-    showSignOut.value = !showSignOut.value;
-  }
-  function confirmSignOut() {
-    axios.post('/logout')
-      .then((response) => {
-        console.log("Sign out successful:", response.data.message);
-        router.push("/login");
-      })
-      .catch((error) => {
-        console.error("Error signing out:", error);
-      });
-  }
+}
+function toggleSignOut() {
+  showSignOut.value = !showSignOut.value;
+}
+function confirmSignOut() {
+  axios
+    .post("/logout")
+    .then((response) => {
+      console.log("Sign out successful:", response.data.message);
+      router.push("/login");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+    });
+}
 
 // Job Listings Logic
-  async function fetchJobs() {
-    try {
-      const response = await axios.get('/applicant/jobdisplay');
+async function fetchJobs() {
+  try {
+    const response = await axios.get("/applicant/jobdisplay");
 
-      console.log(response.data);
+    console.log(response.data);
 
-      recommendedJobs.value=response.data.matchedjobs;
-      otherJobs.value=response.data.otherjobs;
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-      alert("Failed to fetch jobs. Please try again later.");
-    }
+    recommendedJobs.value = response.data.matchedjobs;
+    otherJobs.value = response.data.otherjobs;
+  } catch (error) {
+    console.error("Error fetching jobs:", error);
+    alert("Failed to fetch jobs. Please try again later.");
   }
+}
 
 // Job Application Logic
-  function applyToJob(jobId) {
-    selectedJobId.value = jobId;
-    showApplyPopup.value = true;
+function applyToJob(jobId) {
+  selectedJobId.value = jobId;
+  showApplyPopup.value = true;
+}
+
+async function submitApplication() {
+  if (!coverLetter.value) {
+    alert("Please include a cover letter.");
+    return;
+  }
+  const formData = new FormData();
+  formData.append("job_id", selectedJobId.value);
+  formData.append("cover_letter", coverLetter.value);
+
+  if (resumeFile.value) {
+    formData.append("resume", resumeFile.value);
   }
 
-  async function submitApplication() {
-    if (!coverLetter.value) {
-      alert("Please include a cover letter.");
-      return;
-    }
-    const formData = new FormData();
-    formData.append("job_id", selectedJobId.value);
-    formData.append("cover_letter", coverLetter.value);
+  try {
+    const response = await axios.post("/applicant/jobapply", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-    if (resumeFile.value) {
-      formData.append("resume", resumeFile.value);
-    }
-
-    try{
-      const response = await axios.post('/applicant/jobapply', formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      alert(response.data.message);
-      closeApplyPopup();
-      console.log("Application submitted successfully:", response.data);
-    } catch (error) {
-      console.error("Error submitting application:", error);
-      alert(error.response.data.error);
-    }
-
+    alert(response.data.message);
+    closeApplyPopup();
+    console.log("Application submitted successfully:", response.data);
+  } catch (error) {
+    console.error("Error submitting application:", error);
+    alert(error.response.data.error);
   }
-  function handleFileUpload(event) {
-    resumeFile.value = event.target.files[0];
-  }
+}
+function handleFileUpload(event) {
+  resumeFile.value = event.target.files[0];
+}
 
-  function closeApplyPopup() {
-    showApplyPopup.value = false;
-    resumeFile.value = null;
-    selectedJobId.value = null;
-    coverLetter.value = "";
-  }
+function closeApplyPopup() {
+  showApplyPopup.value = false;
+  resumeFile.value = null;
+  selectedJobId.value = null;
+  coverLetter.value = "";
+}
 
 // Notification Logic
-  function pluralizeType(type, count) {
-    const formatted = formatType(type).toLowerCase();
-    return count > 1 ? `${formatted}s` : formatted;
+function pluralizeType(type, count) {
+  const formatted = formatType(type).toLowerCase();
+  return count > 1 ? `${formatted}s` : formatted;
+}
+
+const filteredNotifications = computed(() =>
+  notifications.value.filter(
+    (notif) =>
+      notif && ["message", "inquiry", "application_update"].includes(notif.type)
+  )
+);
+
+async function fetchNotifications() {
+  try {
+    const response = await axios.get("/notifications");
+    const rawNotifications = response.data.notifications || [];
+
+    const grouped = new Map();
+
+    rawNotifications.forEach((notif) => {
+      if (!notif || !notif.type) return;
+
+      const key = `${notif.sender_id || "system"}_${notif.type}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          ...notif,
+          count: 1,
+          latestContent: notif.content,
+        });
+      } else {
+        const existing = grouped.get(key);
+        existing.count += 1;
+        existing.latestContent = notif.content; // latest content
+        grouped.set(key, existing);
+      }
+    });
+
+    notifications.value = Array.from(grouped.values());
+    newNotifications.value = notifications.value.length;
+
+    console.log("Fetched notifications:", rawNotifications);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
   }
+}
 
-
-  const filteredNotifications = computed(() => 
-    notifications.value.filter(
-      notif => notif && ["message", "inquiry", "application_update"].includes(notif.type)
-    )
-  );
-
-  async function fetchNotifications() {
-    try {
-      const response = await axios.get('/notifications');
-      const rawNotifications = response.data.notifications || [];
-
-      const grouped = new Map();
-
-      rawNotifications.forEach(notif => {
-        if (!notif || !notif.type) return;
-
-        const key = `${notif.sender_id || 'system'}_${notif.type}`;
-        if (!grouped.has(key)) {
-          grouped.set(key, {
-            ...notif,
-            count: 1,
-            latestContent: notif.content,
-          });
-        } else {
-          const existing = grouped.get(key);
-          existing.count += 1;
-          existing.latestContent = notif.content; // latest content
-          grouped.set(key, existing);
-        }
-      });
-
-      notifications.value = Array.from(grouped.values());
-      newNotifications.value = notifications.value.length;
-
-      console.log('Fetched notifications:', rawNotifications);
-
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
+function formatType(type) {
+  switch (type) {
+    case "job_application":
+      return "Job Application";
+    case "inquiry":
+      return "Inquiry";
+    case "application_update":
+      return "Application Update";
+    case "message":
+      return "Message";
+    case "other":
+      return "Other";
   }
-
-  function formatType(type){
-    switch(type){
-      case "job_application":
-        return "Job Application";
-      case "inquiry":
-        return "Inquiry";
-      case "application_update":
-        return "Application Update";
-      case "message":
-        return "Message";
-      case "other":
-        return "Other";
-    }
-  }
+}
 
 // Message Logic
 function sendMessage(companyId) {
@@ -451,17 +457,16 @@ function sendMessage(companyId) {
   showMessagePopup.value = true;
 }
 
-async function sendActualMessage(){
+async function sendActualMessage() {
   try {
-    const response = await axios.post('/message/send', {
+    const response = await axios.post("/message/send", {
       receiver_id: selectedCompanyId.value,
       message: messageContent.value,
     });
 
-    console.log("Message Sent:", response.data)
+    console.log("Message Sent:", response.data);
     showMessagePopup.value = false;
     messageContent.value = "";
-    
   } catch (error) {
     console.error("Error sending message:", error);
     alert("Failed to send message. Please try again later.");
@@ -472,7 +477,6 @@ onMounted(() => {
   fetchJobs();
   fetchNotifications();
 });
-
 
 // function selectIndustry(industry) {
 //   selectedIndustry.value = industry;
@@ -497,7 +501,6 @@ onMounted(() => {
 //   }, 20000);
 // });
 </script>
-
 
 <style scoped>
 * {
@@ -562,7 +565,7 @@ body,
   cursor: pointer;
   transition: transform 0.3s ease, background-color 0.3s ease;
   padding: 15px 20px;
-  margin-top: 32.5vh;
+  margin-top: 15vh;
   margin-left: 8.5vh;
   border-radius: 10px;
 }
@@ -1121,7 +1124,7 @@ label {
   .sidebar.active {
     transform: translateX(0);
   }
-.popup {
+  .popup {
     width: 80%;
   }
   .topbar input[type="text"] {
