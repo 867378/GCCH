@@ -114,7 +114,8 @@
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
               <li v-for="(notif, index) in notifications" :key="index">
-                <strong>{{ formatType(notif.type) }}</strong>: {{ notif.content }}
+                <strong>{{ formatType(notif.type) }}</strong>: {{ notif.latestContent }}
+                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span><br>
                 <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
               </li>
             </ul>
@@ -215,7 +216,7 @@
 
         <!-- Notifications -->
         <div class="right-content">
-          <h3>UPDATES</h3>
+          <h3>Contacts</h3>
             <div class="updates-list">
               <div
                 v-for="(notif, index) in filteredNotifications"
@@ -224,8 +225,12 @@
                 style="cursor: pointer;"
                 class="update-box"
               >
-                <h2>{{ formatType(notif.type) }}</h2>
-                <p>{{ notif.content }}</p>
+                <h2>{{ extractSenderName(notif.latestContent) }}</h2>
+                <p>
+                  <span v-if="notif.count > 1">
+                    ({{ notif.count }} new messages)
+                  </span>
+                </p>
               </div>
             </div>
           </div>
@@ -269,11 +274,6 @@
   })
 
   const notifications = ref([]);
-  const filteredNotifications = computed(() => 
-    notifications.value.filter(
-      notif => notif && ["message", "inquiry"].includes(notif.type)
-    )
-  );
 
   function toggleMail() {
     showMail.value = !showMail.value;
@@ -383,19 +383,50 @@
   //   }
   // }
 
-  async function fetchNotifications() {
-    try {
-      const response = await axios.get('/notifications');
-      console.log("Fetched notifications:", response.data);
+  //notification logic
+  const filteredNotifications = computed(() => 
+    notifications.value.filter(
+      notif => notif && ["message", "inquiry"].includes(notif.type)
+    )
+  );
 
-      notifications.value = response.data.notifications || []; // or adjust based on actual structure
-      newNotifications.value = notifications.value.filter(
-        notif => notif && ['message', 'inquiry'].includes(notif.type)
-      ).length;
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
+  function extractSenderName(content){
+    const match = content.match(/from (.+)$/);
+    return match ? match [1] : "Unknown Sender";
   }
+
+  async function fetchNotifications() {
+  try {
+    const response = await axios.get('/notifications');
+    const rawNotifications = response.data.notifications || [];
+
+    const grouped = new Map();
+
+    rawNotifications.forEach(notif => {
+      if (!notif || !notif.sender_id || !notif.type) return;
+
+      const key = `${notif.sender_id}_${notif.type}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          ...notif,
+          count: 1,
+          latestContent: notif.content,
+        });
+      } else {
+        const existing = grouped.get(key);
+        existing.count += 1;
+        existing.latestContent = notif.content; // latest content
+        grouped.set(key, existing);
+      }
+    });
+
+    notifications.value = Array.from(grouped.values());
+    newNotifications.value = notifications.value.length;
+
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+  }
+}
 
 
   function formatType(type) {
@@ -412,7 +443,7 @@
   onMounted(() => {
     fetchNotifications();
   });
-</script>
+  </script>
 
 <style scoped>
 * {

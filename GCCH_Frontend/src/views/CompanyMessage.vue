@@ -90,7 +90,8 @@
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
               <li v-for="(notif, index) in notifications" :key="index">
-                <strong>{{ formatType(notif.type) }}</strong>: {{ notif.content }}
+                <strong>{{ formatType(notif.type) }}</strong>: {{ notif.latestContent }}
+                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span><br>
                 <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
               </li>
             </ul>
@@ -100,44 +101,45 @@
       </div>
 
       <!-- CHATS -->
-      <div class="content">
-        <div class="left-content">
-          <div class="message-box">
-            <h3 style="text-align: left; font-size: 30px">Messages</h3>
-            <div class="form-row">
-              <div class="messages-list">
-                <div
-                  v-for="(msg, index) in uniqueConversations" 
-                  :key="index"
-                  class="message-item received"
-                  @click="openChat({ sender_id: msg.sender_id })"
-                  style="cursor: pointer"
-                >
-                  <p>
-                    <strong>{{ msg.from }}:</strong>
-                    {{ msg.content }}
-                  </p>
-                  <span class="timestamp">{{
-                    new Date(msg.created_at).toLocaleString()
-                  }}</span>
-                </div>
-              </div>
-            </div>
+<div class="content">
+  <div class="left-content">
+    <div class="message-box">
+      <h3 style="text-align: left; font-size: 30px">Messages</h3>
+      <div class="form-row">
+        <div class="messages-list">
+          <div
+            v-for="(msg, index) in uniqueConversations" 
+            :key="index"
+            class="message-item received"
+            @click="openChat({ sender_id: msg.sender_id })"
+            style="cursor: pointer"
+          >
+            <p>
+              <strong>{{ msg.from }}:</strong>
+              {{ msg.content }}
+            </p>
+            <span class="timestamp">{{
+              new Date(msg.created_at).toLocaleString()
+            }}</span>
           </div>
+        </div>
+      </div>
 
-          <!-- Current Chat -->
-          <div v-if="conversation.length" class="chat-box">
-            <h3>Conversation</h3>
-            <div style="max-height: 400px; overflow-y: auto; margin-bottom: 1rem">
-              <div
-                v-for="(msg, index) in conversation"
-                :key="index"
-                :class="['message-item', msg.from === 'You' ? 'sent' : 'received']"
-              >
-                <p><strong>{{ msg.from }}:</strong> {{ msg.content }}</p>
-                <span class="timestamp">{{ new Date(msg.created_at).toLocaleString() }}</span>
-              </div>
-            </div>
+      <!-- Current Chat -->
+      <div v-if="conversation.length" class="chat-box">
+        <h3>Conversation</h3>
+        <div style="max-height: 400px; overflow-y: auto; margin-bottom: 1rem">
+          <div
+            v-for="(msg, index) in conversation"
+            :key="index"
+            :class="['message-item', msg.from === 'You' ? 'sent' : 'received']"
+          >
+            <p><strong>{{ msg.from }}:</strong> {{ msg.content }}</p>
+            <span class="timestamp">{{ new Date(msg.created_at).toLocaleString() }}</span>
+          </div>
+        </div>
+        
+
             
             <div class="reply-box">
               <textarea
@@ -150,65 +152,32 @@
               <button @click="sendReply">Send</button>
             </div>
           </div>
-          <!-- <div
-            v-if="showMessagePopup"
-            class="popup-overlay"
-            @click.self="closeChat"
-          >
-            <div class="popup chat-popup">
-              <h3>💬 Chat with {{ selectedUser }}</h3>
-              <div
-                style="max-height: 200px; overflow-y: auto; margin-bottom: 1rem"
-              >
-                <div
-                  v-for="(msg, index) in messages[selectedUser]"
-                  :key="index"
-                  :class="[
-                    'message-item',
-                    msg.from === 'You' ? 'sent' : 'received',
-                  ]"
-                >
-                  <p>
-                    <strong>{{ msg.from }}:</strong> {{ msg.text }}
-                  </p>
-                  <span class="timestamp">{{ msg.time }}</span>
-                </div>
-              </div>
-              <div class="reply-box">
-                <textarea
-                  v-model="newReply"
-                  placeholder="Type your message..."
-                  @keyup="handleKeyUp"
-                  @keydown.enter.prevent="sendReply"
-                  class="expanding-textarea"
-                ></textarea>
-                <button @click="sendReply">Send</button>
-              </div>
-              <button @click="closeChat">Close</button>
-            </div>
-          </div> -->
         </div>
+  </div>
 
         <!-- Notifications -->
         <div class="right-content">
-          <h3>UPDATES</h3>
-          <div class="updates-list">
-            <div
-              v-for="(notif, index) in filteredNotifications"
-              :key="index"
-              @click="openChat(notif)"
-              style="cursor: pointer;"
-              class="update-box"
-            >
-              <h2>{{ formatType(notif.type) }}</h2>
-              <p>{{ notif.content }}</p>
+          <h3>Contacts</h3>
+            <div class="updates-list">
+              <div
+                v-for="(notif, index) in filteredNotifications"
+                :key="index"
+                @click="openChat(notif)"
+                style="cursor: pointer;"
+                class="update-box"
+              >
+                <h2>{{ extractSenderName(notif.latestContent) }}</h2>
+                <p>
+                  <span v-if="notif.count > 1">
+                    ({{ notif.count }} new messages)
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      
-    </div>
-  </div>
+    </div>  
 </template>
 
 <script setup>
@@ -244,11 +213,6 @@
   })
 
   const notifications = ref([]);
-  const filteredNotifications = computed(() => 
-    notifications.value.filter(
-      notif => notif && ["message", "inquiry"].includes(notif.type)
-    )
-  );
 
   function toggleMail() {
     showMail.value = !showMail.value;
@@ -358,33 +322,65 @@
   //   }
   // }
 
-  async function fetchNotifications() {
+  //Notification Logic
+  const filteredNotifications = computed(() => 
+    notifications.value.filter(
+      notif => notif && ["message", "inquiry"].includes(notif.type)
+    )
+  );
+
+  function extractSenderName(content){
+    const match = content.match(/from (.+)$/);
+    return match ? match [1] : "Unknown Sender";
+  }
+
+  async function fetchMessageNotifications() {
     try {
       const response = await axios.get('/notifications');
-      console.log("Fetched notifications:", response.data);
+      const rawNotifications = response.data.notifications || [];
 
-      notifications.value = response.data.notifications || []; // or adjust based on actual structure
-      newNotifications.value = notifications.value.filter(
-        notif => notif && ['message', 'inquiry'].includes(notif.type)
-      ).length;
+      const grouped = new Map();
+
+      rawNotifications.forEach(notif => {
+        if (!notif || !notif.sender_id || !notif.type) return;
+
+        const key = `${notif.sender_id}_${notif.type}`;
+        if (!grouped.has(key)) {
+          grouped.set(key, {
+            ...notif,
+            count: 1,
+            latestContent: notif.content,
+          });
+        } else {
+          const existing = grouped.get(key);
+          existing.count += 1;
+          existing.latestContent = notif.content; // latest content
+          grouped.set(key, existing);
+        }
+      });
+
+      notifications.value = Array.from(grouped.values());
+      newNotifications.value = notifications.value.length;
+
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
   }
+
 
   function formatType(type) {
     switch (type) {
       case "job_application": return "Job Application";
       case "inquiry": return "Inquiry";
       case "application_update": return "Application Update";
-      case "message": return "Message";
+      case "message": return "Inquiry";
       case "other": return "Other";
       default: return type;
     }
   }
 
   onMounted(() => {
-    fetchNotifications();
+    fetchMessageNotifications();
   });
   </script>
 
@@ -641,7 +637,7 @@ body,
   gap: 20px;
 }
 .left-content {
-  flex: 3;
+  flex: 1;
 }
 .message-box {
   background: white;
@@ -649,9 +645,8 @@ body,
   border-radius: 10px;
   margin-bottom: 20px;
   border-radius: 3vh;
-  width: 100%;
-  max-height: 100%;
-  overflow-y: auto;
+  width: 150vh;
+  height: 75vh;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -678,7 +673,9 @@ body,
   background-color: #f1f1f1;
   align-self: flex-start;
   border-left: 4px solid #045d56;
-  max-width: 80%;
+  max-width: 50%;
+  margin-top:3vh;
+  margin-bottom: 3vh;
   max-height: fit-content;
 }
 
@@ -687,7 +684,10 @@ body,
   align-self: flex-end;
   border-right: 4px solid #045d56;
   text-align: right;
-  max-width: 80%;
+  margin-left: 58vh;
+  margin-top:3vh;
+  margin-bottom: 3vh;
+  max-width: 50%;
 }
 
 .timestamp {
@@ -703,7 +703,8 @@ body,
   background: white;
   border-radius: 10px;
   padding: 20px;
-  height: fit-content;
+  height: 80vh;
+  overflow:auto;
 }
 .icons-right {
   display: flex;
