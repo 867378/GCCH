@@ -76,7 +76,10 @@
           <div class="popup">
             <h3>📬 Messages</h3>
             <ul class="popup-list">
-              <li v-for="(msg, index) in messages" :key="index">{{ msg }}</li>
+              <li v-for="(notif, index) in notifications" :key="index">
+                <strong>{{ formatType(notif.type) }}</strong>: {{ notif.content }}
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
+              </li>
             </ul>
             <button @click="toggleMail">Close</button>
           </div>
@@ -300,7 +303,12 @@
               <p><strong>Type:</strong> {{ job.job_type }}</p>
               <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
-              <p>Status: {{ job.status }}</p>
+              <p><strong>Status:</strong> {{ job.status }}</p>
+              <p><strong>Recommended courses:</strong>
+                {{ [job.recommended_course, job.recommended_course_2, job.recommended_course_3]
+                  .filter(course => course)
+                  .join(', ') }}
+              </p>
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
