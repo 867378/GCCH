@@ -372,7 +372,6 @@
     }
   }
 
-
   function formatType(type) {
     switch (type) {
       case "job_application": return "Job Application";

@@ -284,6 +284,7 @@ const otherJobs = ref([]);
 //For Notifications
 const notifications = ref([]);
 
+
 // NavBar Logic
   function toggleMail() {
     showMail.value = !showMail.value;
