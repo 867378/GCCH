@@ -109,11 +109,33 @@
             <p><strong>Status:</strong> {{ selectedJob.status }}</p>
 
             <h3>Applicants</h3>
-            <ul>
-              <li v-for="(applicant, i) in jobApplicants" :key="i">
-                {{ applicant.name }} - {{ applicant.email }}
+            <ul v-if="jobApplicants.length > 0">
+              <li v-for="application in jobApplicants" :key="application.id" class="mb-4">
+                <strong>{{ application.applicant.first_name }} {{ application.applicant.last_name }}</strong><br>
+                <span><strong>Course:</strong> {{ application.applicant.course }}</span><br>
+                <span><strong>Phone:</strong> {{ application.applicant.phone_number }}</span><br>
+                <span><strong>Cover Letter:</strong> {{ application.cover_letter }}</span><br>
+                <span><strong>Date Applied:</strong> {{ application.date_applied }}</span><br>
+                <span><strong>Status:</strong> {{ application.status }}</span><br>
+                <span><strong>Schedule: </strong>{{ application.scheduled_at }}</span><br>
+
+                <div v-if="application.resume">
+                  <a :href="application.resume.embed_url" target="_blank">📄 View Resume</a>
+                </div>
+
+                <div>
+                  <button @click="assessApplication(application.id, 'accepted')">✅ Accept</button>
+                  <button @click="assessApplication(application.id, 'rejected')">❌ Reject</button>
+                  <button @click="scheduleInterview(application.id)">📅 Schedule Interview</button>
+                  <button @click="scheduleAssessment(application.id)">📝 Schedule Assessment</button>
+                </div>
+
+                <hr>
               </li>
             </ul>
+
+            <p v-else>No applicants have applied yet.</p>
+            
           </div>
           <div v-else>
             <p>Select a job to view details and applicants.</p>
@@ -166,17 +188,6 @@ const messages = ref([]);
 const notifications = ref([]);
 const postedJobs = ref([]);
 
-const jobData = ref({
-  job_title: "",
-  job_description: "",
-  job_location: "",
-  monthly_salary: "",
-  job_type: "",
-  recommended_course: "",
-  recommended_course_2: "",
-  recommended_course_3: "",
-});
-
 function toggleMail() {
   showMail.value = !showMail.value;
   if (showMail.value) {
@@ -206,48 +217,54 @@ function confirmSignOut() {
       });
   };
 
-// Job Posting Logic
-async function postJob() {
-  try {
-    const response = await axios.post("/company/postjob", {
-      job_title: jobData.value.job_title,
-      job_description: jobData.value.job_description,
-      job_location: jobData.value.job_location,
-      monthly_salary: jobData.value.monthly_salary,
-      job_type: jobData.value.job_type,
-      recommended_course: jobData.value.recommended_course,
-      recommended_course_2: jobData.value.recommended_course_2 || null,
-      recommended_course_3: jobData.value.recommended_course_3 || null,
-    });
-    console.log("Job posted successfully:", response.data);
-    alert(response.data.message);
-
-    await fetchPostedJobs();
-
-    jobData.value = {
-      job_title: "",
-      job_description: "",
-      job_location: "",
-      monthly_salary: "",
-      job_type: "",
-      recommended_course: "",
-      recommended_course_2: null,
-      recommended_course_3: null,
-    };
+//Get Applicants of a Certain Job
+  async function fetchApplicants(jobId) {
+  try{
+    const response = await axios.get(`/job/${jobId}/applications`);
+    jobApplicants.value = response.data.applications;
+    console.log(response.data)
   } catch (error) {
-    console.error("Error posting job:", error);
-    alert(error);
+    console.error("Failed to fetch applicants", error);
+    jobApplicants.value = [];
   }
 }
 
-
+//Fetch Jobs
 async function fetchPostedJobs() {
   try {
     const response = await axios.get("/company/jobdisplay");
     postedJobs.value = response.data.jobs;
+    console.log(response.data)
+
+    if (postedJobs.value.length > 0) {
+      selectedJob.value = postedJobs.value[0]; // or let user pick
+      await fetchApplicants(selectedJob.value.id);
+    } else {
+      jobApplicants.value = [];
+    }
+
   } catch (error) {
     console.error("Error fetching posted jobs:", error);
-    alert("Error fetching posted jobs");
+  }
+}
+
+async function assessApplication(applicationId, status, scheduleAt = null, comment = ''){
+
+  try {
+    const payload = {
+      status,
+      scheduled_at: scheduleAt,
+      comment
+    };
+
+    const response = await axios.post(`/company/job-applications/${applicationId}/assess`, payload);
+    console.log ("Assessment Successful:", response.data);
+
+    await fetchApplicants(selectedJob.value.id);
+
+  } catch (error) {
+    console.error("Error updating application status:", error.response?.data || error);
+    alert(error.response?.data?.error || 'Failed to update application');
   }
 }
 
@@ -256,6 +273,20 @@ onMounted(fetchPostedJobs);
 function selectJob(job) {
   selectedJob.value = job;
   fetchApplicants(job.id); 
+}
+
+function scheduleInterview(applicationId) {
+  const date = prompt("Enter interview date (YYYY-MM-DD HH:MM:SS):");
+  if (date) {
+    assessApplication(applicationId, 'interview', date);
+  }
+}
+
+function scheduleAssessment(applicationId) {
+  const date = prompt("Enter assessment date (YYYY-MM-DD HH:MM:SS):");
+  if (date) {
+    assessApplication(applicationId, 'assessment', date);
+  }
 }
 
 </script>

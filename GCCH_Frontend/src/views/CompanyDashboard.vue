@@ -291,6 +291,8 @@
               class="posted-jobs-box"
               v-for="(job, index) in postedJobs"
               :key="index"
+              @click="selectJob(job)"
+
             >
               <h2>{{ job.job_title }}</h2>
               <p>{{ job.job_description }}</p>
@@ -327,9 +329,12 @@ const pendingApplications = ref(10);
 const isSidenavOpen = ref(true);
 
 const messages = ref([]);
-const notifications = ref([]);
-const updates = ref([]);
+
+const notifications = ref({});
+
 const postedJobs = ref([]);
+
+
 
 const jobData = ref({
   job_title: "",

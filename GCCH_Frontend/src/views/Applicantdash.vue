@@ -410,6 +410,7 @@ async function sendActualMessage(){
       message: messageContent.value,
     });
 
+    console.log("Message Sent:", response.data)
     showMessagePopup.value = false;
     messageContent.value = "";
     
