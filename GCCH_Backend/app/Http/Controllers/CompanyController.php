@@ -113,6 +113,7 @@ class CompanyController extends Controller
                 }
 
                 return [
+                    'id' => $application->id,
                     'applicant' => $application->applicant,
                     'resume' => [
                         'file_name' => $resumeFile ? $resumeFile->file_name : null,
@@ -120,6 +121,7 @@ class CompanyController extends Controller
                     ],
                     'cover_letter' => $application->cover_letter,
                     'status' => $application->status,
+                    'scheduled_at' => $application->scheduled_at,
                     'date_applied' => $application->date_applied,
                 ];
             });

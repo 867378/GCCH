@@ -110,23 +110,24 @@
 
             <h3>Applicants</h3>
             <ul v-if="jobApplicants.length > 0">
-              <li v-for="application in jobApplicants" :key="application.applicant.id" class="mb-4">
+              <li v-for="application in jobApplicants" :key="application.id" class="mb-4">
                 <strong>{{ application.applicant.first_name }} {{ application.applicant.last_name }}</strong><br>
                 <span><strong>Course:</strong> {{ application.applicant.course }}</span><br>
                 <span><strong>Phone:</strong> {{ application.applicant.phone_number }}</span><br>
                 <span><strong>Cover Letter:</strong> {{ application.cover_letter }}</span><br>
-                <span><strong>Status:</strong> {{ application.status }}</span><br>
                 <span><strong>Date Applied:</strong> {{ application.date_applied }}</span><br>
+                <span><strong>Status:</strong> {{ application.status }}</span><br>
+                <span><strong>Schedule: </strong>{{ application.scheduled_at }}</span><br>
 
                 <div v-if="application.resume">
                   <a :href="application.resume.embed_url" target="_blank">📄 View Resume</a>
                 </div>
 
                 <div>
-                  <button @click="assessApplication(application.applicant.id, 'accepted')">✅ Accept</button>
-                  <button @click="assessApplication(application.applicant.id, 'rejected')">❌ Reject</button>
-                  <button @click="scheduleInterview(application.applicant.id)">📅 Schedule Interview</button>
-                  <button @click="scheduleAssessment(application.applicant.id)">📝 Schedule Assessment</button>
+                  <button @click="assessApplication(application.id, 'accepted')">✅ Accept</button>
+                  <button @click="assessApplication(application.id, 'rejected')">❌ Reject</button>
+                  <button @click="scheduleInterview(application.id)">📅 Schedule Interview</button>
+                  <button @click="scheduleAssessment(application.id)">📝 Schedule Assessment</button>
                 </div>
 
                 <hr>
@@ -217,13 +218,14 @@ function confirmSignOut() {
   };
 
 //Get Applicants of a Certain Job
-  async function fetchApplicants(selectedJob) {
+  async function fetchApplicants(jobId) {
   try{
-    const response = await axios.get(`/job/${selectedJob}/applications`);
+    const response = await axios.get(`/job/${jobId}/applications`);
     jobApplicants.value = response.data.applications;
     console.log(response.data)
   } catch (error) {
     console.error("Failed to fetch applicants", error);
+    jobApplicants.value = [];
   }
 }
 
@@ -234,15 +236,11 @@ async function fetchPostedJobs() {
     postedJobs.value = response.data.jobs;
     console.log(response.data)
 
-    const applicants = await fetchApplicants(selectedJob);
-
-    if (applicants === null) {
-      alert("Error fetching applicants.");
-      console.log("No applicants yet.");
-      jobApplicants.value = []; // or set a message to show in the UI
-
+    if (postedJobs.value.length > 0) {
+      selectedJob.value = postedJobs.value[0]; // or let user pick
+      await fetchApplicants(selectedJob.value.id);
     } else {
-      jobApplicants.value = applicants;
+      jobApplicants.value = [];
     }
 
   } catch (error) {
@@ -261,7 +259,7 @@ async function assessApplication(applicationId, status, scheduleAt = null, comme
     const response = await axios.post(`/company/job-applications/${applicationId}/assess`, payload);
     console.log ("Assessment Successful:", response.data);
 
-    await fetchApplicants(selectedJob);
+    await fetchApplicants(selectedJob.value.id);
 
   } catch (error) {
     console.error("Error updating application status:", error.response?.data || error);
