@@ -283,7 +283,7 @@
         </div>
 
 
-        <!-- JOB DISPLAY -->
+<!-- JOB DISPLAY -->
         <div class="right-content">
           <h3>POSTED JOBS</h3>
           <div class="posted-jobs">
@@ -292,6 +292,7 @@
               v-for="(job, index) in postedJobs"
               :key="index"
               @click="selectJob(job)"
+
             >
               <h2>{{ job.job_title }}</h2>
               <p>{{ job.job_description }}</p>
@@ -332,6 +333,7 @@ const messages = ref([]);
 const notifications = ref({});
 
 const postedJobs = ref([]);
+
 
 
 const jobData = ref({
