@@ -186,17 +186,26 @@
         <!-- Notifications -->  
         <div class="right-content">
           <h3>CHECK THIS OUT</h3>
-          <div class="updates-list">
-            <div
-              v-for="notification in notifications"
-              :key="notification"
-              class="update-box"
-              @click="handleNotificationClick(notification)"
-            >
-              <h2>{{ formatType(notification.type) }}</h2>
-              <p>{{ notification.content }}</p>
+            <div class="updates-list">
+              <div
+                v-for="(notif, index) in filteredNotifications"
+                :key="index"
+                @click="openChat(notif)"
+                style="cursor: pointer;"
+                class="update-box"
+              >
+              
+                <h2>{{ formatType(notif.type) }}</h2>
+                <p>
+                  {{ notif.latestContent }}
+                  <span v-if="notif.count > 1">
+                    ({{ notif.count }} new {{ pluralizeType(notif.type, notif.count) }})
+                  </span>
+                </p>
+
+              </div>
             </div>
-          </div>
+
         </div>
 
       </div>
@@ -252,7 +261,7 @@
 </template>
 
 <script setup>
-import { ref,onMounted } from 'vue';
+import { ref,onMounted,computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -374,10 +383,48 @@ const notifications = ref([]);
   }
 
 // Notification Logic
+  function pluralizeType(type, count) {
+    const formatted = formatType(type).toLowerCase();
+    return count > 1 ? `${formatted}s` : formatted;
+  }
+
+
+  const filteredNotifications = computed(() => 
+    notifications.value.filter(
+      notif => notif && ["message", "inquiry", "application_update"].includes(notif.type)
+    )
+  );
+
   async function fetchNotifications() {
     try {
       const response = await axios.get('/notifications');
-      notifications.value = response.data.notifications;
+      const rawNotifications = response.data.notifications || [];
+
+      const grouped = new Map();
+
+      rawNotifications.forEach(notif => {
+        if (!notif || !notif.type) return;
+
+        const key = `${notif.sender_id || 'system'}_${notif.type}`;
+        if (!grouped.has(key)) {
+          grouped.set(key, {
+            ...notif,
+            count: 1,
+            latestContent: notif.content,
+          });
+        } else {
+          const existing = grouped.get(key);
+          existing.count += 1;
+          existing.latestContent = notif.content; // latest content
+          grouped.set(key, existing);
+        }
+      });
+
+      notifications.value = Array.from(grouped.values());
+      newNotifications.value = notifications.value.length;
+
+      console.log('Fetched notifications:', rawNotifications);
+
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
