@@ -33,10 +33,6 @@ class GoogleDriveService
 
                     $fileId = $content->extraMetaData()['id'] ?? null;
                     
-                    //if ($fileId) {
-                    //    $this->setPublicPermission($fileId);
-                    //}
-                    
                     return [
                         'name' => basename($content->path()),
                         'path' => $content->path(),

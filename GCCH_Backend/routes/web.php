@@ -31,6 +31,7 @@ Route::get('/delete-all-data', function () {
     DB::table('jobs')->truncate();
     DB::table('job_applications')->truncate();
     DB::table('resumes')->truncate();
+    DB::table('cover_letters')->truncate();
     DB::table('sessions')->truncate();
     DB::table('messages')->truncate();
     DB::table('notifications')->truncate();

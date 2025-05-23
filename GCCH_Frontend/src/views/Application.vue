@@ -79,7 +79,11 @@
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
               <li v-for="(notif, index) in notifications" :key="index">
-                {{ notif }}
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.latestContent }}
+                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
+                ><br />
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
               </li>
             </ul>
             <button @click="toggleNotif">Close</button>
@@ -95,30 +99,30 @@
             <div class="form-row">
               <div class="resume-list">
                 <div
-                  v-for="(app, index) in applications"
+                  v-for="application in applications"
                   :key="index"
                   class="resume-item received"
                 >
-                  <h4>{{ app.name }}</h4>
-                  <p><strong>Job Title:</strong> {{ app.jobTitle }}</p>
-                  <p><strong>Status:</strong> {{ app.status }}</p>
+                  <h4>Job Application for : {{ application.job_title }}</h4>
+                  <p><strong>Job Title:</strong> {{ application.job_title }}</p>
+                  <p><strong>Status:</strong> {{ application.status }}</p>
                   <p>
                     <strong>Schedule:</strong>
-                    {{ app.schedule || "To be announced" }}
+                    {{ application.schedule || "To be announced" }}
                   </p>
                   <p>
                     <strong>Comments:</strong>
-                    {{ app.comments || "No comments yet." }}
+                    {{ application.comments || "No comments yet." }}
                   </p>
                   <p>
-                    <strong>Updated At:</strong> {{ formatDate(app.updatedAt) }}
+                    <strong>Updated At:</strong> {{ formatDate(application.updated_at) }}
                   </p>
 
-                  <button @click="viewResume(app.resume, app)">
+                  <!-- <button @click="viewResume(app.resume, app)">
                     View Resume
-                  </button>
+                  </button> -->
                 </div>
-                <div
+                <!-- <div
                   v-if="showResumeModal"
                   class="app-overlay"
                   @click.self="closeResume"
@@ -140,32 +144,42 @@
                     ></iframe>
                     <button @click="closeResume">Close</button>
                   </div>
-                </div>
+                </div> -->
+
               </div>
             </div>
           </div>
         </div>
         <!-- Notifications -->
         <div class="right-content">
-          <h3>UPDATES</h3>
+          <h3>CHECK THIS OUT</h3>
           <div class="updates-list">
             <div
-              v-for="notification in notifications"
-              :key="notification"
+              v-for="(notif, index) in filteredNotifications"
+              :key="index"
+              @click="openChat(notif)"
+              style="cursor: pointer"
               class="update-box"
             >
-              <h2>{{ formatType(notification.type) }}</h2>
-              <p>{{ notification.content }}</p>
+              <h2>{{ formatType(notif.type) }}</h2>
+              <p>
+                {{ notif.latestContent }}
+                <span v-if="notif.count > 1">
+                  ({{ notif.count }} new
+                  {{ pluralizeType(notif.type, notif.count) }})
+                </span>
+              </p>
             </div>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 
@@ -175,13 +189,7 @@ const showNotif = ref(false);
 const showSignOut = ref(false);
 const unreadMessages = ref(0);
 const newNotifications = ref(0);
-const selectedUserId = ref(null);
-const selectedApplicant = ref(null);
-const selectedStatus = ref("");
-const showSave = ref(false);
-const showResumeModal = ref(false);
 
-const updates = ref([]);
 const messages = ref([]);
 const notifications = ref([]);
 const applications = ref([]);
@@ -217,11 +225,48 @@ function confirmSignOut() {
     });
 }
 
-//Notification Logic
+// Notification Logic
+function pluralizeType(type, count) {
+  const formatted = formatType(type).toLowerCase();
+  return count > 1 ? `${formatted}s` : formatted;
+}
+
+const filteredNotifications = computed(() =>
+  notifications.value.filter(
+    (notif) =>
+      notif && ["message", "inquiry", "application_update"].includes(notif.type)
+  )
+);
+
 async function fetchNotifications() {
   try {
     const response = await axios.get("/notifications");
-    notifications.value = response.data.notifications;
+    const rawNotifications = response.data.notifications || [];
+
+    const grouped = new Map();
+
+    rawNotifications.forEach((notif) => {
+      if (!notif || !notif.type) return;
+
+      const key = `${notif.sender_id || "system"}_${notif.type}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          ...notif,
+          count: 1,
+          latestContent: notif.content,
+        });
+      } else {
+        const existing = grouped.get(key);
+        existing.count += 1;
+        existing.latestContent = notif.content; // latest content
+        grouped.set(key, existing);
+      }
+    });
+
+    notifications.value = Array.from(grouped.values());
+    newNotifications.value = notifications.value.length;
+
+    console.log("Fetched notifications:", rawNotifications);
   } catch (error) {
     console.error("Error fetching notifications:", error);
   }
@@ -242,21 +287,33 @@ function formatType(type) {
   }
 }
 
-function viewResume(resumeLink, applicant) {
-  selectedResume.value = resumeLink;
-  selectedApplicant.value = applicant;
-  showResumeModal.value = true;
+async function fetchJobApplications(){
+  try{
+    const response = await axios.get('/applicant/applications');
+    console.log("Success", response.data);
+    applications.value = response.data.applications;
+    
+  } catch (error) {
+    console.error("Error Occured", error);
+  }
 }
 
-function closeResume() {
-  showResumeModal.value = false;
-  selectedResume.value = null;
-  selectedApplicant.value = null;
-}
+// function viewResume(resumeLink, applicant) {
+//   selectedResume.value = resumeLink;
+//   selectedApplicant.value = applicant;
+//   showResumeModal.value = true;
+// }
 
-function saveStatus() {}
+// function closeResume() {
+//   showResumeModal.value = false;
+//   selectedResume.value = null;
+//   selectedApplicant.value = null;
+// }
+
+// function saveStatus() {}
 
 onMounted(() => {
+  fetchJobApplications();
   fetchNotifications();
 });
 

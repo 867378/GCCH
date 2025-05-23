@@ -175,6 +175,13 @@
                   <span class="salary">₱{{ matchedJob.monthly_salary }}</span>
                 </div>
               </div>
+
+              <!-- Job Slots -->
+              <p>{{ matchedJob.filled_slots }}/{{ matchedJob.total_slots }}</p>
+
+              <!--  -->
+              <p>Status: {{ matchedJob.status }}</p>
+
               <!-- Job Description -->
               <p class="job-description">{{ matchedJob.job_description }}</p>
 
@@ -228,9 +235,9 @@
   >
     <div class="popup">
       <h3>📄 Upload Your Resume</h3>
-      <input type="file" @change="handleFileUpload" accept=".pdf" />
+      <input type="file" @change="handleFileUploadResume" accept=".pdf" />
       <br /><br />
-      <input type="text" v-model="coverLetter" placeholder="Cover Letter" />
+      <input type="file" @change="handleFileUploadCoverLetter" accept=".pdf,.doc,.docx" />
       <br /><br />
       <button @click="submitApplication">Apply</button>
       <button
@@ -292,7 +299,7 @@ const messageContent = ref("");
 //for Apply Popup
 const selectedJobId = ref(null);
 const resumeFile = ref(null);
-const coverLetter = ref("");
+const coverLetterFile = ref(null);
 
 //for Job Listings
 const recommendedJobs = ref([]);
@@ -350,17 +357,19 @@ function applyToJob(jobId) {
   showApplyPopup.value = true;
 }
 
+
 async function submitApplication() {
-  if (!coverLetter.value) {
+  if (!coverLetterFile.value) {
     alert("Please include a cover letter.");
     return;
   }
+
   const formData = new FormData();
   formData.append("job_id", selectedJobId.value);
-  formData.append("cover_letter", coverLetter.value);
+  formData.append("cover_letter", coverLetterFile.value);  // 👈 MUST be File
 
   if (resumeFile.value) {
-    formData.append("resume", resumeFile.value);
+    formData.append("resume", resumeFile.value);  // 👈 MUST be File
   }
 
   try {
@@ -375,18 +384,24 @@ async function submitApplication() {
     console.log("Application submitted successfully:", response.data);
   } catch (error) {
     console.error("Error submitting application:", error);
-    alert(error.response.data.error);
+    alert(error.response?.data?.error || "An unknown error occurred.");
   }
 }
-function handleFileUpload(event) {
+
+
+function handleFileUploadResume(event) {
   resumeFile.value = event.target.files[0];
+}
+
+function handleFileUploadCoverLetter(event){
+  coverLetterFile.value = event.target.files[0];
 }
 
 function closeApplyPopup() {
   showApplyPopup.value = false;
   resumeFile.value = null;
   selectedJobId.value = null;
-  coverLetter.value = "";
+  coverLetterFile.value = "";
 }
 
 // Notification Logic

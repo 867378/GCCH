@@ -123,10 +123,6 @@
                   {{ application.applicant.phone_number }}</span
                 ><br />
                 <span
-                  ><strong>Cover Letter:</strong>
-                  {{ application.cover_letter }}</span
-                ><br />
-                <span
                   ><strong>Date Applied:</strong>
                   {{ application.date_applied }}</span
                 ><br />
@@ -136,7 +132,12 @@
                   ><strong>Schedule: </strong
                   >{{ application.scheduled_at }}</span
                 ><br />
-
+                
+                <div>
+                  <a :href="application.cover_letter.embed_url" target="_blank">
+                    📄 View Cover Letter
+                  </a>
+                </div>
                 <div v-if="application.resume">
                   <a :href="application.resume.embed_url" target="_blank"
                     >📄 View Resume</a
@@ -253,7 +254,9 @@ function confirmSignOut() {
 async function fetchApplicants(jobId) {
   try {
     const response = await axios.get(`/job/${jobId}/applications`);
-    jobApplicants.value = response.data.applications;
+    jobApplicants.value = response.data.applications.filter(
+      applicant => applicant.status !== 'rejected'
+    );
     console.log(response.data);
   } catch (error) {
     console.error("Failed to fetch applicants", error);

@@ -233,6 +233,12 @@
                   placeholder="Enter Monthly Salary (in Php)"
                   class="salary-input"
                 />
+
+                <input 
+                  type="number"
+                  v-model="jobData.total_slots"
+                  placeholder="Hiring Slot"
+                />
               </div>
             </div>
           </form>
@@ -299,6 +305,7 @@
               <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
               <p><strong>Status:</strong> {{ job.status }}</p>
+              <p><strong>Slot: {{ job.filled_slots }}/{{ job.total_slots }}</strong></p>
               <p><strong>Recommended courses:</strong>
                 {{ [job.recommended_course, job.recommended_course_2, job.recommended_course_3]
                   .filter(course => course)
@@ -335,8 +342,6 @@ const messages = ref([]);
 const notifications = ref({});
 const postedJobs = ref([]);
 
-
-
 const jobData = ref({
   job_title: "",
   job_description: "",
@@ -346,6 +351,7 @@ const jobData = ref({
   recommended_course: "",
   recommended_course_2: "",
   recommended_course_3: "",
+  total_slots: ""
 });
 
 function toggleMail() {
@@ -414,6 +420,7 @@ async function postJob() {
       recommended_course: jobData.value.recommended_course,
       recommended_course_2: jobData.value.recommended_course_2 || null,
       recommended_course_3: jobData.value.recommended_course_3 || null,
+      total_slots: jobData.value.total_slots,
     });
     console.log("Job posted successfully:", response.data);
     alert(response.data.message);
@@ -427,8 +434,9 @@ async function postJob() {
       monthly_salary: "",
       job_type: "",
       recommended_course: "",
-      recommended_course_2: null,
-      recommended_course_3: null,
+      recommended_course_2: "",
+      recommended_course_3: "",
+      total_slots:"",
     };
   } catch (error) {
     console.error("Error posting job:", error);
@@ -442,7 +450,6 @@ async function fetchPostedJobs() {
     postedJobs.value = response.data.jobs;
   } catch (error) {
     console.error("Error fetching posted jobs:", error);
-    alert("Error fetching posted jobs");
   }
 }
 

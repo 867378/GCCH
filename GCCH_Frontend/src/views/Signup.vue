@@ -38,18 +38,18 @@
             />
             <input placeholder="Last Name" v-model="form.lastName" required />
             <input type="date" v-model="form.birthday" required />
-            <select v-model="form.gender" required>
-              <option value="" disabled selected>Select Gender</option>
+            <select v-model="form.sex" required>
+              <option value="" disabled selected>Select Sex</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="prefer_not_to_say">Prefer Not to Say</option>
             </select>
             <input
               placeholder="Phone Number"
               v-model="form.phone"
               inputmode="numeric"
               pattern="[0-9]*"
-              maxlength="13"
+              maxlength="11"
               @input="form.phone = form.phone.replace(/\D/g, '')"
             />
             <select v-model="form.course" required>
@@ -137,7 +137,7 @@
 </template>
 
 <script setup>
-import { ref,onMounted } from "vue";
+import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 
@@ -151,7 +151,7 @@ const form = ref({
   middleName: "",
   lastName: "",
   birthday: "",
-  gender: "",
+  sex: "",
   phone: "",
   course: "",
   companyName: "",
@@ -191,7 +191,7 @@ const submitApplicantForm = async() => {
       middle_name: form.value.middleName,
       last_name: form.value.lastName,
       date_of_birth: form.value.birthday,
-      gender: form.value.gender,
+      sex: form.value.sex,
       phone_number: form.value.phone,
       course: form.value.course,
     });

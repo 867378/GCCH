@@ -20,6 +20,8 @@ class Job extends Model
         'recommended_course_3',
         'date_posted',
         'status',
+        'total_slots',
+        'filled_slots',
         'company_id', // foreign key from company that posted the job
     ];
 

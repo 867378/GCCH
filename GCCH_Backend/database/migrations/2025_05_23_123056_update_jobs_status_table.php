@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->unsignedBigInteger('sender_id')->nullable()->after('type')->change();
+        Schema::table('jobs', function (Blueprint $table) {
+            $table->enum('status',['open','closed'])->change();
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->dropColumn('sender_id');
+        Schema::table('jobs', function (Blueprint $table) {
+            $table->enum('status',['open','close'])->change();
         });
     }
 };
