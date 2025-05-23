@@ -408,10 +408,10 @@ body,
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
-  border-right: 1px solid #ccc;
-  flex-shrink: 0;
+  border-radius: 2vh;
+  border-right: 3.5px solid #045d56;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-
 .logo {
   height: 8vh;
   width: 14vh;
@@ -718,10 +718,10 @@ body,
   border-radius: 10px;
   margin-bottom: 20px;
   border-radius: 3vh;
+  border-bottom: #045d56 4px solid;
   width: 95%;
-  height: 80vh;
+  height: 85vh;
   margin-left: 3vh;
-  overflow-y: auto;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }

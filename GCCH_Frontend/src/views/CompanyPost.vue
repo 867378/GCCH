@@ -145,24 +145,58 @@
 
                 <div>
                   <button
-                    @click="assessApplication(application.id, 'accepted')"
+                    v-if="!showStatusOptions"
+                    @click="showStatusOptions = true"
                   >
-                    ✅ Accept
+                    Select Status
                   </button>
-                  <button
-                    @click="assessApplication(application.id, 'rejected')"
-                  >
-                    ❌ Reject
-                  </button>
-                  <button @click="scheduleInterview(application.id)">
-                    📅 Schedule Interview
-                  </button>
-                  <button @click="scheduleAssessment(application.id)">
-                    📝 Schedule Assessment
-                  </button>
-                </div>
 
-                <hr />
+                  <div v-else>
+                    <div class="button-group">
+                      <button
+                        @click="
+                          assessApplication(application.id, 'accepted', comment)
+                        "
+                      >
+                        ✅ Accept
+                      </button>
+                      <button
+                        @click="
+                          assessApplication(application.id, 'rejected', comment)
+                        "
+                      >
+                        ❌ Reject
+                      </button>
+                      <button @click="scheduleInterview(application.id)">
+                        📅 Schedule Interview
+                      </button>
+                      <button @click="scheduleAssessment(application.id)">
+                        📝 Schedule Assessment
+                      </button>
+                    </div>
+
+                    <textarea
+                      v-model="comment"
+                      placeholder="Add a comment (optional)"
+                      rows="3"
+                      class="border p-2 mt-2 w-full"
+                    ></textarea>
+
+                    <button
+                      @click="showStatusOptions = false"
+                      class="cancel-button"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      @click="
+                        assessApplication(application.id, 'comment', comment)
+                      "
+                    >
+                      Submit Comment
+                    </button>
+                  </div>
+                </div>
               </li>
             </ul>
 
@@ -216,8 +250,13 @@ const isSidenavOpen = ref(true);
 const selectedJob = ref(null);
 const jobApplicants = ref([]);
 const messages = ref([]);
+
 const notifications = ref([]);
 const postedJobs = ref([]);
+// Dummy data for messages
+
+const showStatusOptions = ref(false);
+const comment = ref("");
 
 function toggleMail() {
   showMail.value = !showMail.value;
@@ -348,7 +387,9 @@ body,
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
-  border-right: 1px solid #ccc;
+  border-radius: 2vh;
+  border-right: 3.5px solid #045d56;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .logo {
   height: 8vh;
@@ -581,17 +622,31 @@ body,
 }
 
 .selected-job-box {
-  background-color: #fff;
-  padding: 24px;
-  margin-top: 0vh;
-  margin-left: 5vh;
+  /* background-color: #fff;
+  padding: 20px;
+  margin-left: 3vh;
   border-radius: 12px;
+  border-left: #045d56 4px solid;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  width: 120vh;
-  max-width: 120vh;
-  max-height: 100vh;
+  width: 125vh;
+  max-width: 140vh;
+  max-height: 85vh;
   transition: all 0.3s ease;
-  overflow: auto;
+  text-transform: uppercase;
+  overflow: auto; */
+
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border-radius: 3vh;
+  border-left: #045d56 4px solid;
+  width: 95%;
+  max-height: 80vh;
+  margin-left: 3vh;
+  overflow-y: auto;
+  text-transform: uppercase;
+
 }
 
 .selected-job-box h2 {
@@ -622,15 +677,38 @@ body,
   background-color: #f9f9f9;
   padding: 16px;
   border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  border: 2px solid #e0e6ed;
+  border-bottom: #045d56 4px solid;
+  width: 60vh;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.selected-job-box li:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+}
+
+.selected-job-box li strong {
+  display: inline-block;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.selected-job-box li span {
+  display: block;
+  margin: 2px 0;
+  color: #444;
+  font-size: 14px;
 }
 
 .selected-job-box button {
-  margin: 6px 6px 6px 0;
-  padding: 8px 14px;
-  font-size: 14px;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
+  padding: 5px 14px;
+  font-size: 10px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
@@ -638,25 +716,19 @@ body,
 .selected-job-box button:hover {
   opacity: 0.9;
 }
-
-.selected-job-box button:nth-child(1) {
-  background-color: #2ecc71; /* Accept */
-  color: white;
+.cancel-button {
+  margin-left: 8px;
+  margin-right: 30vh;
 }
 
-.selected-job-box button:nth-child(2) {
-  background-color: #e74c3c; /* Reject */
-  color: white;
+.button-group {
+  display: flex;
+  gap: 10px;
 }
-
-.selected-job-box button:nth-child(3) {
-  background-color: #3498db; /* Schedule Interview */
+.selected-job-box button {
+  background-color: #045d56;
   color: white;
-}
-
-.selected-job-box button:nth-child(4) {
-  background-color: #f39c12; /* Schedule Assessment */
-  color: white;
+  font-size: 10px;
 }
 
 .selected-job-box a {
@@ -666,6 +738,17 @@ body,
 
 .selected-job-box a:hover {
   text-decoration: underline;
+}
+
+textarea {
+  border: 1px solid #ccc;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 100%;
+  resize: none;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .right-content {
@@ -704,6 +787,7 @@ body,
   background-color: #ffffff;
   border: 1px solid #e0e6ed;
   border-radius: 16px;
+  border-left: #045d56 4px solid;
   margin: 2vh;
   width: 35vh;
   padding: 16px;

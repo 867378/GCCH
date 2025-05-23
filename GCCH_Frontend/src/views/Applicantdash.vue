@@ -226,7 +226,7 @@
     class="popup-overlay"
     @click.self="closeApplyPopup"
   >
-    <div class="popup">
+    <div class="apply-popup">
       <h3>📄 Upload Your Resume</h3>
       <input type="file" @change="handleFileUpload" accept=".pdf" />
       <br /><br />
@@ -520,8 +520,9 @@ body,
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
-  border-right: 1px solid #ccc;
-  flex-shrink: 0;
+  border-radius: 2vh;
+  border-right: 3.5px solid #045d56;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .logo {
@@ -742,6 +743,74 @@ body,
   background-color: #033f3a;
 }
 
+.apply-popup {
+  background-color: #fff;
+  position: relative;
+  padding: 25px;
+  border-radius: 15px;
+  width: 38%;
+  height: 45vh;
+  overflow-y: auto;
+  text-align: left;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  animation: popIn 0.3s ease;
+}
+
+.apply-popup h3 {
+  margin-bottom: 5vh;
+  font-size: 20px;
+  font-weight: bold;
+  color: #045d56;
+}
+
+/* File Input */
+.apply-popup input[type="file"] {
+  background-color: #045d56;
+  border: 2px #999;
+  padding: 12px 16px;
+  margin-left: 18vh;
+  width: 50%;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  color: #e9e4e4;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
+}
+
+/* Cover Letter Input */
+.apply-popup input[type="text"] {
+  margin-top: 15px;
+  margin-left: 18vh;
+
+  width: 50%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
+
+}
+
+/* Buttons */
+.apply-popup button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  margin-left: 25vh;
+  background-color: #045d56;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.apply-popup button:hover {
+  background-color: #e0f2f1;
+  color: #045d56;
+}
 @keyframes popIn {
   from {
     opacity: 0;
@@ -764,8 +833,15 @@ body,
 
 .left-content {
   flex: 3;
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  overflow: auto;
 }
 
+.left-content h3 {
+  margin-bottom: 2vh;
+}
 .company-name {
   font-size: 20px;
   font-weight: bold;
@@ -793,7 +869,7 @@ body,
   background-color: #045d56;
   color: #fff;
   width: 15%;
-  margin-left: 88vh;
+  margin-left: 70vh;
   margin-right: 5vh;
   border: none;
   padding: 6px 10px;
@@ -811,19 +887,21 @@ body,
 .job-box {
   border: 1px solid #ddd;
   padding: 15px;
-  max-width: 100%;
+  max-width: 90%;
+  margin-left: 5vh;
   margin-bottom: 20px;
   border-radius: 12px;
+  border-bottom: #045d56 4px solid;
   background-color: #fff;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
-.job-card {
+/* .job-card {
   border: 1px solid #ddd;
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 20px;
   background-color: #fff;
-}
+} */
 .job-header {
   display: flex;
   align-items: center;

@@ -37,12 +37,13 @@
               v-model="form.middleName"
             />
             <input placeholder="Last Name" v-model="form.lastName" required />
+            <label for="birthday">Birthday</label>
             <input type="date" v-model="form.birthday" required />
             <select v-model="form.gender" required>
-              <option value="" disabled selected>Select Gender</option>
+              <option value="" disabled selected>Select Sex</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="other">Prefer Not To Say</option>
             </select>
             <input
               placeholder="Phone Number"
@@ -53,7 +54,7 @@
               @input="form.phone = form.phone.replace(/\D/g, '')"
             />
             <select v-model="form.course" required>
-              <option value="" disabled selected>Select Course</option>
+              <option value="" disabled selected>Select Program</option>
               <option value="BSIT">BSIT</option>
               <option value="BSCS">BSCS</option>
               <option value="BSEMC">BSEMC</option>
@@ -379,6 +380,32 @@ select:focus {
   flex-direction: column;
   gap: 0.5rem;
 }
+
+label[for="birthday"] {
+  color: #045d56;
+  font-size: 0.8rem;
+  text-align: left;
+  display: block; 
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+  padding-left: 0.25rem;
+}
+
+/* .form-view label{
+  font-size: 1rem;
+text-align: left;
+margin-right: 100vh;
+margin-top: 0.5rem;
+
+} */
+
+/* label[for="birthday"] {
+  color: #6B7280;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  text-align: left;
+  font-weight: 500;
+} */
 
 .photo-panel {
   width: 100%;

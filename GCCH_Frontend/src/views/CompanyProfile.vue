@@ -269,8 +269,9 @@ body,
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
-  border-right: 1px solid #ccc;
-  flex-shrink: 0;
+  border-radius: 2vh;
+  border-right: 3.5px solid #045d56;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .logo {
@@ -577,6 +578,7 @@ body,
   border: 1px solid #ccc;
   border-radius: 2rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  border-left: #045d56 solid 4px;
   padding: 2rem;
   height: 100%;
   width: 100%;

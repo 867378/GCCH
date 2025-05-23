@@ -72,7 +72,8 @@
             <h3>📬 Messages</h3>
             <ul class="popup-list">
               <li v-for="(notif, index) in notifications" :key="index">
-                <strong>{{ formatType(notif.type) }}</strong>: {{ notif.content }}
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.content }}
                 <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
               </li>
             </ul>
@@ -94,6 +95,47 @@
       </div>
       <div class="content">
         <div class="left-content">
+          <div class="cards">
+            <div class="card">
+              <p>
+                <strong>
+                  <img
+                    src="/public/people.png"
+                    alt="total clients Icon"
+                    class="ikon"
+                  />
+                  ACCEPTED APPLICANTS</strong
+                >
+              </p>
+              <p>{{ totalClients }}</p>
+            </div>
+            <div class="card">
+              <p>
+                <strong>
+                  <img
+                    src="/public/checklist.png"
+                    alt="total job listings Icon"
+                    class="ikon"
+                  />
+                  TOTAL JOB LISTINGS</strong
+                >
+              </p>
+              <p>{{ totalJobs }}</p>
+            </div>
+            <div class="card">
+              <p>
+                <strong>
+                  <img
+                    src="/public/buffer.png"
+                    alt="pending applications Icon"
+                    class="ikon"
+                  />
+                  PENDING APPLICATION</strong
+                >
+              </p>
+              <p>{{ pendingApplications }}</p>
+            </div>
+          </div>
           <form @submit.prevent="postJob">
             <div class="post-box">
               <h3>Job Description</h3>
@@ -236,52 +278,9 @@
               </div>
             </div>
           </form>
-
-          <div class="cards">
-            <div class="card">
-              <p>
-                <strong>
-                  <img
-                    src="/public/people.png"
-                    alt="total clients Icon"
-                    class="ikon"
-                  />
-                  TOTAL CLIENTS</strong
-                >
-              </p>
-              <p>{{ totalClients }}</p>
-            </div>
-            <div class="card">
-              <p>
-                <strong>
-                  <img
-                    src="/public/checklist.png"
-                    alt="total job listings Icon"
-                    class="ikon"
-                  />
-                  TOTAL JOB LISTINGS</strong
-                >
-              </p>
-              <p>{{ totalJobs }}</p>
-            </div>
-            <div class="card">
-              <p>
-                <strong>
-                  <img
-                    src="/public/buffer.png"
-                    alt="pending applications Icon"
-                    class="ikon"
-                  />
-                  PENDING APPLICATION</strong
-                >
-              </p>
-              <p>{{ pendingApplications }}</p>
-            </div>
-          </div>
         </div>
 
-
-<!-- JOB DISPLAY -->
+        <!-- JOB DISPLAY -->
         <div class="right-content">
           <h3>POSTED JOBS</h3>
           <div class="posted-jobs">
@@ -290,7 +289,6 @@
               v-for="(job, index) in postedJobs"
               :key="index"
               @click="selectJob(job)"
-
             >
               <h2>{{ job.job_title }}</h2>
               <p>{{ job.job_description }}</p>
@@ -299,16 +297,22 @@
               <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
               <p><strong>Status:</strong> {{ job.status }}</p>
-              <p><strong>Recommended courses:</strong>
-                {{ [job.recommended_course, job.recommended_course_2, job.recommended_course_3]
-                  .filter(course => course)
-                  .join(', ') }}
+              <p>
+                <strong>Recommended courses:</strong>
+                {{
+                  [
+                    job.recommended_course,
+                    job.recommended_course_2,
+                    job.recommended_course_3,
+                  ]
+                    .filter((course) => course)
+                    .join(", ")
+                }}
               </p>
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -334,8 +338,6 @@ const isSidenavOpen = ref(true);
 const messages = ref([]);
 const notifications = ref({});
 const postedJobs = ref([]);
-
-
 
 const jobData = ref({
   job_title: "",
@@ -363,7 +365,8 @@ function toggleSignOut() {
 }
 
 function confirmSignOut() {
-  axios.post('/logout')
+  axios
+    .post("/logout")
 
     .then((response) => {
       console.log("Sign out successful:", response.data.message);
@@ -375,29 +378,29 @@ function confirmSignOut() {
 }
 
 // Notification Logic
-  async function fetchNotifications() {
-    try {
-      const response = await axios.get('/notifications');
-      notifications.value = response.data.notifications;
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
+async function fetchNotifications() {
+  try {
+    const response = await axios.get("/notifications");
+    notifications.value = response.data.notifications;
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
   }
+}
 
-  function formatType(type){
-    switch(type){
-      case "job_application":
-        return "Job Application";
-      case "inquiry":
-        return "Inquiry";
-      case "application_update":
-        return "Application Update";
-      case "message":
-        return "Inquiry";
-      case "other":
-        return "Other";
-    }
+function formatType(type) {
+  switch (type) {
+    case "job_application":
+      return "Job Application";
+    case "inquiry":
+      return "Inquiry";
+    case "application_update":
+      return "Application Update";
+    case "message":
+      return "Inquiry";
+    case "other":
+      return "Other";
   }
+}
 
 onMounted(() => {
   fetchNotifications();
@@ -467,7 +470,9 @@ body,
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
-  border-right: 1px solid #ccc;
+  border-radius: 2vh;
+  border-right: 3.5px solid #045d56;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .logo {
   height: 8vh;
@@ -701,10 +706,10 @@ body,
 .post-box {
   background: white;
   padding: 20px;
-  border-radius: 10px;
   margin-bottom: 10px;
-  border-radius: 3vh;
+  border-radius: 5vh;
   width: 130vh;
+  border-bottom: #045d56 solid 4px;
 }
 .post-box textarea {
   width: 100%;
@@ -851,32 +856,12 @@ body,
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
   overflow: hidden;
+  border-left: #045d56 solid 5px;
 }
 
 .posted-jobs-box:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-}
-#media-picker {
-  display: none;
-  transition: color 0.3s ease-in-out;
-}
-
-label {
-  background-color: #045d56;
-  color: #fff;
-  padding: 8px 10px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-right: 70%;
-  transition: color 0.5s ease-in-out;
-}
-
-label:hover {
-  background-color: #f1f1f1;
-  color: #045d56;
 }
 
 .cards {
@@ -886,12 +871,14 @@ label:hover {
 .card {
   background: white;
   padding: 15px;
-  border-radius: 20px;
+  border-radius: 3vh;
   text-align: center;
   flex: 1;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease-in-out;
   cursor: pointer;
+  margin-bottom: 1vh;
+  border-bottom: #045d56 solid 4px;
 }
 
 .card:hover {
