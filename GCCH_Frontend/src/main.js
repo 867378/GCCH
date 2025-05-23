@@ -15,9 +15,9 @@ const app = createApp(App);
 async function bootstrap(){
     try {
         await initializeCsrfCookie();
-app.use(createPinia());
-app.use(router);
-app.mount("#app");
+        app.use(createPinia());
+        app.use(router);
+        app.mount("#app");
     } catch (error) {
         console.error("Failed to initialize CSRF cookie", error);
     }

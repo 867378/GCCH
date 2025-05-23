@@ -12,7 +12,7 @@ class Applicant extends Model
         'middle_name',
         'last_name',
         'date_of_birth',
-        'gender',
+        'sex',
         'phone_number',
         'course',
     ];

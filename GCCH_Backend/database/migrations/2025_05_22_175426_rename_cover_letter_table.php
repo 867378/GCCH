@@ -11,9 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->unsignedBigInteger('sender_id')->nullable()->after('type')->change();
-        });
+        Schema::rename('cover_letter', 'cover_letters');
     }
 
     /**
@@ -21,8 +19,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->dropColumn('sender_id');
-        });
+        Schema::rename('cover_letters', 'cover_letter');
     }
 };
