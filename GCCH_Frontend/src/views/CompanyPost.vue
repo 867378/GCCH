@@ -107,7 +107,8 @@
             </p>
             <p><strong>Date Posted:</strong> {{ selectedJob.date_posted }}</p>
             <p><strong>Status:</strong> {{ selectedJob.status }}</p>
-
+          </div>
+          <div v-if="selectedJob" class="selected-job-box">
             <h3>Ongoing Applications</h3>
             <ul v-if="jobApplicants.length > 0">
               <li
@@ -143,7 +144,11 @@
                     📄 View Cover Letter
                   </a> -->
 
-                  <iframe :src="application.cover_letter.embed_url" width="100%" height="600"></iframe>
+                  <iframe
+                    :src="application.cover_letter.embed_url"
+                    width="100%"
+                    height="600"
+                  ></iframe>
                 </div>
                 <div v-if="application.resume">
                   <a :href="application.resume.embed_url" target="_blank"
@@ -338,7 +343,8 @@ async function fetchApplicants(jobId) {
   try {
     const response = await axios.get(`/job/${jobId}/applications`);
     jobApplicants.value = response.data.applications.filter(
-      (applicant) => applicant.status !== "rejected" && applicant.status !== "accepted"
+      (applicant) =>
+        applicant.status !== "rejected" && applicant.status !== "accepted"
     );
     console.log(response.data);
   } catch (error) {
@@ -430,8 +436,21 @@ body,
   height: 100vh;
   overflow: hidden;
 }
+.container {
+  position: relative;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: #e6f0ea;
+}
+
 .sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
   width: 200px;
+  z-index: 1000;
   background: #fafafa;
   padding: 20px 0;
   border-radius: 2vh;
@@ -542,11 +561,25 @@ body,
   margin-right: 10px;
 }
 .main {
-  flex-grow: 1;
+  margin-left: 200px; /* Match sidebar width */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: #eaf4f2;
+  height: 100vh;
+  overflow: hidden;
 }
+
+.topbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 200px; /* Match sidebar width */
+  height: 60px;
+  z-index: 999;
+  background: #fafafa;
+  border-bottom: 1px solid #ccc;
+}
+
 .topbar {
   height: 60px;
   background: #fafafa;
@@ -558,7 +591,7 @@ body,
 }
 
 .hamburger {
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: space-between;
   width: 25px;
@@ -660,37 +693,27 @@ body,
 }
 
 .content {
+  margin-top: 60px;
+  margin-bottom: 5px;
+  height: calc(100vh - 60px);
   padding: 20px;
   display: flex;
   gap: 20px;
+  overflow-y: auto;
 }
+
 .left-content {
   flex: 3;
 }
 
 .selected-job-box {
-  /* background-color: #fff;
-  padding: 20px;
-  margin-left: 3vh;
-  border-radius: 12px;
-  border-left: #045d56 4px solid;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  width: 125vh;
-  max-width: 140vh;
-  max-height: 85vh;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  overflow: auto; */
-
   background: white;
   padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
   border-radius: 3vh;
-  border-left: #045d56 4px solid;
-  width: 95%;
-  max-height: 80vh;
-  margin-left: 3vh;
+  border-bottom: #045d56 4px solid;
+  width: 85%;
+  margin-left: 10vh;
+  margin-bottom: 1vh;
   overflow-y: auto;
   text-transform: capitalize;
 }
@@ -712,6 +735,8 @@ body,
 .selected-job-box p {
   margin: 8px 0;
   color: #151718;
+  white-space: pre-line;
+  line-height: 1.5;
 }
 
 .selected-job-box ul {
@@ -724,7 +749,7 @@ body,
   padding: 16px;
   border-radius: 10px;
   border: 2px solid #e0e6ed;
-  border-bottom: #045d56 4px solid;
+  border-left: #045d56 4px solid;
   width: 60vh;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -884,67 +909,20 @@ textarea {
 }
 
 @media (max-width: 1024px) {
-  .hamburger {
-    display: flex;
-    z-index: 1001;
-  }
-  .content {
-    gap: 0;
-  }
   .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 25vh;
-    z-index: 1000;
-    transition: transform 0.3s ease;
+    transform: translateX(-100%);
   }
 
   .sidebar.active {
     transform: translateX(0);
   }
 
-  .logo {
-    margin-top: 8vh;
-    margin-left: 4vh;
-    margin-bottom: 10vh;
+  .main {
+    margin-left: 0;
   }
 
-  .post-box {
-    border-radius: 3vh;
-    width: 95%;
-  }
-  .post-box textarea {
-    width: 100%;
-    margin-top: 2vh;
-    height: 25vh;
-  }
-
-  .right-content {
-    padding-top: 3vh;
-    margin-right: 1vh;
-    height: 85vh;
-    width: 50vh;
-    overflow: auto;
-  }
-
-  .posted-jobs-box {
-    margin-left: 2vh;
-    width: 25vh;
-    padding: 10px 20px;
-  }
-
-  .label {
-    padding: 10px 10px;
-    margin-right: 2vh;
-  }
-
-  .form-row {
-    gap: 10vh;
-  }
-  .sign-out {
-    margin-left: 7.5vh;
+  .topbar {
+    left: 0;
   }
 }
 

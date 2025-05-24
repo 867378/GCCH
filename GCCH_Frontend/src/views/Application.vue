@@ -115,7 +115,8 @@
                     {{ application.comments || "No comments yet." }}
                   </p>
                   <p>
-                    <strong>Updated At:</strong> {{ formatDate(application.updated_at) }}
+                    <strong>Updated At:</strong>
+                    {{ formatDate(application.updated_at) }}
                   </p>
 
                   <!-- <button @click="viewResume(app.resume, app)">
@@ -145,7 +146,6 @@
                     <button @click="closeResume">Close</button>
                   </div>
                 </div> -->
-
               </div>
             </div>
           </div>
@@ -173,7 +173,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -287,12 +286,11 @@ function formatType(type) {
   }
 }
 
-async function fetchJobApplications(){
-  try{
-    const response = await axios.get('/applicant/applications');
+async function fetchJobApplications() {
+  try {
+    const response = await axios.get("/applicant/applications");
     console.log("Success", response.data);
     applications.value = response.data.applications;
-    
   } catch (error) {
     console.error("Error Occured", error);
   }
@@ -478,7 +476,7 @@ body,
 }
 
 .hamburger {
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: space-between;
   width: 25px;
@@ -639,6 +637,8 @@ body,
   margin-left: 25vh;
   margin-bottom: 10px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-transform: capitalize;
+
 }
 
 .resume-item.received:hover {
@@ -690,6 +690,7 @@ body,
   margin-bottom: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-transform: capitalize;
 }
 
 .update-box:hover {

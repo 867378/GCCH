@@ -101,14 +101,23 @@
             <div class="job-card">
               <!-- Header -->
               <div class="job-header">
-                <img src="/public/user.png" class="ikon" />
-                <h3 class="company-name">{{ matchedJob.job_title }}</h3>
-                <!-- <button class="message-btn" @click="sendMessage()">
-                  Send Message
-                </button>
-                <button class="apply-btn" @click="applyToJob()"> 
-                  Apply
-                </button> -->
+                <div class="job-title-section">
+                  <img src="/public/user.png" class="ikon" />
+                  <h3 class="company-name">{{ matchedJob.job_title }}</h3>
+                </div>
+
+                <!-- Apply and Message Buttons -->
+                <div class="button-group">
+                  <button
+                    class="message-btn"
+                    @click="sendMessage(matchedJob.company_id)"
+                  >
+                    Send Message
+                  </button>
+                  <button class="apply-btn" @click="applyToJob(matchedJob.id)">
+                    Apply
+                  </button>
+                </div>
               </div>
 
               <!-- Move salary here BELOW description -->
@@ -140,23 +149,10 @@
                 <div class="job-detail">
                   <img src="/public/updates.png" class="ikon" />
                   <p>Status: {{ matchedJob.status }}</p>
+                </div>
               </div>
-            </div>
               <!-- Job Description -->
               <p class="job-description">{{ matchedJob.job_description }}</p>
-
-              <!-- Apply and Message Buttons -->
-              <div class="job-actions">
-                <button
-                  class="message-btn"
-                  @click="sendMessage(matchedJob.company_id)"
-                >
-                  Send Message
-                </button>
-                <button class="apply-btn" @click="applyToJob(matchedJob.id)">
-                  Apply
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -331,9 +327,10 @@ async function submitApplication() {
 
   try {
     const response = await axios.post("/applicant/jobapply", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers:
+        {
+          "Content-Type": "multipart/form-data",
+        },
     });
 
     alert(response.data.message);
@@ -487,8 +484,21 @@ body,
   height: 100vh;
   overflow: hidden;
 }
+.container {
+  position: relative;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: #e6f0ea;
+}
+
 .sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
   width: 200px;
+  z-index: 1000;
   background: #fafafa;
   padding: 20px 0;
   border-radius: 2vh;
@@ -600,7 +610,8 @@ body,
   margin-right: 10px;
 }
 .main {
-  flex-grow: 1;
+  margin-left: 200px;
+  flex: 1;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -618,7 +629,7 @@ body,
 }
 
 .hamburger {
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: space-between;
   width: 25px;
@@ -777,12 +788,11 @@ body,
 }
 
 .content {
-  flex-grow: 1;
-  overflow-y: auto;
+  margin-top: 10px;
   padding: 20px;
   display: flex;
   gap: 20px;
-  margin-bottom: 1vh;
+  overflow-y: auto;
 }
 
 .left-content {
@@ -806,7 +816,7 @@ body,
   background-color: #045d56;
   color: #fff;
   border: none;
-  margin-left: auto;
+  margin-left: 0;
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
@@ -823,9 +833,9 @@ body,
 .message-btn {
   background-color: #045d56;
   color: #fff;
-  width: 15%;
-  margin-left: 70vh;
-  margin-right: 5vh;
+  width: auto;
+  margin-left: 0;
+  margin-right: 10px;
   border: none;
   padding: 6px 10px;
   border-radius: 6px;
@@ -846,25 +856,29 @@ body,
   margin-left: 5vh;
   margin-bottom: 20px;
   border-radius: 12px;
-  border-bottom: #045d56 4px solid;
+  white-space: pre-line;
+  border-left: #045d56 4px solid;
   background-color: #fff;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    text-transform: capitalize;
+
 }
-/* .job-card {
-  border: 1px solid #ddd;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  background-color: #fff;
-} */
+
 .job-header {
   display: flex;
   align-items: center;
-  justify-content: left;
+  justify-content: space-between; 
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.job-title-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .job-description {
-  word-wrap: break-word;
   font-size: 15px;
   margin-top: 3vh;
   margin-bottom: 3vh;
@@ -995,6 +1009,8 @@ label {
   margin-bottom: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-transform: capitalize;
+
 }
 
 .update-box:hover {
@@ -1003,44 +1019,12 @@ label {
 }
 
 @media (max-width: 1024px) {
-  .hamburger {
-    display: flex;
-    z-index: 1001;
-  }
-
   .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 25vh;
-    z-index: 1000;
-    transition: transform 0.3s ease;
+    width: 200px; 
   }
 
-  .sidebar.active {
-    transform: translateX(0);
-  }
-
-  .logo {
-    margin-top: 8vh;
-    margin-left: 4vh;
-    margin-bottom: 10vh;
-  }
-  .message-btn {
-    margin-left: 25vh;
-    font-size: 10px;
-  }
-  .apply-btn {
-    margin-left: 5vh;
-    font-size: 10px;
-  }
-
-  .job-media {
-    margin-left: 8vh;
-  }
-  .sign-out {
-    margin-left: 7.5vh;
+  .main {
+    margin-left: 200px; 
   }
 }
 
@@ -1098,12 +1082,12 @@ label {
   }
 
   .message-btn {
-    margin-left: 25vh;
-    font-size: 6px;
+    margin-left: 0;
+    font-size: 8px;
   }
   .apply-btn {
-    margin-left: 5vh;
-    font-size: 6px;
+    margin-left: 0;
+    font-size: 8px;
   }
   .salary,
   .job-type {
@@ -1168,11 +1152,11 @@ label {
   }
 
   .message-btn {
-    margin-left: 15vh;
+    margin-left: 0;
     font-size: 4px;
   }
   .apply-btn {
-    margin-left: 3vh;
+    margin-left: 0;
     font-size: 4px;
   }
   .salary,
