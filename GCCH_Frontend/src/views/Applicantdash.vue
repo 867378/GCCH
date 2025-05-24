@@ -202,7 +202,7 @@
       <input
         type="file"
         @change="handleFileUploadCoverLetter"
-        accept=".pdf,.doc,.docx"
+        accept=".pdf"
       />
       <br /><br />
       <button @click="submitApplication">Apply</button>
@@ -323,10 +323,10 @@ async function submitApplication() {
 
   const formData = new FormData();
   formData.append("job_id", selectedJobId.value);
-  formData.append("cover_letter", coverLetterFile.value); // 👈 MUST be File
+  formData.append("cover_letter", coverLetterFile.value);
 
   if (resumeFile.value) {
-    formData.append("resume", resumeFile.value); // 👈 MUST be File
+    formData.append("resume", resumeFile.value);
   }
 
   try {
@@ -340,8 +340,14 @@ async function submitApplication() {
     closeApplyPopup();
     console.log("Application submitted successfully:", response.data);
   } catch (error) {
-    console.error("Error submitting application:", error);
-    alert(error.response?.data?.error || "An unknown error occurred.");
+    if (error.response && error.response.status === 422) {
+      const errors = error.response.data.error;
+      let errorMessages = Object.values(errors).flat().join('\n');
+      alert("Validation Error:\n" + errorMessages);
+    } else {
+      console.error("Unexpected error:", error);
+      alert("An unexpected error occurred.");
+    }
   }
 }
 
@@ -438,6 +444,7 @@ async function sendActualMessage() {
     console.log("Message Sent:", response.data);
     showMessagePopup.value = false;
     messageContent.value = "";
+    alert("Message Sent!");
   } catch (error) {
     console.error("Error sending message:", error);
     alert("Failed to send message. Please try again later.");
@@ -449,28 +456,6 @@ onMounted(() => {
   fetchNotifications();
 });
 
-// function selectIndustry(industry) {
-//   selectedIndustry.value = industry;
-// }
-// function selectCompany(company) {
-//   selectedCompany.value = company;
-// }
-// function clearFilters() {
-//   selectedIndustry.value = null;
-//   selectedCompany.value = null;
-// }
-
-// function filterBy(course) {
-//   console.log("Selected Course:", course);
-// }
-
-// // Lifecycle hook
-// onMounted(() => {
-//   setInterval(() => {
-//     unreadMessages.value += 1;
-//     newNotifications.value += 1;
-//   }, 20000);
-// });
 </script>
 
 <style scoped>

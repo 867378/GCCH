@@ -20,7 +20,9 @@ Route::get('/login', function () {
     return view('auth.google-auth');
 })->name('login');
 
-Route::prefix('user')->name('api.')->group(function () {
+Route::prefix('user')->name('api.')->group(function () { 
+    Route::get('/applicant/{id}',[ApplicantController::class, 'fetchApplicantData'])->name('applicant.data');
+    Route::get('/company/{id}',[CompanyController::class, 'fetchCompanyData'])->name('company.data');
     Route::get('select-role/{user}', [UserController::class, 'selectRole'])->name('select-role');
     Route::post('set-role/{userId}', [UserController::class, 'setRole'])->name('set-role');
     Route::get('applicant/profile/{user}', [UserController::class, 'showApplicantProfileForm'])->name('applicant-form');
@@ -37,12 +39,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 //Applicant routes
 Route::middleware(['auth:sanctum','applicant'])->group(function () {
+
     Route::post('/applicant/jobapply', [ApplicantController::class, 'jobapply'])->name('applicant.jobapply');
     Route::get('/applicant/jobdisplay', [ApplicantController::class, 'jobdisplay'])->name('applicant.jobdisplay');
     Route::get('/applicant/jobdisplay/{id}', [ApplicantController::class, 'jobdisplay'])->name('applicant.jobdisplay');
     Route::get('/applicant/applications', [ApplicantController::class, 'applicationStatus'])->name('applicant.applicationStatus');
 });
-
 
 //Company routes
 Route::middleware(['auth:sanctum','company'])->group(function () {
@@ -51,6 +53,9 @@ Route::middleware(['auth:sanctum','company'])->group(function () {
     Route::get('/company/jobdisplay/{id}', [CompanyController::class, 'jobdisplay'])->name('company.jobdisplay');
     Route::get('/job/{job}/applications', [CompanyController::class, 'viewJobApplications'])->name('company.jobapplications');
     Route::post('/company/job-applications/{jobApplication}/assess', [CompanyController::class, 'assessApplication'])->name('company.update.application');
+    Route::get('/company/total-clients', [CompanyController::class, 'totalClients']);
+    Route::get('/company/total-jobs', [CompanyController::class, 'totalJobs']);
+    Route::get('/company/pending-applications', [CompanyController::class, 'pendingApplications']);
     //
 });
 

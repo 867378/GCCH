@@ -117,35 +117,7 @@
                   <p>
                     <strong>Updated At:</strong> {{ formatDate(application.updated_at) }}
                   </p>
-
-                  <!-- <button @click="viewResume(app.resume, app)">
-                    View Resume
-                  </button> -->
                 </div>
-                <!-- <div
-                  v-if="showResumeModal"
-                  class="app-overlay"
-                  @click.self="closeResume"
-                >
-                  <div class="app">
-                    <h3>📄 Resume</h3>
-                    <p><strong>Name:</strong> {{ selectedApplicant.name }}</p>
-                    <p>
-                      <strong>Message:</strong>
-                      {{ selectedApplicant.message || "No message provided." }}
-                    </p>
-
-                    <iframe
-                      v-if="selectedResume"
-                      :src="selectedResume"
-                      width="100%"
-                      height="500px"
-                      frameborder="0"
-                    ></iframe>
-                    <button @click="closeResume">Close</button>
-                  </div>
-                </div> -->
-
               </div>
             </div>
           </div>

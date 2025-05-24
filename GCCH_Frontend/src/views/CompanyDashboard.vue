@@ -178,7 +178,7 @@
                   >
                     Recommended Programs
                     <span v-if="selectedCourses.length"
-                      >({{ selectedCourses.length }})</span
+                      >({{ selectedCourses.length }}/3)</span
                     >
                   </button>
                   <div v-if="showCourseDropdown" class="dropdown-list">
@@ -231,7 +231,7 @@
             >
               <h2>{{ job.job_title }}</h2>
               <p><strong>Location:</strong> {{ job.job_location }}</p>
-              <p><strong>Type:</strong> {{ job.job_type }}</p>
+              <p><strong>Type:</strong> {{ formatType(job.job_type) }}</p>
               <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
               <p><strong>Status:</strong> {{ job.status }}</p>
@@ -273,12 +273,11 @@ const showNotif = ref(false);
 const showSignOut = ref(false);
 const unreadMessages = ref(0);
 const newNotifications = ref(0);
-const totalClients = ref(120);
-const totalJobs = ref(50);
-const pendingApplications = ref(10);
+const totalClients = ref(0);
+const totalJobs = ref(0);
+const pendingApplications = ref(0);
 const isSidenavOpen = ref(true);
 
-const messages = ref([]);
 const notifications = ref({});
 const postedJobs = ref([]);
 //coirse dropdown
@@ -348,6 +347,23 @@ function confirmSignOut() {
       console.error("Error signing out:", error);
     });
 }
+//Dashboard Logic
+async function fetchDashboardCounts() {
+  try {
+    const [clientsRes, jobsRes, pendingRes] = await Promise.all([
+      axios.get('/company/total-clients'),
+      axios.get('/company/total-jobs'),
+      axios.get('/company/pending-applications'),
+    ])
+
+    totalClients.value = clientsRes.data.count
+    totalJobs.value = jobsRes.data.count
+    pendingApplications.value = pendingRes.data.total
+
+  } catch (error) {
+    console.error('Failed to fetch dashboard stats:', error)
+  }
+}
 
 // Notification Logic
 async function fetchNotifications() {
@@ -369,6 +385,10 @@ function formatType(type) {
       return "Application Update";
     case "message":
       return "Inquiry";
+    case "full_time":
+      return "Full-time"
+    case "part_time":
+      return "Part-time"
     case "other":
       return "Other";
   }
@@ -376,6 +396,7 @@ function formatType(type) {
 
 onMounted(() => {
   fetchNotifications();
+  fetchDashboardCounts();
 });
 
 async function postJob() {
@@ -412,8 +433,14 @@ async function postJob() {
       total_slots: "",
     };
   } catch (error) {
-    console.error("Error posting job:", error);
-    alert(error);
+    if (error.response && error.response.status === 422) {
+      const errors = error.response.data.error;
+      let errorMessages = Object.values(errors).flat().join('\n');
+      alert("Validation Error:\n" + errorMessages);
+    } else {
+      console.error("Unexpected error:", error);
+      alert("An unexpected error occurred.");
+    }
   }
 }
 

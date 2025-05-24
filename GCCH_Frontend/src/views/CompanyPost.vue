@@ -107,6 +107,7 @@
             </p>
             <p><strong>Date Posted:</strong> {{ selectedJob.date_posted }}</p>
             <p><strong>Status:</strong> {{ selectedJob.status }}</p>
+            <p><strong>Slots:</strong>{{ selectedJob.filled_slots }}/{{ selectedJob.total_slots }}</p>
 
             <h3>Ongoing Applications</h3>
             <ul v-if="jobApplicants.length > 0">
@@ -139,11 +140,9 @@
                 ><br />
 
                 <div>
-                  <!-- <a :href="application.cover_letter.embed_url" target="_blank">
+                  <a :href="application.cover_letter.embed_url" target="_blank">
                     📄 View Cover Letter
-                  </a> -->
-
-                  <iframe :src="application.cover_letter.embed_url" width="100%" height="600"></iframe>
+                  </a>
                 </div>
                 <div v-if="application.resume">
                   <a :href="application.resume.embed_url" target="_blank"
@@ -243,7 +242,9 @@
               <p><strong>Type:</strong> {{ job.job_type }}</p>
               <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
-              <p>Status: {{ job.status }}</p>
+              <p><strong>Status:</strong> {{ job.status }}</p>
+              <p><strong>Slots:</strong>{{ job.filled_slots }}/{{ job.total_slots }}</p>
+              
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
@@ -385,6 +386,7 @@ async function assessApplication(
     console.log("Assessment Successful:", response.data);
 
     await fetchApplicants(selectedJob.value.id);
+    await fetchPostedJobs();
   } catch (error) {
     console.error(
       "Error updating application status:",
