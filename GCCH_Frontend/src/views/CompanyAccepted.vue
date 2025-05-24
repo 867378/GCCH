@@ -108,25 +108,15 @@
                 <strong
                   >{{ application.applicant.first_name }}
                   {{ application.applicant.last_name }}</strong
-                ><br />
+                >
                 <span
                   ><strong>Course:</strong>
                   {{ application.applicant.course }}</span
-                ><br />
+                >
                 <span
                   ><strong>Phone:</strong>
                   {{ application.applicant.phone_number }}</span
-                ><br />
-                <span
-                  ><strong>Date Applied:</strong>
-                  {{ application.date_applied }}</span
-                ><br />
-                <span><strong>Status:</strong> {{ application.status }}</span
-                ><br />
-                <span
-                  ><strong>Schedule: </strong
-                  >{{ application.scheduled_at }}</span
-                ><br />
+                >
               </li>
             </ul>
           </div>
@@ -178,9 +168,6 @@ const messages = ref([]);
 const notifications = ref([]);
 const postedJobs = ref([]);
 // Dummy data for messages
-
-const showStatusOptions = ref(false);
-const comment = ref("");
 
 function toggleMail() {
   showMail.value = !showMail.value;
@@ -243,56 +230,7 @@ async function fetchPostedJobs() {
     console.error("Error fetching posted jobs:", error);
   }
 }
-
-async function assessApplication(
-  applicationId,
-  status,
-  scheduleAt = null,
-  comment = ""
-) {
-  try {
-    const payload = {
-      status,
-      scheduled_at: scheduleAt,
-      comment,
-    };
-
-    const response = await axios.post(
-      `/company/job-applications/${applicationId}/assess`,
-      payload
-    );
-    console.log("Assessment Successful:", response.data);
-
-    await fetchApplicants(selectedJob.value.id);
-  } catch (error) {
-    console.error(
-      "Error updating application status:",
-      error.response?.data || error
-    );
-    alert(error.response?.data?.error || "Failed to update application");
-  }
-}
-
 onMounted(fetchPostedJobs);
-
-function selectJob(job) {
-  selectedJob.value = job;
-  fetchApplicants(job.id);
-}
-
-function scheduleInterview(applicationId) {
-  const date = prompt("Enter interview date (YYYY-MM-DD HH:MM:SS):");
-  if (date) {
-    assessApplication(applicationId, "interview", date);
-  }
-}
-
-function scheduleAssessment(applicationId) {
-  const date = prompt("Enter assessment date (YYYY-MM-DD HH:MM:SS):");
-  if (date) {
-    assessApplication(applicationId, "assessment", date);
-  }
-}
 </script>
 
 <style scoped>

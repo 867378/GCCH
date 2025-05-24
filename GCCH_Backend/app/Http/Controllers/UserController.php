@@ -90,7 +90,7 @@ class UserController extends Controller
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
             'date_of_birth' => 'required|date',
-            'sex' => 'required|in:male,female,prefer_not_to_say',
+            'sex' => 'required|in:male,female,prefer_to_not_say',
             'phone_number' => ['required', 'string', 'max:15', 'regex:/^[\d\s]+$/'],
             'course' => 'required|in:BSIT,BSCS,BSEMC,BSN,BSM,BSA,BSBA-FM,BSBA-HRM,BSBA-MM,BSCA,BSHM,BSTM,BAComm,BECEd,BCAEd,BPEd,BEED,BSEd-Eng,BSEd-Math,BSEd-Fil,BSEd-SS,BSEd-Sci,Other',
         ]);

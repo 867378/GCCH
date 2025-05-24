@@ -44,7 +44,7 @@
               <option value="" disabled selected>Select Sex</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
-              <option value="prefer_not_to_say">Prefer Not to Say</option>
+              <option value="prefer_to_not_say">Prefer Not to Say</option>
             </select>
             <input
               placeholder="Phone Number"

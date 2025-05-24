@@ -47,7 +47,7 @@ class ApplicantController extends Controller
                 $validated = $request->validate([
                     'job_id' => 'required|exists:jobs,id',
                     'resume' => 'nullable|file|mimes:pdf|max:2048',
-                    'cover_letter' => 'required|file|mimes:pdf,docx,doc|max:2048',
+                    'cover_letter' => 'required|file|mimes:pdf,docx,doc',
                 ]);
             } catch (ValidationException $e) {
                 return response()->json([
