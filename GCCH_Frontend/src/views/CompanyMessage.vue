@@ -852,6 +852,7 @@ body,
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  margin-top: 1vh;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 

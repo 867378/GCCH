@@ -866,7 +866,7 @@ body,
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
   overflow: hidden;
-  text-transform: uppercase;
+  text-transform: capitalize;
   border-left: #045d56 solid 5px;
 }
 

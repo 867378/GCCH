@@ -691,7 +691,7 @@ body,
   max-height: 80vh;
   margin-left: 3vh;
   overflow-y: auto;
-  text-transform: uppercase;
+  text-transform: capitalize;
 }
 
 .selected-job-box h2 {
@@ -867,7 +867,7 @@ textarea {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
-  text-transform: uppercase;
+  text-transform: capitalize;
   overflow: hidden;
 }
 

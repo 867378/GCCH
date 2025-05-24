@@ -98,7 +98,6 @@
       <div class="content">
         <div class="left-content">
           <div v-if="selectedJob" class="selected-job-box">
-           
             <h3>Accepted Applicants</h3>
             <ul v-if="jobApplicants.length > 0">
               <li
@@ -130,6 +129,27 @@
                 ><br />
               </li>
             </ul>
+          </div>
+        </div>
+
+        <div class="right-content">
+          <h3>POSTED JOBS</h3>
+          <div class="posted-jobs">
+            <div
+              class="posted-jobs-box"
+              v-for="(job, index) in postedJobs"
+              :key="index"
+              @click="selectJob(job)"
+            >
+              <h2>{{ job.job_title }}</h2>
+              <p>{{ job.job_description }}</p>
+              <p><strong>Location:</strong> {{ job.job_location }}</p>
+              <p><strong>Type:</strong> {{ job.job_type }}</p>
+              <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
+              <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
+              <p>Status: {{ job.status }}</p>
+            </div>
+            <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
         </div>
       </div>
@@ -699,7 +719,7 @@ textarea {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
-  text-transform: uppercase;
+  text-transform: sentence-case;
   overflow: hidden;
 }
 
