@@ -561,7 +561,7 @@ body,
   margin-right: 10px;
 }
 .main {
-  margin-left: 200px; /* Match sidebar width */
+  margin-left: 200px; 
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -573,7 +573,7 @@ body,
   position: fixed;
   top: 0;
   right: 0;
-  left: 200px; /* Match sidebar width */
+  left: 200px;
   height: 60px;
   z-index: 999;
   background: #fafafa;
@@ -756,7 +756,7 @@ body,
 
 .selected-job-box li:hover {
   transform: scale(1.03);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .selected-job-box li strong {
