@@ -28,4 +28,8 @@ class JobApplication extends Model
     public function resumeFile(){
         return $this->belongsTo(Resume::class, 'resume');
     }
+
+    public function coverLetterFile(){
+        return $this->belongsTo(CoverLetter::class, 'cover_letter');
+    }
 }

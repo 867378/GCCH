@@ -15,17 +15,17 @@
           </router-link>
         </li>
         <li>
+          <router-link to="/companyaccepted" class="sidenav-text">
+            <img src="/public/agreement.png" class="ikon" /> ACCEPTED
+          </router-link>
+        </li>
+        <li>
           <router-link to="/CompanyMessage" class="sidenav-text">
             <img src="/public/message.png" class="ikon" />
             MESSAGES
           </router-link>
         </li>
-        <li>
-          <router-link to="/CompanyApplication" class="sidenav-text">
-            <img src="/public/resume.png" class="ikon" />
-            APPLICATIONS
-          </router-link>
-        </li>
+
         <li style="font-weight: bold">
           <router-link to="/CompanyProfile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
@@ -274,8 +274,9 @@ body,
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
-  border-right: 1px solid #ccc;
-  flex-shrink: 0;
+  border-radius: 2vh;
+  border-right: 3.5px solid #045d56;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .logo {
@@ -582,6 +583,7 @@ body,
   border: 1px solid #ccc;
   border-radius: 2rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  border-left: #045d56 solid 4px;
   padding: 2rem;
   height: 100%;
   width: 100%;

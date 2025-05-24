@@ -14,18 +14,18 @@
             <img src="/public/laptop.png" class="ikon" /> POSTED JOBS
           </router-link>
         </li>
+        <li>
+          <router-link to="/companyaccepted" class="sidenav-text">
+            <img src="/public/agreement.png" class="ikon" /> ACCEPTED
+          </router-link>
+        </li>
         <li style="font-weight: bold">
           <router-link to="/companymessage" class="sidenav-text">
             <img src="/public/message.png" class="ikon" />
             MESSAGES
           </router-link>
         </li>
-        <li>
-          <router-link to="/companyapplication" class="sidenav-text">
-            <img src="/public/resume.png" class="ikon" />
-            APPLICATIONS
-          </router-link>
-        </li>
+
         <li>
           <router-link to="/companyprofile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
@@ -77,7 +77,8 @@
             <h3>📬 Messages</h3>
             <ul class="popup-list">
               <li v-for="(notif, index) in notifications" :key="index">
-                <strong>{{ formatType(notif.type) }}</strong>: {{ notif.content }}
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.content }}
                 <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
               </li>
             </ul>
@@ -90,7 +91,10 @@
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
               <li v-for="(notif, index) in notifications" :key="index">
-                <strong>{{ formatType(notif.type) }}</strong>: {{ notif.content }}
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.latestContent }}
+                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
+                ><br />
                 <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
               </li>
             </ul>
@@ -107,7 +111,7 @@
             <div class="form-row">
               <div class="messages-list">
                 <div
-                  v-for="(msg, index) in uniqueConversations" 
+                  v-for="(msg, index) in uniqueConversations"
                   :key="index"
                   class="message-item received"
                   @click="openChat({ sender_id: msg.sender_id })"
@@ -123,45 +127,15 @@
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Current Chat -->
-          <div v-if="conversation.length" class="chat-box">
-            <h3>Conversation</h3>
-            <div style="max-height: 400px; overflow-y: auto; margin-bottom: 1rem">
+            <!-- Current Chat -->
+            <div v-if="conversation.length" class="chat-box">
+              <h3>Conversation</h3>
               <div
-                v-for="(msg, index) in conversation"
-                :key="index"
-                :class="['message-item', msg.from === 'You' ? 'sent' : 'received']"
-              >
-                <p><strong>{{ msg.from }}:</strong> {{ msg.content }}</p>
-                <span class="timestamp">{{ new Date(msg.created_at).toLocaleString() }}</span>
-              </div>
-            </div>
-            
-            <div class="reply-box">
-              <textarea
-                v-model="newReply"
-                placeholder="Type your message..."
-                @keyup="handleKeyUp"
-                @keydown.enter.prevent="sendReply"
-                class="expanding-textarea"
-              ></textarea>
-              <button @click="sendReply">Send</button>
-            </div>
-          </div>
-          <!-- <div
-            v-if="showMessagePopup"
-            class="popup-overlay"
-            @click.self="closeChat"
-          >
-            <div class="popup chat-popup">
-              <h3>💬 Chat with {{ selectedUser }}</h3>
-              <div
-                style="max-height: 200px; overflow-y: auto; margin-bottom: 1rem"
+                style="max-height: 400px; overflow-y: auto; margin-bottom: 1rem"
               >
                 <div
-                  v-for="(msg, index) in messages[selectedUser]"
+                  v-for="(msg, index) in conversation"
                   :key="index"
                   :class="[
                     'message-item',
@@ -169,11 +143,14 @@
                   ]"
                 >
                   <p>
-                    <strong>{{ msg.from }}:</strong> {{ msg.text }}
+                    <strong>{{ msg.from }}:</strong> {{ msg.content }}
                   </p>
-                  <span class="timestamp">{{ msg.time }}</span>
+                  <span class="timestamp">{{
+                    new Date(msg.created_at).toLocaleString()
+                  }}</span>
                 </div>
               </div>
+
               <div class="reply-box">
                 <textarea
                   v-model="newReply"
@@ -184,194 +161,241 @@
                 ></textarea>
                 <button @click="sendReply">Send</button>
               </div>
-              <button @click="closeChat">Close</button>
             </div>
-          </div> -->
+          </div>
         </div>
 
         <!-- Notifications -->
         <div class="right-content">
-          <h3>UPDATES</h3>
+          <h3>CONTACTS</h3>
           <div class="updates-list">
             <div
               v-for="(notif, index) in filteredNotifications"
               :key="index"
               @click="openChat(notif)"
-              style="cursor: pointer;"
+              style="cursor: pointer"
               class="update-box"
             >
-              <h2>{{ formatType(notif.type) }}</h2>
-              <p>{{ notif.content }}</p>
+              <h2>{{ extractSenderName(notif.latestContent) }}</h2>
+              <p>
+                <span v-if="notif.count > 1">
+                  ({{ notif.count }} new messages)
+                </span>
+              </p>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-  import { ref, onMounted, computed } from "vue";
-  import { useRouter } from "vue-router";
-  import axios from "axios";
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
-  const router = useRouter();
+const router = useRouter();
 
-  const unreadMessages = ref(0);
-  const newNotifications = ref(0);
-  const isSidenavOpen = ref(false);
+const unreadMessages = ref(0);
+const newNotifications = ref(0);
+const isSidenavOpen = ref(true);
 
-  const showMail = ref(false);
-  const showNotif = ref(false);
-  const showSignOut = ref(false);
+const showMail = ref(false);
+const showNotif = ref(false);
+const showSignOut = ref(false);
 
-  const selectedUserId = ref(null);
-  const newReply = ref("");
+const selectedUserId = ref(null);
+const newReply = ref("");
 
-  const currentUserId = ref(localStorage.getItem("user_id"));
-  const allMessages = ref([]);
-  const conversation = ref([]);
-  const uniqueConversations = computed(() => {
-    const map = new Map();
-    for (const msg of allMessages.value) {
-      if (!map.has(msg.sender_id)) {
-        map.set(msg.sender_id, msg);
+const currentUserId = ref(localStorage.getItem("user_id"));
+const allMessages = ref([]);
+const conversation = ref([]);
+const uniqueConversations = computed(() => {
+  const map = new Map();
+  for (const msg of allMessages.value) {
+    if (!map.has(msg.sender_id)) {
+      map.set(msg.sender_id, msg);
+    }
+  }
+  return Array.from(map.values());
+});
 
+const notifications = ref([]);
+
+function toggleMail() {
+  showMail.value = !showMail.value;
+  if (showMail.value) {
+    unreadMessages.value = 0;
+  }
+}
+
+function toggleNotif() {
+  showNotif.value = !showNotif.value;
+  if (showNotif.value) {
+    newNotifications.value = 0;
+  }
+}
+
+function toggleSignOut() {
+  showSignOut.value = !showSignOut.value;
+}
+
+function confirmSignOut() {
+  axios
+    .post("/logout")
+    .then(() => {
+      router.push("/login");
+    })
+    .catch(console.error);
+}
+
+async function openChat(obj) {
+  const senderId = obj.sender_id;
+
+  if (!senderId) {
+    console.warn("No sender ID found in notification:", obj);
+    return;
+  }
+
+  selectedUserId.value = senderId;
+  await fetchConversation(senderId);
+}
+
+async function markMessageAsRead(messageId) {
+  try {
+    await axios.post(`/message/mark-as-read/${messageId}`);
+    console.log(`Message ${messageId} marked as read`);
+  } catch (error) {
+    console.error("Error marking message as read:", error);
+  }
+}
+
+async function fetchConversation(senderId) {
+  try {
+    const response = await axios.get(`/message/conversation/${senderId}`);
+    const data = Array.isArray(response.data) ? response.data : [];
+
+    // Format the conversation with "You" or "Them"
+    conversation.value = data.map((msg) => ({
+      ...msg,
+      from: msg.sender_id == currentUserId.value ? "You" : "Them",
+      content: msg.message, // alias 'message' as 'content' for display if needed
+    }));
+
+    for (const msg of data) {
+      if (msg.receiver_id == currentUserId.value && !msg.read_at) {
+        await markMessageAsRead(msg.id);
       }
     }
-    return Array.from(map.values());
-  })
-
-  const notifications = ref([]);
-  const filteredNotifications = computed(() => 
-    notifications.value.filter(
-      notif => notif && ["message", "inquiry"].includes(notif.type)
-    )
-  );
-
-  function toggleMail() {
-    showMail.value = !showMail.value;
-    if (showMail.value) {
-      unreadMessages.value = 0;
-    }
+  } catch (error) {
+    console.error("Error fetching conversation:", error);
+    conversation.value = [];
   }
+}
 
-  function toggleNotif() {
-    showNotif.value = !showNotif.value;
-    if (showNotif.value) {
-      newNotifications.value = 0;
-    }
-  }
-
-  function toggleSignOut() {
-    showSignOut.value = !showSignOut.value;
-  }
-
-  function confirmSignOut() {
-    axios.post('/logout')
-      .then(() => {
-        router.push("/login");
-      })
-      .catch(console.error);
-  }
-
-  async function openChat(obj) {
-    const senderId = obj.sender_id;
-
-    if(!senderId){
-      console.warn("No sender ID found in notification:", obj);
-      return;
-    }
-
-    selectedUserId.value = senderId;
-    await fetchConversation(senderId);
-  }
-
-  async function fetchConversation(senderId) {
+async function sendReply() {
+  if (!newReply.value.trim()) return;
   try {
-      const response = await axios.get(`/message/conversation/${senderId}`);
-      const data = Array.isArray(response.data) ? response.data : [];
-
-      // Format the conversation with "You" or "Them"
-      conversation.value = data.map(msg => ({
-        ...msg,
-        from: msg.sender_id == currentUserId.value ? "You" : "Them",
-        content: msg.message, // alias 'message' as 'content' for display if needed
-      }));
-    } catch (error) {
-      console.error("Error fetching conversation:", error);
-      conversation.value = [];
-    }
+    await axios.post("/message/send", {
+      receiver_id: selectedUserId.value,
+      message: newReply.value.trim(),
+    });
+    conversation.value.push({
+      sender_id: currentUserId.value,
+      receiver_id: selectedUserId.value,
+      message: newReply.value.trim(),
+      from: "You",
+      content: newReply.value.trim(),
+      created_at: new Date().toISOString(),
+    });
+    newReply.value = "";
+  } catch (error) {
+    console.error("Error sending message:", error);
   }
+}
 
-  async function sendReply() {
-    if (!newReply.value.trim()) return;
-    try {
-      await axios.post("/message/send", {
-        receiver_id: selectedUserId.value,
-        message: newReply.value.trim(),
-      });
-      conversation.value.push({
-        sender_id: currentUserId.value,
-        receiver_id: selectedUserId.value,
-        message: newReply.value.trim(),
-        from: "You",
-        content: newReply.value.trim(),
-        created_at: new Date().toISOString(),
-      });
-      newReply.value = "";
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
+// function closeChat() {
+//   showMessagePopup.value = false;
+//   selectedUserId.value = null;
+//   messages.value = [];
+// }
+
+// function handleKeyUp(event) {
+//   const textarea = event.target;
+//   textarea.style.height = "auto";
+//   textarea.style.height = `${textarea.scrollHeight}px`;
+//   if (event.key === "Enter" && !event.shiftKey) {
+//     event.preventDefault();
+//     sendReply();
+//   }
+// }
+
+//Notification Logic
+const filteredNotifications = computed(() =>
+  notifications.value.filter(
+    (notif) => notif && ["message", "inquiry"].includes(notif.type)
+  )
+);
+
+function extractSenderName(content) {
+  const match = content.match(/from (.+)$/);
+  return match ? match[1] : "Unknown Sender";
+}
+
+async function fetchMessageNotifications() {
+  try {
+    const response = await axios.get("/notifications");
+    const rawNotifications = response.data.notifications || [];
+
+    const grouped = new Map();
+
+    rawNotifications.forEach((notif) => {
+      if (!notif || !notif.sender_id || !notif.type) return;
+
+      const key = `${notif.sender_id}_${notif.type}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          ...notif,
+          count: 1,
+          latestContent: notif.content,
+        });
+      } else {
+        const existing = grouped.get(key);
+        existing.count += 1;
+        existing.latestContent = notif.content; // latest content
+        grouped.set(key, existing);
+      }
+    });
+
+    notifications.value = Array.from(grouped.values());
+    newNotifications.value = notifications.value.length;
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
   }
+}
 
-  // function closeChat() {
-  //   showMessagePopup.value = false;
-  //   selectedUserId.value = null;
-  //   messages.value = [];
-  // }
-
-  // function handleKeyUp(event) {
-  //   const textarea = event.target;
-  //   textarea.style.height = "auto";
-  //   textarea.style.height = `${textarea.scrollHeight}px`;
-  //   if (event.key === "Enter" && !event.shiftKey) {
-  //     event.preventDefault();
-  //     sendReply();
-  //   }
-  // }
-
-  async function fetchNotifications() {
-    try {
-      const response = await axios.get('/notifications');
-      console.log("Fetched notifications:", response.data);
-
-      notifications.value = response.data.notifications || []; // or adjust based on actual structure
-      newNotifications.value = notifications.value.filter(
-        notif => notif && ['message', 'inquiry'].includes(notif.type)
-      ).length;
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
+function formatType(type) {
+  switch (type) {
+    case "job_application":
+      return "Job Application";
+    case "inquiry":
+      return "Inquiry";
+    case "application_update":
+      return "Application Update";
+    case "message":
+      return "Inquiry";
+    case "other":
+      return "Other";
+    default:
+      return type;
   }
+}
 
-
-  function formatType(type) {
-    switch (type) {
-      case "job_application": return "Job Application";
-      case "inquiry": return "Inquiry";
-      case "application_update": return "Application Update";
-      case "message": return "Message";
-      case "other": return "Other";
-      default: return type;
-    }
-  }
-
-  onMounted(() => {
-    fetchNotifications();
-  });
-  </script>
+onMounted(() => {
+  fetchMessageNotifications();
+});
+</script>
 
 <style scoped>
 * {
@@ -391,7 +415,9 @@ body,
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
-  border-right: 1px solid #ccc;
+  border-radius: 2vh;
+  border-right: 3.5px solid #045d56;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .logo {
   height: 8vh;
@@ -634,9 +660,10 @@ body,
   border-radius: 10px;
   margin-bottom: 20px;
   border-radius: 3vh;
-  width: 100%;
-  max-height: 100%;
-  overflow-y: auto;
+  border-left: #045d56 4px solid;
+  width: 95%;
+  height: 83vh;
+  margin-left: 3vh;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -663,7 +690,9 @@ body,
   background-color: #f1f1f1;
   align-self: flex-start;
   border-left: 4px solid #045d56;
-  max-width: 80%;
+  max-width: 50%;
+  margin-top: 3vh;
+  margin-bottom: 3vh;
   max-height: fit-content;
 }
 
@@ -672,7 +701,10 @@ body,
   align-self: flex-end;
   border-right: 4px solid #045d56;
   text-align: right;
-  max-width: 80%;
+  margin-left: 58vh;
+  margin-top: 3vh;
+  margin-bottom: 3vh;
+  max-width: 50%;
 }
 
 .timestamp {
@@ -722,6 +754,8 @@ body,
   font-size: 10px;
   margin-top: 2vh;
   margin-bottom: 20px;
+    text-transform: uppercase;
+
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -1004,7 +1038,6 @@ body,
   .popup.chat-popup .sent {
     margin-left: 10vh;
   }
-
 }
 @media (max-width: 385px) {
   .sidebar {
@@ -1018,12 +1051,11 @@ body,
     margin-bottom: 5vh;
   }
 
-    .popup.chat-popup {
+  .popup.chat-popup {
     width: 50vh;
   }
   .popup.chat-popup .sent {
     margin-left: 10vh;
-
   }
 }
 </style>

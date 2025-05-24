@@ -551,14 +551,28 @@ section {
   font-size: 14px;
   text-align: center;
 }
-
 .datetime-container {
-  background: linear-gradient(135deg, #0f8073, #97bbb7);
-  padding: 8px 20px;
-  border-radius: 15px;
+  background: linear-gradient(135deg, #1cb9a7, #374151);
+  background-size: 400% 400%; 
+  animation: gradientShift 10s ease infinite;
+  padding: 6px 20px;
+  border-radius: 10px;
   box-shadow: 0 4px 15px rgba(4, 93, 86, 0.1);
   margin-right: 20px;
 }
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 
 .datetime-wrapper {
   display: flex;
@@ -576,7 +590,7 @@ section {
 
 .date-display {
   color: #e0f2f1;
-  font-size: 0.85rem;
+  font-size: 0.65rem;
   font-weight: 500;
 }
 

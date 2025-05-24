@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class GoogleDriveService
 {
     public function uploadFile($file, $customFileName){
-        $folderPath = env('GOOGLE_DRIVE_FOLDER_PATH');
+        $folderPath = config('filesystems.disks.google.folderPath', '/');
         $extension = $file->getClientOriginalExtension();
         $uniqueSuffix = now()->timestamp . '_' . Str::random(8);
         $fileName = $customFileName . '_' .$uniqueSuffix . '.' . $extension;
@@ -32,10 +32,6 @@ class GoogleDriveService
                 if($content instanceof FileAttributes && basename($content->path()) === $fileName) {
 
                     $fileId = $content->extraMetaData()['id'] ?? null;
-                    
-                    //if ($fileId) {
-                    //    $this->setPublicPermission($fileId);
-                    //}
                     
                     return [
                         'name' => basename($content->path()),
@@ -70,6 +66,7 @@ class GoogleDriveService
         }
     }
     */
+    
 
     public function listFiles(){
         return Storage::disk('google')->listContents('/', false);

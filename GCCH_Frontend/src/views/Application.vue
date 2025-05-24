@@ -4,30 +4,23 @@
       <img src="/public/gcchnobg.png" alt="GCCH Logo" class="logo" />
       <ul>
         <li>
-          <router-link to="/CompanyDash" class="sidenav-text">
-            <img src="/public/home.png" class="ikon" />
-            HOME
+          <router-link to="/Applicantdash" class="sidenav-text">
+            <img src="/public/job-offer.png" class="ikon" />
+            JOB LISTINGS
           </router-link>
         </li>
         <li>
-          <router-link to="/CompanyPost" class="sidenav-text">
-            <img src="/public/laptop.png" class="ikon" /> POSTED JOBS
-          </router-link>
-        </li>
-        <li>
-          <router-link to="/CompanyMessage" class="sidenav-text">
-            <img src="/public/message.png" class="ikon" />
-            MESSAGES
+          <router-link to="/Applicantmessage" class="sidenav-text">
+            <img src="/public/mail.png" class="ikon" /> MESSAGES
           </router-link>
         </li>
         <li style="font-weight: bold">
-          <router-link to="/CompanyApplication" class="sidenav-text">
-            <img src="/public/resume.png" class="ikon" />
-            APPLICATIONS
+          <router-link to="/Application" class="sidenav-text">
+            <img src="/public/resume.png" class="ikon" /> APPLICATION
           </router-link>
         </li>
         <li>
-          <router-link to="/CompanyProfile" class="sidenav-text">
+          <router-link to="/Applicantprofile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
             PROFILE
           </router-link>
@@ -86,7 +79,11 @@
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
               <li v-for="(notif, index) in notifications" :key="index">
-                {{ notif }}
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.latestContent }}
+                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
+                ><br />
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
               </li>
             </ul>
             <button @click="toggleNotif">Close</button>
@@ -102,36 +99,30 @@
             <div class="form-row">
               <div class="resume-list">
                 <div
-                  v-for="(app, index) in applications"
+                  v-for="application in applications"
                   :key="index"
                   class="resume-item received"
                 >
-                  <h4>{{ app.name }}</h4>
-                  <button @click="viewResume(app.resume, app)">
-                    Open Resume
-                  </button>
+                  <h4>Job Application for : {{ application.job_title }}</h4>
+                  <p><strong>Job Title:</strong> {{ application.job_title }}</p>
+                  <p><strong>Status:</strong> {{ application.status }}</p>
+                  <p>
+                    <strong>Schedule:</strong>
+                    {{ application.schedule || "To be announced" }}
+                  </p>
+                  <p>
+                    <strong>Comments:</strong>
+                    {{ application.comments || "No comments yet." }}
+                  </p>
+                  <p>
+                    <strong>Updated At:</strong> {{ formatDate(application.updated_at) }}
+                  </p>
 
-                  <select
-                    v-model="app.status"
-                    @change="app.showSave = true"
-                    class="status-select"
-                  >
-                    <option disabled value="">Select status</option>
-                    <option>Ongoing Assessment</option>
-                    <option>For Interview</option>
-                    <option>Accepted</option>
-                    <option>Rejected</option>
-                  </select>
-
-                  <button
-                    v-if="app.showSave"
-                    @click="saveStatus(app)"
-                    class="savebtn"
-                  >
-                    Save
-                  </button>
+                  <!-- <button @click="viewResume(app.resume, app)">
+                    View Resume
+                  </button> -->
                 </div>
-                <div
+                <!-- <div
                   v-if="showResumeModal"
                   class="app-overlay"
                   @click.self="closeResume"
@@ -153,51 +144,53 @@
                     ></iframe>
                     <button @click="closeResume">Close</button>
                   </div>
-                </div>
+                </div> -->
+
               </div>
             </div>
           </div>
         </div>
         <!-- Notifications -->
         <div class="right-content">
-          <h3>UPDATES</h3>
+          <h3>CHECK THIS OUT</h3>
           <div class="updates-list">
             <div
-              v-for="notification in notifications"
-              :key="notification"
+              v-for="(notif, index) in filteredNotifications"
+              :key="index"
+              @click="openChat(notif)"
+              style="cursor: pointer"
               class="update-box"
             >
-              <h2>{{ formatType(notification.type) }}</h2>
-              <p>{{ notification.content }}</p>
+              <h2>{{ formatType(notif.type) }}</h2>
+              <p>
+                {{ notif.latestContent }}
+                <span v-if="notif.count > 1">
+                  ({{ notif.count }} new
+                  {{ pluralizeType(notif.type, notif.count) }})
+                </span>
+              </p>
             </div>
           </div>
         </div>
-
       </div>
+
     </div>
   </div>
 </template>
 
-
 <script setup>
-import { ref,onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 
-const isSidenavOpen = ref(false);
+const isSidenavOpen = ref(true);
 const showMail = ref(false);
 const showNotif = ref(false);
 const showSignOut = ref(false);
 const unreadMessages = ref(0);
 const newNotifications = ref(0);
-const selectedUserId = ref(null);
-const selectedApplicant = ref(null);
-const selectedStatus = ref("");
-const showSave = ref(false);
-const showResumeModal = ref(false);
 
-const updates = ref([]);
-const messages = ref ([]);
+const messages = ref([]);
 const notifications = ref([]);
 const applications = ref([]);
 
@@ -221,29 +214,66 @@ function toggleSignOut() {
 }
 
 function confirmSignOut() {
-  axios.post('/logout')
+  axios
+    .post("/logout")
     .then((response) => {
       console.log("Sign out successful:", response.data.message);
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
-
     });
 }
 
-//Notification Logic
+// Notification Logic
+function pluralizeType(type, count) {
+  const formatted = formatType(type).toLowerCase();
+  return count > 1 ? `${formatted}s` : formatted;
+}
+
+const filteredNotifications = computed(() =>
+  notifications.value.filter(
+    (notif) =>
+      notif && ["message", "inquiry", "application_update"].includes(notif.type)
+  )
+);
+
 async function fetchNotifications() {
   try {
-    const response = await axios.get('/notifications');
-    notifications.value = response.data.notifications;
+    const response = await axios.get("/notifications");
+    const rawNotifications = response.data.notifications || [];
+
+    const grouped = new Map();
+
+    rawNotifications.forEach((notif) => {
+      if (!notif || !notif.type) return;
+
+      const key = `${notif.sender_id || "system"}_${notif.type}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          ...notif,
+          count: 1,
+          latestContent: notif.content,
+        });
+      } else {
+        const existing = grouped.get(key);
+        existing.count += 1;
+        existing.latestContent = notif.content; // latest content
+        grouped.set(key, existing);
+      }
+    });
+
+    notifications.value = Array.from(grouped.values());
+    newNotifications.value = notifications.value.length;
+
+    console.log("Fetched notifications:", rawNotifications);
   } catch (error) {
     console.error("Error fetching notifications:", error);
   }
 }
 
-function formatType(type){
-  switch(type){
+function formatType(type) {
+  switch (type) {
     case "job_application":
       return "Job Application";
     case "inquiry":
@@ -257,23 +287,33 @@ function formatType(type){
   }
 }
 
-function viewResume(resumeLink, applicant) {
-  selectedResume.value = resumeLink;
-  selectedApplicant.value = applicant;
-  showResumeModal.value = true;
+async function fetchJobApplications(){
+  try{
+    const response = await axios.get('/applicant/applications');
+    console.log("Success", response.data);
+    applications.value = response.data.applications;
+    
+  } catch (error) {
+    console.error("Error Occured", error);
+  }
 }
 
-function closeResume() {
-  showResumeModal.value = false;
-  selectedResume.value = null;
-  selectedApplicant.value = null;
-}
+// function viewResume(resumeLink, applicant) {
+//   selectedResume.value = resumeLink;
+//   selectedApplicant.value = applicant;
+//   showResumeModal.value = true;
+// }
 
-function saveStatus(){
+// function closeResume() {
+//   showResumeModal.value = false;
+//   selectedResume.value = null;
+//   selectedApplicant.value = null;
+// }
 
-}
+// function saveStatus() {}
 
 onMounted(() => {
+  fetchJobApplications();
   fetchNotifications();
 });
 
@@ -284,6 +324,15 @@ onMounted(() => {
 //     }, 20000);
 //   },
 // };
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-PH", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
 </script>
 
 <style scoped>
@@ -304,7 +353,9 @@ body,
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
-  border-right: 1px solid #ccc;
+  border-radius: 2vh;
+  border-right: 3.5px solid #045d56;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .logo {
   height: 8vh;
@@ -347,7 +398,7 @@ body,
   cursor: pointer;
   transition: transform 0.3s ease, background-color 0.3s ease;
   padding: 15px 20px;
-  margin-top: 10vh;
+  margin-top: 15vh;
   margin-left: 8.5vh;
   border-radius: 10px;
 }
@@ -546,20 +597,24 @@ body,
 .resume-box {
   background: white;
   padding: 20px;
-  margin-bottom: 10px;
+  border-radius: 10px;
+  margin-bottom: 20px;
   border-radius: 3vh;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
+  border-bottom: #045d56 4px solid;
+  width: 95%;
+  height: 80vh;
+  margin-left: 3vh;
+  overflow: auto;
 }
 .resumeh3 {
   text-align: left;
   font-size: 1.7rem;
   margin-bottom: 2vh;
+  text-transform: uppercase;
 }
 .resume-list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(1, 1fr);
   gap: 10px;
   margin-top: 3vh;
   max-height: 100%;
@@ -579,54 +634,27 @@ body,
   align-self: flex-start;
   border-left: 4px solid #045d56;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  max-width: 58%;
+  max-width: 60%;
   height: 100%;
-  margin-left: 13vh;
-  margin-bottom: 20px;
+  margin-left: 25vh;
+  margin-bottom: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.resume-item button {
-  background-color: #045d56;
-  color: white;
-  border: none;
-  margin-right: 1vh;
-  padding: 4px 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-top: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.resume-item button:hover {
-  background-color: #033f3a;
-  transform: translateY(-2px);
-}
-
-.status-select {
-  padding: 6px 12px;
-  font-size: 14px;
-  border: 1px solid #bbb;
-  border-radius: 6px;
-  background-color: #f9f9f9;
-  color: #333;
-  cursor: pointer;
-  margin-top: 1vh;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.status-select:focus {
-  outline: none;
-  border-color: #045d56;
-  box-shadow: 0 0 3px rgba(4, 93, 86, 0.5);
+.resume-item.received:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
 }
 
 .right-content {
   flex: 1;
   background: white;
   border-radius: 10px;
+  border-left: #045d56 4px solid;
   padding: 20px;
-  height: fit-content;
+  width: 40vh;
+  height: 80vh;
+  overflow: auto;
 }
 .icons-right {
   display: flex;
@@ -659,7 +687,7 @@ body,
   padding: 20px;
   font-size: 10px;
   margin-top: 2vh;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -946,7 +974,6 @@ body,
 }
 
 @media (max-width: 385px) {
-
   .sidebar {
     width: 21vh;
     font-size: 8px;
@@ -962,7 +989,7 @@ body,
     max-height: 50vh;
   }
 
-   .resume-list {
+  .resume-list {
     grid-template-columns: repeat(1, 1fr);
   }
 

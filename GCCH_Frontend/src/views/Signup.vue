@@ -38,23 +38,24 @@
             />
             <input placeholder="Last Name" v-model="form.lastName" required />
             <span class="bday">BIRTHDAY</span>
+
             <input type="date" v-model="form.birthday" required />
-            <select v-model="form.gender" required>
-              <option value="" disabled selected>Select Gender</option>
+            <select v-model="form.sex" required>
+              <option value="" disabled selected>Select Sex</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="prefer_not_to_say">Prefer Not to Say</option>
             </select>
             <input
               placeholder="Phone Number"
               v-model="form.phone"
               inputmode="numeric"
               pattern="[0-9]*"
-              maxlength="13"
+              maxlength="11"
               @input="form.phone = form.phone.replace(/\D/g, '')"
             />
             <select v-model="form.course" required>
-              <option value="" disabled selected>Select Course</option>
+              <option value="" disabled selected>Select Program</option>
               <option value="BSIT">BSIT</option>
               <option value="BSCS">BSCS</option>
               <option value="BSEMC">BSEMC</option>
@@ -138,7 +139,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+
+import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 
@@ -152,7 +154,7 @@ const form = ref({
   middleName: "",
   lastName: "",
   birthday: "",
-  gender: "",
+  sex: "",
   phone: "",
   course: "",
   companyName: "",
@@ -196,7 +198,7 @@ const submitApplicantForm = async () => {
       middle_name: form.value.middleName,
       last_name: form.value.lastName,
       date_of_birth: form.value.birthday,
-      gender: form.value.gender,
+      sex: form.value.sex,
       phone_number: form.value.phone,
       course: form.value.course,
     });
@@ -394,6 +396,32 @@ select:focus {
   flex-direction: column;
   gap: 0.5rem;
 }
+
+label[for="birthday"] {
+  color: #045d56;
+  font-size: 0.8rem;
+  text-align: left;
+  display: block; 
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+  padding-left: 0.25rem;
+}
+
+/* .form-view label{
+  font-size: 1rem;
+text-align: left;
+margin-right: 100vh;
+margin-top: 0.5rem;
+
+} */
+
+/* label[for="birthday"] {
+  color: #6B7280;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  text-align: left;
+  font-weight: 500;
+} */
 
 .photo-panel {
   width: 100%;

@@ -3,12 +3,13 @@ import Loginpage from "@/views/Loginpage.vue";
 import Signup from "@/views/Signup.vue";
 import CompanyDashboard from "@/views/CompanyDashboard.vue";
 import CompanyPost from "@/views/CompanyPost.vue";
+import CompanyAccepted from "@/views/CompanyAccepted.vue";
 import CompanyMessage from "@/views/CompanyMessage.vue";
-import CompanyApplication from "@/views/CompanyApplication.vue";
 import CompanyProfile from "@/views/CompanyProfile.vue";
 import Applicantdash from "@/views/Applicantdash.vue";
 import Applicantmessage from "@/views/Applicantmessage.vue";
 import Applicantprofile from "@/views/Applicantprofile.vue";
+import Application from "@/views/Application.vue";
 import Redirecting from "@/views/Redirecting.vue";
 
 const router = createRouter({
@@ -45,12 +46,11 @@ const router = createRouter({
     },
 
     {
-      path: "/companyapplication",
-      name: "CompanyApplication",
-      component: CompanyApplication,
+      path: "/companyaccepted",
+      name: "CompanyAccepted",
+      component: CompanyAccepted,
     },
-
-   {
+    {
       path: "/companyprofile",
       name: "CompanyProfile",
       component: CompanyProfile,
@@ -72,6 +72,12 @@ const router = createRouter({
       path: "/applicantprofile",
       name: "ApplicantProfile",
       component: Applicantprofile,
+    },
+    
+    {
+      path: "/application",
+      name: "Application",
+      component: Application,
     },
 
     {

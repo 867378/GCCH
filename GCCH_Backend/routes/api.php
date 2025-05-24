@@ -43,6 +43,7 @@ Route::middleware(['auth:sanctum','applicant'])->group(function () {
     Route::get('/applicant/applications', [ApplicantController::class, 'applicationStatus'])->name('applicant.applicationStatus');
 });
 
+
 //Company routes
 Route::middleware(['auth:sanctum','company'])->group(function () {
     Route::post('/company/postjob', [CompanyController::class, 'postjob'])->name('company.postjob');
@@ -57,7 +58,7 @@ Route::middleware(['auth:sanctum','company'])->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/message/send', [MessageController::class, 'send'])->name('message.send');
     Route::get('/message/conversation/{userId}', [MessageController::class, 'conversation'])->name('message.conversation');
-    Route::post('/message/mark-as-read/{userId}', [MessageController::class, 'markAsRead'])->name('message.markAsRead');
+    Route::post('/message/mark-as-read/{messageId}', [MessageController::class, 'markAsRead'])->name('message.markAsRead');
 });
 
 //Notification routes

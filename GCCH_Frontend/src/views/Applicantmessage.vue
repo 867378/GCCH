@@ -15,6 +15,11 @@
           </router-link>
         </li>
         <li>
+          <router-link to="/Application" class="sidenav-text">
+            <img src="/public/resume.png" class="ikon" /> APPLICATION
+          </router-link>
+        </li>
+        <li>
           <router-link to="/Applicantprofile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
             PROFILE
@@ -50,42 +55,6 @@
           <input type="text" placeholder="Search..." />
         </div>
         <div class="icons-right">
-          <div class="icon industry-dropdown">
-            <img src="/public/search.png" />
-            <div class="custom-dropdown">
-              <div class="dropdown-label">Industry</div>
-              <ul class="dropdown-options">
-                <li @click="filterBy('Tech Field')">Tech Field</li>
-                <li @click="filterBy('Hospitality & Tourism Management')">
-                  Hospitality & Tourism Management
-                </li>
-                <li @click="filterBy('Education, Arts & Sciences')">
-                  Education, Arts & Sciences
-                </li>
-                <li @click="filterBy('Business & Accountancy')">
-                  Business & Accountancy
-                </li>
-                <li @click="filterBy('Health Profession')">
-                  Health Profession
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="icon industry-dropdown">
-            <img src="/public/company.png" />
-            <div class="custom-dropdown">
-              <div class="dropdown-label">Company</div>
-              <ul class="dropdown-options">
-                <li>Estaciong Co.</li>
-                <li>Barbatos Co.</li>
-                <li>Lopez Co.</li>
-                <li>Cordova Co.</li>
-                <li>ong co.</li>
-              </ul>
-            </div>
-          </div>
-
           <div class="icon" @click="toggleMail">
             <img src="/public/mail.png" />
             <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
@@ -100,9 +69,11 @@
           <div class="popup">
             <h3>📬 Messages</h3>
             <ul class="popup-list">
-              <li>John: Interested in your post.</li>
-              <li>Jane: Sent a resume for the job.</li>
-              <li>Mark: Asking about job requirements.</li>
+              <li v-for="(notif, index) in notifications" :key="index">
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.content }}
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
+              </li>
             </ul>
             <button @click="toggleMail">Close</button>
           </div>
@@ -112,14 +83,20 @@
           <div class="popup">
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
-              <li>3 new applicants this week</li>
-              <li>Company profile approved</li>
-              <li>New feature: Analytics tab</li>
+              <li v-for="(notif, index) in notifications" :key="index">
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.latestContent }}
+                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
+                ><br />
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
+              </li>
             </ul>
             <button @click="toggleNotif">Close</button>
           </div>
         </div>
       </div>
+
+      <!-- CHATS -->
       <div class="content">
         <div class="left-content">
           <div class="message-box">
@@ -127,81 +104,77 @@
             <div class="form-row">
               <div class="messages-list">
                 <div
-                  v-for="(msgs, user) in messages"
-                  :key="user"
+                  v-for="(msg, index) in uniqueConversations"
+                  :key="index"
                   class="message-item received"
-                  @click="openChat(user)"
+                  @click="openChat({ sender_id: msg.sender_id })"
                   style="cursor: pointer"
                 >
                   <p>
-                    <strong>{{ user }}:</strong>
-                    {{ msgs[msgs.length - 1].text }}
+                    <strong>{{ msg.from }}:</strong>
+                    {{ msg.content }}
                   </p>
                   <span class="timestamp">{{
-                    msgs[msgs.length - 1].time
+                    new Date(msg.created_at).toLocaleString()
                   }}</span>
                 </div>
               </div>
+            </div>
+
+            <!-- Current Chat -->
+            <div v-if="conversation.length" class="chat-box">
+              <h3>Conversation</h3>
               <div
-                v-if="showMessagePopup"
-                class="popup-overlay"
-                @click.self="closeChat"
+                style="max-height: 400px; overflow-y: auto; margin-bottom: 1rem"
               >
-                <div class="popup chat-popup">
-                  <h3>💬 Chat with {{ selectedUser }}</h3>
-                  <div
-                    style="
-                      max-height: 300px;
-                      overflow-y: auto;
-                      margin-bottom: 1rem;
-                    "
-                  >
-                    <div
-                      v-for="(msg, index) in messages[selectedUser]"
-                      :key="index"
-                      :class="[
-                        'message-item',
-                        msg.from === 'You' ? 'sent' : 'received',
-                      ]"
-                    >
-                      <p>
-                        <strong>{{ msg.from }}:</strong> {{ msg.text }}
-                      </p>
-                      <span class="timestamp">{{ msg.time }}</span>
-                    </div>
-                  </div>
-                  <div class="reply-box">
-                    <textarea
-                      v-model="newReply"
-                      placeholder="Type your message..."
-                      @keyup="handleKeyUp"
-                      @keydown.enter.prevent="sendReply"
-                      class="expanding-textarea"
-                    ></textarea>
-                    <button @click="sendReply">Send</button>
-                  </div>
-                  <button @click="closeChat">Close</button>
+                <div
+                  v-for="(msg, index) in conversation"
+                  :key="index"
+                  :class="[
+                    'message-item',
+                    msg.from === 'You' ? 'sent' : 'received',
+                  ]"
+                >
+                  <p>
+                    <strong>{{ msg.from }}:</strong> {{ msg.content }}
+                  </p>
+                  <span class="timestamp">{{
+                    new Date(msg.created_at).toLocaleString()
+                  }}</span>
                 </div>
+              </div>
+
+              <div class="reply-box">
+                <textarea
+                  v-model="newReply"
+                  placeholder="Type your message..."
+                  @keyup="handleKeyUp"
+                  @keydown.enter.prevent="sendReply"
+                  class="expanding-textarea"
+                ></textarea>
+                <button @click="sendReply">Send</button>
               </div>
             </div>
           </div>
         </div>
 
+        <!-- Notifications -->
         <div class="right-content">
-          <h3>CHECK THIS OUT</h3>
-          <div>
+          <h3>Contacts</h3>
+          <div class="updates-list">
             <div
-              v-for="(update, index) in updates"
+              v-for="(notif, index) in filteredNotifications"
               :key="index"
+              @click="openChat(notif)"
+              style="cursor: pointer"
               class="update-box"
             >
-              <h2>
-                <span v-if="update.type === 'message'"></span>
-                <span v-if="update.type === 'applicant'"></span>
-                <span v-if="update.type === 'job_post'"></span>
-                {{ update.user }} {{ update.content }}
-              </h2>
-              <p>{{ update.time }}</p>
+              <h2>{{ extractSenderName(notif.latestContent) }}</h2>
+              <p>
+                <span v-if="notif.count > 1">
+                  ({{ notif.count }} new messages)
+                </span>
+              </p>
             </div>
           </div>
         </div>
@@ -210,155 +183,211 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      showMail: false,
-      showNotif: false,
-      showSignOut: false,
-      unreadMessages: 0,
-      newNotifications: 0,
-      showMessagePopup: false,
-      selectedUser: null,
-      selectedCompany: null,
-      messageContent: "",
-      newReply: "",
-      isSidenavOpen: false,
+<script setup>
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
-      updates: [
-        {
-          type: "message",
-          user: "Jape",
-          time: "10:47 AM",
-          content: "sent you a message",
-        },
-        {
-          type: "applicant",
-          user: "Paulo",
-          time: "9:15 AM",
-          content: "submitted a resume",
-        },
-        {
-          type: "job_post",
-          user: "You",
-          time: "8:00 AM",
-          content: "posted a job ",
-        },
-      ],
+const router = useRouter();
 
-      messages: {
-        Jape: [
-          {
-            from: "Jane",
-            text: "Hello! I'm interested in the job post.",
-            time: "10:45 AM",
-          },
-          {
-            from: "You",
-            text: "Thank you! Please send your resume.",
-            time: "10:46 AM",
-          },
-          {
-            from: "Jane",
-            text: "I just sent it. Let me know if received!",
-            time: "10:47 AM",
-          },
-        ],
-        Paulo: [
-          {
-            from: "Mark",
-            text: "Can I apply without experience?",
-            time: "9:15 AM",
-          },
-          {
-            from: "You",
-            text: "Yes, feel free to send your resume.",
-            time: "9:17 AM",
-          },
-        ],
+const unreadMessages = ref(0);
+const newNotifications = ref(0);
+const isSidenavOpen = ref(true);
 
-        Aaron: [
-          {
-            from: "Mark",
-            text: "Can I apply without experience?",
-            time: "9:15 AM",
-          },
-          {
-            from: "You",
-            text: "Yes, feel free to send your resume.",
-            time: "9:17 AM",
-          },
-        ],
-      },
-    };
-  },
+const showMail = ref(false);
+const showNotif = ref(false);
+const showSignOut = ref(false);
 
-  methods: {
-    toggleSidenav() {
-      this.issidenavOpen = !this.issidenavOpen;
-    },
+const selectedUserId = ref(null);
+const newReply = ref("");
 
-    toggleMail() {
-      this.showMail = !this.showMail;
-      if (this.showMail) {
-        this.unreadMessages = 0;
+const currentUserId = ref(localStorage.getItem("user_id"));
+const allMessages = ref([]);
+const conversation = ref([]);
+const uniqueConversations = computed(() => {
+  const map = new Map();
+  for (const msg of allMessages.value) {
+    if (!map.has(msg.sender_id)) {
+      map.set(msg.sender_id, msg);
+    }
+  }
+  return Array.from(map.values());
+});
+
+const notifications = ref([]);
+
+function toggleMail() {
+  showMail.value = !showMail.value;
+  if (showMail.value) {
+    unreadMessages.value = 0;
+  }
+}
+
+function toggleNotif() {
+  showNotif.value = !showNotif.value;
+  if (showNotif.value) {
+    newNotifications.value = 0;
+  }
+}
+
+function toggleSignOut() {
+  showSignOut.value = !showSignOut.value;
+}
+
+function confirmSignOut() {
+  axios
+    .post("/logout")
+    .then(() => {
+      router.push("/login");
+    })
+    .catch(console.error);
+}
+
+async function openChat(obj) {
+  const senderId = obj.sender_id;
+
+  if (!senderId) {
+    console.warn("No sender ID found in notification:", obj);
+    return;
+  }
+
+  selectedUserId.value = senderId;
+  await fetchConversation(senderId);
+}
+
+async function markMessageAsRead(messageId) {
+  try {
+    await axios.post(`/message/mark-as-read/${messageId}`);
+    console.log(`Message ${messageId} marked as read`);
+  } catch (error) {
+    console.error("Error marking message as read:", error);
+  }
+}
+
+async function fetchConversation(senderId) {
+  try {
+    const response = await axios.get(`/message/conversation/${senderId}`);
+    const data = Array.isArray(response.data) ? response.data : [];
+
+    // Format the conversation with "You" or "Them"
+    conversation.value = data.map((msg) => ({
+      ...msg,
+      from: msg.sender_id == currentUserId.value ? "You" : "Them",
+      content: msg.message, // alias 'message' as 'content' for display if needed
+    }));
+
+    for (const msg of data) {
+      if (msg.receiver_id == currentUserId.value && !msg.read_at) {
+        await markMessageAsRead(msg.id);
       }
-    },
-    toggleNotif() {
-      this.showNotif = !this.showNotif;
-      if (this.showNotif) {
-        this.newNotifications = 0;
-      }
-    },
-    toggleSignOut() {
-      this.showSignOut = !this.showSignOut;
-    },
-    confirmSignOut() {
-      console.log("Signing out...");
-      window.location.href = "/login";
-    },
-    openChat(user) {
-      this.selectedUser = user;
-      this.showMessagePopup = true;
-    },
-    closeChat() {
-      this.showMessagePopup = false;
-      this.selectedUser = null;
-    },
-    handleKeyUp(event) {
-      const textarea = event.target;
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  } catch (error) {
+    console.error("Error fetching conversation:", error);
+    conversation.value = [];
+  }
+}
 
-      if (event.key === "Enter" && !event.shiftKey) {
-        this.sendReply();
-      }
-    },
-    sendReply() {
-      if (this.newReply.trim() && this.selectedUser) {
-        const now = new Date();
-        const time = now.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
+async function sendReply() {
+  if (!newReply.value.trim()) return;
+  try {
+    await axios.post("/message/send", {
+      receiver_id: selectedUserId.value,
+      message: newReply.value.trim(),
+    });
+    conversation.value.push({
+      sender_id: currentUserId.value,
+      receiver_id: selectedUserId.value,
+      message: newReply.value.trim(),
+      from: "You",
+      content: newReply.value.trim(),
+      created_at: new Date().toISOString(),
+    });
+    newReply.value = "";
+  } catch (error) {
+    console.error("Error sending message:", error);
+  }
+}
+
+// function closeChat() {
+//   showMessagePopup.value = false;
+//   selectedUserId.value = null;
+//   messages.value = [];
+// }
+
+// function handleKeyUp(event) {
+//   const textarea = event.target;
+//   textarea.style.height = "auto";
+//   textarea.style.height = `${textarea.scrollHeight}px`;
+//   if (event.key === "Enter" && !event.shiftKey) {
+//     event.preventDefault();
+//     sendReply();
+//   }
+// }
+
+//notification logic
+const filteredNotifications = computed(() =>
+  notifications.value.filter(
+    (notif) => notif && ["message", "inquiry"].includes(notif.type)
+  )
+);
+
+function extractSenderName(content) {
+  const match = content.match(/from (.+)$/);
+  return match ? match[1] : "Unknown Sender";
+}
+
+async function fetchNotifications() {
+  try {
+    const response = await axios.get("/notifications");
+    const rawNotifications = response.data.notifications || [];
+
+    const grouped = new Map();
+
+    rawNotifications.forEach((notif) => {
+      if (!notif || !notif.sender_id || !notif.type) return;
+
+      const key = `${notif.sender_id}_${notif.type}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          ...notif,
+          count: 1,
+          latestContent: notif.content,
         });
-
-        this.messages[this.selectedUser].push({
-          from: "You",
-          text: this.newReply,
-          time: time,
-        });
-        this.newReply = "";
+      } else {
+        const existing = grouped.get(key);
+        existing.count += 1;
+        existing.latestContent = notif.content; // latest content
+        grouped.set(key, existing);
       }
-    },
-  },
-  mounted() {
-    setInterval(() => {
-      this.unreadMessages += 1;
-      this.newNotifications += 1;
-    }, 20000);
-  },
-};
+    });
+
+    notifications.value = Array.from(grouped.values());
+    newNotifications.value = notifications.value.length;
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+  }
+}
+
+function formatType(type) {
+  switch (type) {
+    case "job_application":
+      return "Job Application";
+    case "inquiry":
+      return "Inquiry";
+    case "application_update":
+      return "Application Update";
+    case "message":
+      return "Message";
+    case "other":
+      return "Other";
+    default:
+      return type;
+  }
+}
+
+onMounted(() => {
+  fetchNotifications();
+});
 </script>
 
 <style scoped>
@@ -379,10 +408,10 @@ body,
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
-  border-right: 1px solid #ccc;
-  flex-shrink: 0;
+  border-radius: 2vh;
+  border-right: 3.5px solid #045d56;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-
 .logo {
   height: 8vh;
   width: 14vh;
@@ -424,7 +453,7 @@ body,
   cursor: pointer;
   transition: transform 0.3s ease, background-color 0.3s ease;
   padding: 15px 20px;
-  margin-top: 32.5vh;
+  margin-top: 15vh;
   margin-left: 8.5vh;
   border-radius: 10px;
 }
@@ -688,11 +717,11 @@ body,
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 20px;
-  border-radius: 15px;
+  border-radius: 3vh;
+  border-bottom: #045d56 4px solid;
   width: 95%;
+  height: 85vh;
   margin-left: 3vh;
-  max-height: 100%;
-  overflow-y: auto;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -719,7 +748,9 @@ body,
   background-color: #f1f1f1;
   align-self: flex-start;
   border-left: 4px solid #045d56;
-  max-width: 80%;
+  max-width: 50%;
+  margin-top: 3vh;
+  margin-bottom: 3vh;
   max-height: fit-content;
 }
 
@@ -728,7 +759,10 @@ body,
   align-self: flex-end;
   border-right: 4px solid #045d56;
   text-align: right;
-  max-width: 80%;
+  margin-left: 58vh;
+  margin-top: 3vh;
+  margin-bottom: 3vh;
+  max-width: 50%;
 }
 
 .timestamp {
@@ -737,18 +771,6 @@ body,
   margin-top: 5px;
   display: block;
   text-align: right;
-}
-
-label {
-  background-color: #045d56;
-  color: #fff;
-  padding: 8px 10px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-right: 70%;
-  transition: color 0.5s ease-in-out;
 }
 
 .right-content {
@@ -1061,7 +1083,7 @@ label {
     margin-left: 3vh;
     margin-bottom: 5vh;
   }
-    .topbar input[type="text"] {
+  .topbar input[type="text"] {
     width: 10vh;
   }
 }

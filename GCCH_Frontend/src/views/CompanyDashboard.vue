@@ -15,17 +15,17 @@
           </router-link>
         </li>
         <li>
+          <router-link to="/companyaccepted" class="sidenav-text">
+            <img src="/public/agreement.png" class="ikon" /> ACCEPTED
+          </router-link>
+        </li>
+        <li>
           <router-link to="/companymessage" class="sidenav-text">
             <img src="/public/message.png" class="ikon" />
             MESSAGES
           </router-link>
         </li>
-        <li>
-          <router-link to="/companyapplication" class="sidenav-text">
-            <img src="/public/resume.png" class="ikon" />
-            APPLICATIONS
-          </router-link>
-        </li>
+
         <li>
           <router-link to="/companyprofile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
@@ -76,7 +76,11 @@
           <div class="popup">
             <h3>📬 Messages</h3>
             <ul class="popup-list">
-              <li v-for="(msg, index) in messages" :key="index">{{ msg }}</li>
+              <li v-for="(notif, index) in notifications" :key="index">
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.content }}
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
+              </li>
             </ul>
             <button @click="toggleMail">Close</button>
           </div>
@@ -96,149 +100,6 @@
       </div>
       <div class="content">
         <div class="left-content">
-          <form @submit.prevent="postJob">
-            <div class="post-box">
-              <h3>Job Description</h3>
-              <button>Post Job</button>
-              <input
-                v-model="jobData.job_title"
-                type="text"
-                placeholder="Enter Job Title"
-                class="job-title"
-              />
-
-              <textarea
-                v-model="jobData.job_description"
-                placeholder="Describe the job description of your company....."
-              ></textarea>
-
-              <div class="form-row">
-                <select
-                  v-model="jobData.job_type"
-                  class="job-form job-type"
-                  id="job_type"
-                >
-                  <option disabled selected value="">Job Type</option>
-                  <option value="full_time">Full-time</option>
-                  <option value="part_time">Part-time</option>
-                  <option value="internship">Internship</option>
-                  <option value="contract">Contract</option>
-                </select>
-
-                <select
-                  v-model="jobData.recommended_course"
-                  class="job-form job-type"
-                  id="recommended_course"
-                >
-                  <option disabled selected value="">Recommended Course</option>
-                  <option value="BSIT">BSIT</option>
-                  <option value="BSCS">BSCS</option>
-                  <option value="BSEMC">BSEMC</option>
-                  <option value="BSN">BSN</option>
-                  <option value="BSM">BSM</option>
-                  <option value="BSA">BSA</option>
-                  <option value="BSBA-FM">BSBA-FM</option>
-                  <option value="BSBA-HRM">BSBA-HRM</option>
-                  <option value="BSBA-MM">BSBA-MM</option>
-                  <option value="BSCA">BSCA</option>
-                  <option value="BSHM">BSHM</option>
-                  <option value="BSTM">BSTM</option>
-                  <option value="BAComm">BAComm</option>
-                  <option value="BECEd">BECEd</option>
-                  <option value="BCAEd">BCAEd</option>
-                  <option value="BPEd">BPEd</option>
-                  <option value="BEED">BEED</option>
-                  <option value="BSEd-Eng">BSEd-Eng</option>
-                  <option value="BSEd-Math">BSEd-Math</option>
-                  <option value="BSEd-Fil">BSEd-Fil</option>
-                  <option value="BSEd-SS">BSEd-SS</option>
-                  <option value="BSEd-Sci">BSEd-Sci</option>
-                  <option value="Other">Other</option>
-                </select>
-
-                <select
-                  v-model="jobData.recommended_course_2"
-                  class="job-form job-type"
-                  id="recommended_course_2"
-                >
-                  <option disabled selected value="">
-                    Recommended Course 2
-                  </option>
-                  <option value="BSIT">BSIT</option>
-                  <option value="BSCS">BSCS</option>
-                  <option value="BSEMC">BSEMC</option>
-                  <option value="BSN">BSN</option>
-                  <option value="BSM">BSM</option>
-                  <option value="BSA">BSA</option>
-                  <option value="BSBA-FM">BSBA-FM</option>
-                  <option value="BSBA-HRM">BSBA-HRM</option>
-                  <option value="BSBA-MM">BSBA-MM</option>
-                  <option value="BSCA">BSCA</option>
-                  <option value="BSHM">BSHM</option>
-                  <option value="BSTM">BSTM</option>
-                  <option value="BAComm">BAComm</option>
-                  <option value="BECEd">BECEd</option>
-                  <option value="BCAEd">BCAEd</option>
-                  <option value="BPEd">BPEd</option>
-                  <option value="BEED">BEED</option>
-                  <option value="BSEd-Eng">BSEd-Eng</option>
-                  <option value="BSEd-Math">BSEd-Math</option>
-                  <option value="BSEd-Fil">BSEd-Fil</option>
-                  <option value="BSEd-SS">BSEd-SS</option>
-                  <option value="BSEd-Sci">BSEd-Sci</option>
-                  <option value="Other">Other</option>
-                </select>
-
-                <select
-                  v-model="jobData.recommended_course_3"
-                  class="job-form job-type"
-                  id="recommended_course_3"
-                >
-                  <option disabled selected value="">
-                    Recommended Course 3
-                  </option>
-                  <option value="BSIT">BSIT</option>
-                  <option value="BSCS">BSCS</option>
-                  <option value="BSEMC">BSEMC</option>
-                  <option value="BSN">BSN</option>
-                  <option value="BSM">BSM</option>
-                  <option value="BSA">BSA</option>
-                  <option value="BSBA-FM">BSBA-FM</option>
-                  <option value="BSBA-HRM">BSBA-HRM</option>
-                  <option value="BSBA-MM">BSBA-MM</option>
-                  <option value="BSCA">BSCA</option>
-                  <option value="BSHM">BSHM</option>
-                  <option value="BSTM">BSTM</option>
-                  <option value="BAComm">BAComm</option>
-                  <option value="BECEd">BECEd</option>
-                  <option value="BCAEd">BCAEd</option>
-                  <option value="BPEd">BPEd</option>
-                  <option value="BEED">BEED</option>
-                  <option value="BSEd-Eng">BSEd-Eng</option>
-                  <option value="BSEd-Math">BSEd-Math</option>
-                  <option value="BSEd-Fil">BSEd-Fil</option>
-                  <option value="BSEd-SS">BSEd-SS</option>
-                  <option value="BSEd-Sci">BSEd-Sci</option>
-                  <option value="Other">Other</option>
-                </select>
-
-                <input
-                  v-model="jobData.job_location"
-                  type="text"
-                  placeholder="Enter Job Location"
-                  class="job-input"
-                />
-
-                <input
-                  type="number"
-                  v-model="jobData.monthly_salary"
-                  placeholder="Enter Monthly Salary (in Php)"
-                  class="salary-input"
-                />
-              </div>
-            </div>
-          </form>
-
           <div class="cards">
             <div class="card">
               <p>
@@ -248,7 +109,7 @@
                     alt="total clients Icon"
                     class="ikon"
                   />
-                  TOTAL CLIENTS</strong
+                  ACCEPTED APPLICANTS</strong
                 >
               </p>
               <p>{{ totalClients }}</p>
@@ -280,10 +141,84 @@
               <p>{{ pendingApplications }}</p>
             </div>
           </div>
+          <form @submit.prevent="postJob">
+            <div class="post-box">
+              <h3>Job Description</h3>
+              <button>Post Job</button>
+              <input
+                v-model="jobData.job_title"
+                type="text"
+                placeholder="Enter Job Title"
+                class="job-title"
+              />
+
+              <textarea
+                v-model="jobData.job_description"
+                placeholder="Describe the job description of your company....."
+              ></textarea>
+
+              <div class="form-row">
+                <select
+                  v-model="jobData.job_type"
+                  class="job-form job-type"
+                  id="job_type"
+                >
+                  <option disabled selected value="">Job Type</option>
+                  <option value="full_time">Full-time</option>
+                  <option value="part_time">Part-time</option>
+                  <option value="internship">Internship</option>
+                  <option value="contract">Contract</option>
+                </select>
+
+                <div class="dropdown-checkbox">
+                  <button
+                    type="button"
+                    @click="toggleCourseDropdown"
+                    class="dropdown-btn"
+                  >
+                    Recommended Courses
+                    <span v-if="selectedCourses.length"
+                      >({{ selectedCourses.length }})</span
+                    >
+                  </button>
+                  <div v-if="showCourseDropdown" class="dropdown-list">
+                    <label v-for="course in courseOptions" :key="course">
+                      <input
+                        type="checkbox"
+                        :value="course"
+                        v-model="selectedCourses"
+                      />
+                      {{ course }}
+                    </label>
+                  </div>
+                </div>
+
+                <input
+                  v-model="jobData.job_location"
+                  type="text"
+                  placeholder="Enter Job Location"
+                  class="job-input"
+                />
+
+                <input
+                  type="number"
+                  v-model="jobData.monthly_salary"
+                  placeholder="Enter Monthly Salary (in Php)"
+                  class="salary-input"
+                />
+
+                <input
+                  type="number"
+                  v-model="jobData.total_slots"
+                  placeholder="Hiring Slot"
+                  class="slot-input"
+                />
+              </div>
+            </div>
+          </form>
         </div>
 
-
-<!-- JOB DISPLAY -->
+        <!-- JOB DISPLAY -->
         <div class="right-content">
           <h3>POSTED JOBS</h3>
           <div class="posted-jobs">
@@ -291,6 +226,7 @@
               class="posted-jobs-box"
               v-for="(job, index) in postedJobs"
               :key="index"
+              @click="selectJob(job)"
             >
               <h2>{{ job.job_title }}</h2>
               <p>{{ job.job_description }}</p>
@@ -298,12 +234,28 @@
               <p><strong>Type:</strong> {{ job.job_type }}</p>
               <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
-              <p>Status: {{ job.status }}</p>
+              <p><strong>Status:</strong> {{ job.status }}</p>
+              <p>
+                <strong
+                  >Slot: {{ job.filled_slots }}/{{ job.total_slots }}</strong
+                >
+              </p>
+              <p>
+                <strong>Recommended courses:</strong>
+                {{
+                  [
+                    job.recommended_course,
+                    job.recommended_course_2,
+                    job.recommended_course_3,
+                  ]
+                    .filter((course) => course)
+                    .join(", ")
+                }}
+              </p>
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -327,9 +279,19 @@ const pendingApplications = ref(10);
 const isSidenavOpen = ref(true);
 
 const messages = ref([]);
-const notifications = ref([]);
-const updates = ref([]);
+const notifications = ref({});
 const postedJobs = ref([]);
+//coirse dropdown
+
+const showCourseDropdown = ref(false);
+const selectedCourses = ref([]);
+
+const courseOptions = [
+  "BSIT", "BSCS", "BSEMC", "BSN", "BSM", "BSA",
+  "BSBA-FM", "BSBA-HRM", "BSBA-MM", "BSCA", "BSHM",
+  "BSTM", "BAComm", "BECEd", "BCAEd", "BPEd", "BEED",
+  "BSEd-Eng", "BSEd-Math", "BSEd-Fil", "BSEd-SS", "BSEd-Sci", "Other"
+];
 
 const jobData = ref({
   job_title: "",
@@ -340,7 +302,12 @@ const jobData = ref({
   recommended_course: "",
   recommended_course_2: "",
   recommended_course_3: "",
+  total_slots: "",
 });
+
+function toggleCourseDropdown() {
+  showCourseDropdown.value = !showCourseDropdown.value;
+}
 
 function toggleMail() {
   showMail.value = !showMail.value;
@@ -357,7 +324,8 @@ function toggleSignOut() {
 }
 
 function confirmSignOut() {
-  axios.post('/logout')
+  axios
+    .post("/logout")
 
     .then((response) => {
       console.log("Sign out successful:", response.data.message);
@@ -367,31 +335,38 @@ function confirmSignOut() {
       console.error("Error signing out:", error);
     });
 }
+//checkbox logic
+// async function postJob() {
+//   jobData.value.recommended_course = selectedCourses.value[0] || null;
+//   jobData.value.recommended_course_2 = selectedCourses.value[1] || null;
+//   jobData.value.recommended_course_3 = selectedCourses.value[2] || null;
+
+// }
 
 // Notification Logic
-  async function fetchNotifications() {
-    try {
-      const response = await axios.get('/notifications');
-      notifications.value = response.data.notifications;
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
+async function fetchNotifications() {
+  try {
+    const response = await axios.get("/notifications");
+    notifications.value = response.data.notifications;
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
   }
+}
 
-  function formatType(type){
-    switch(type){
-      case "job_application":
-        return "Job Application";
-      case "inquiry":
-        return "Inquiry";
-      case "application_update":
-        return "Application Update";
-      case "message":
-        return "Inquiry";
-      case "other":
-        return "Other";
-    }
+function formatType(type) {
+  switch (type) {
+    case "job_application":
+      return "Job Application";
+    case "inquiry":
+      return "Inquiry";
+    case "application_update":
+      return "Application Update";
+    case "message":
+      return "Inquiry";
+    case "other":
+      return "Other";
   }
+}
 
 onMounted(() => {
   fetchNotifications();
@@ -408,6 +383,7 @@ async function postJob() {
       recommended_course: jobData.value.recommended_course,
       recommended_course_2: jobData.value.recommended_course_2 || null,
       recommended_course_3: jobData.value.recommended_course_3 || null,
+      total_slots: jobData.value.total_slots,
     });
     console.log("Job posted successfully:", response.data);
     alert(response.data.message);
@@ -421,8 +397,9 @@ async function postJob() {
       monthly_salary: "",
       job_type: "",
       recommended_course: "",
-      recommended_course_2: null,
-      recommended_course_3: null,
+      recommended_course_2: "",
+      recommended_course_3: "",
+      total_slots: "",
     };
   } catch (error) {
     console.error("Error posting job:", error);
@@ -436,7 +413,6 @@ async function fetchPostedJobs() {
     postedJobs.value = response.data.jobs;
   } catch (error) {
     console.error("Error fetching posted jobs:", error);
-    alert("Error fetching posted jobs");
   }
 }
 
@@ -461,7 +437,9 @@ body,
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
-  border-right: 1px solid #ccc;
+  border-radius: 2vh;
+  border-right: 3.5px solid #045d56;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .logo {
   height: 8vh;
@@ -695,10 +673,11 @@ body,
 .post-box {
   background: white;
   padding: 20px;
-  border-radius: 10px;
   margin-bottom: 10px;
-  border-radius: 3vh;
+  border-radius: 5vh;
   width: 130vh;
+  border-bottom: #045d56 solid 4px;
+  overflow: auto;
 }
 .post-box textarea {
   width: 100%;
@@ -736,7 +715,7 @@ body,
 
 .form-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 3fr);
   gap: 1vh;
   align-items: center;
   margin-top: 3vh;
@@ -796,7 +775,7 @@ body,
   color: #000;
 }
 .job-input {
-  width: 32vh;
+  width: 44vh;
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #ccc;
@@ -804,8 +783,50 @@ body,
   color: #333;
   margin-left: 2.5vh;
 }
+
+.dropdown-checkbox {
+  position: relative;
+  display: flex;
+  margin-top: 4vh;
+}
+
+.dropdown-btn {
+  padding: 10px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  width: 80%;
+  text-align: left;
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  width: 80%;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.dropdown-list label {
+  display: block;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
 .salary-input {
-  width: 32vh;
+  width: 44vh;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  margin-left: 2.5vh;
+}
+.slot-input {
+  width: 44vh;
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #ccc;
@@ -845,32 +866,13 @@ body,
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
   overflow: hidden;
+  text-transform: uppercase;
+  border-left: #045d56 solid 5px;
 }
 
 .posted-jobs-box:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-}
-#media-picker {
-  display: none;
-  transition: color 0.3s ease-in-out;
-}
-
-label {
-  background-color: #045d56;
-  color: #fff;
-  padding: 8px 10px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-right: 70%;
-  transition: color 0.5s ease-in-out;
-}
-
-label:hover {
-  background-color: #f1f1f1;
-  color: #045d56;
 }
 
 .cards {
@@ -880,12 +882,14 @@ label:hover {
 .card {
   background: white;
   padding: 15px;
-  border-radius: 20px;
+  border-radius: 3vh;
   text-align: center;
   flex: 1;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease-in-out;
   cursor: pointer;
+  margin-bottom: 1vh;
+  border-bottom: #045d56 solid 4px;
 }
 
 .card:hover {

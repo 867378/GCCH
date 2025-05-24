@@ -15,6 +15,11 @@
           </router-link>
         </li>
         <li>
+          <router-link to="/Application" class="sidenav-text">
+            <img src="/public/resume.png" class="ikon" /> APPLICATION
+          </router-link>
+        </li>
+        <li>
           <router-link to="/Applicantprofile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
             PROFILE
@@ -50,56 +55,6 @@
           <input type="text" placeholder="Search..." />
         </div>
         <div class="icons-right">
-          <div class="icon industry-dropdown">
-            <img src="/public/search.png" />
-            <div class="custom-dropdown">
-              <button @click="clearFilters" class="clear-btn">
-                Clear Filters
-              </button>
-
-              <div class="dropdown-label">Industry</div>
-              <ul class="dropdown-options">
-                <li @click="selectIndustry('Techfield')">Tech Field</li>
-                <li @click="selectIndustry('Hospitality & Tourism Management')">
-                  Hospitality & Tourism Management
-                </li>
-                <li @click="selectIndustry('Education, Arts & Sciences')">
-                  Education, Arts & Sciences
-                </li>
-                <li @click="selectIndustry('Business & Accountancy')">
-                  Business & Accountancy
-                </li>
-                <li @click="selectIndustry('Health Profession')">
-                  Health Profession
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="icon industry-dropdown">
-            <img src="/public/company.png" />
-            <div class="custom-dropdown">
-              <button @click="clearFilters" class="clear-btn">
-                Clear Filters
-              </button>
-
-              <div class="dropdown-label">Company</div>
-              <ul class="dropdown-options">
-                <li @click="selectCompany('Tech Solutions Inc.')">
-                  Tech Solutions Inc.
-                </li>
-                <li @click="selectCompany('Tech Solutions Inc.')">
-                  Barbatos Co.
-                </li>
-                <li @click="selectCompany('Tech Solutions Inc.')">Lopez Co.</li>
-                <li @click="selectCompany('Tech Solutions Inc.')">Dior</li>
-                <li @click="selectCompany('Tech Solutions Inc.')">
-                  Louis Vuitton
-                </li>
-              </ul>
-            </div>
-          </div>
-
           <div class="icon" @click="toggleMail">
             <img src="/public/mail.png" />
             <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
@@ -138,7 +93,11 @@
       <div class="content">
         <div class="left-content">
           <h3>RECOMMENDED JOBS</h3>
-          <div class="job-box" v-for="matchedJob in recommendedJobs" :key="matchedJob.id">
+          <div
+            class="job-box"
+            v-for="matchedJob in recommendedJobs"
+            :key="matchedJob.id"
+          >
             <div class="job-card">
               <!-- Header -->
               <div class="job-header">
@@ -166,12 +125,32 @@
                   <span class="salary">₱{{ matchedJob.monthly_salary }}</span>
                 </div>
               </div>
+
+              <!-- Job Slots -->
+              <div class="job-info">
+                <div class="job-detail">
+                  <img src="/public/people.png" class="ikon" />
+                  <p>
+                    {{ matchedJob.filled_slots }}/{{ matchedJob.total_slots }}
+                  </p>
+                </div>
+              </div>
+              <!--  -->
+              <div class="job-info">
+                <div class="job-detail">
+                  <img src="/public/updates.png" class="ikon" />
+                  <p>Status: {{ matchedJob.status }}</p>
+              </div>
+            </div>
               <!-- Job Description -->
               <p class="job-description">{{ matchedJob.job_description }}</p>
 
               <!-- Apply and Message Buttons -->
               <div class="job-actions">
-                <button class="message-btn" @click="sendMessage(matchedJob.company_id)">
+                <button
+                  class="message-btn"
+                  @click="sendMessage(matchedJob.company_id)"
+                >
                   Send Message
                 </button>
                 <button class="apply-btn" @click="applyToJob(matchedJob.id)">
@@ -179,26 +158,31 @@
                 </button>
               </div>
             </div>
-
           </div>
         </div>
 
-        <!-- Notifications -->  
+        <!-- Notifications -->
         <div class="right-content">
           <h3>CHECK THIS OUT</h3>
           <div class="updates-list">
             <div
-              v-for="notification in notifications"
-              :key="notification"
+              v-for="(notif, index) in filteredNotifications"
+              :key="index"
+              @click="openChat(notif)"
+              style="cursor: pointer"
               class="update-box"
-              @click="handleNotificationClick(notification)"
             >
-              <h2>{{ formatType(notification.type) }}</h2>
-              <p>{{ notification.content }}</p>
+              <h2>{{ formatType(notif.type) }}</h2>
+              <p>
+                {{ notif.latestContent }}
+                <span v-if="notif.count > 1">
+                  ({{ notif.count }} new
+                  {{ pluralizeType(notif.type, notif.count) }})
+                </span>
+              </p>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -209,19 +193,20 @@
     class="popup-overlay"
     @click.self="closeApplyPopup"
   >
-    <div class="popup">
+    <div class="apply-popup">
       <h3>📄 Upload Your Resume</h3>
-      <input type="file" @change="handleFileUpload" accept=".pdf" />
+      <span>Resume </span>
+      <input type="file" @change="handleFileUploadResume" accept=".pdf" />
       <br /><br />
-      <input type="text" v-model="coverLetter" placeholder="Cover Letter" />
-      <br /><br /> 
+      <span>Cover Letter </span>
+      <input
+        type="file"
+        @change="handleFileUploadCoverLetter"
+        accept=".pdf,.doc,.docx"
+      />
+      <br /><br />
       <button @click="submitApplication">Apply</button>
-      <button
-        style="margin-left: 10px; background-color: gray"
-        @click="closeApplyPopup"
-      >
-        Cancel
-      </button>
+      <button @click="closeApplyPopup">Cancel</button>
     </div>
   </div>
 
@@ -232,19 +217,16 @@
     @click.self="showMessagePopup = false"
   >
     <div class="popup">
-      <h3>✉️ Message </h3>
+      <h3>✉️ Message</h3>
       <textarea
         v-model="messageContent"
         placeholder="Type your message here..."
         rows="5"
-        style="width: 100%; padding: 8px"
+        style="width: 100%; padding: 8px; resize: none"
       ></textarea>
       <br /><br />
       <button @click="sendActualMessage">Send</button>
-      <button
-        style="margin-left: 10px; background-color: gray"
-        @click="showMessagePopup = false"
-      >
+      <button @click="showMessagePopup = false" class="cancel-btn">
         Cancel
       </button>
     </div>
@@ -252,9 +234,9 @@
 </template>
 
 <script setup>
-import { ref,onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
 const router = useRouter();
 
@@ -275,7 +257,7 @@ const messageContent = ref("");
 //for Apply Popup
 const selectedJobId = ref(null);
 const resumeFile = ref(null);
-const coverLetter = ref("");
+const coverLetterFile = ref(null);
 
 //for Job Listings
 const recommendedJobs = ref([]);
@@ -285,117 +267,160 @@ const otherJobs = ref([]);
 const notifications = ref([]);
 
 // NavBar Logic
-  function toggleMail() {
-    showMail.value = !showMail.value;
-    if (showMail.value) {
-      unreadMessages.value = 0;
-    }
+function toggleMail() {
+  showMail.value = !showMail.value;
+  if (showMail.value) {
+    unreadMessages.value = 0;
   }
-  function toggleNotif() {
-    showNotif.value = !showNotif.value;
-    if (showNotif.value) {
-      newNotifications.value = 0;
-    }
+}
+function toggleNotif() {
+  showNotif.value = !showNotif.value;
+  if (showNotif.value) {
+    newNotifications.value = 0;
   }
-  function toggleSignOut() {
-    showSignOut.value = !showSignOut.value;
-  }
-  function confirmSignOut() {
-    axios.post('/logout')
-      .then((response) => {
-        console.log("Sign out successful:", response.data.message);
-        router.push("/login");
-      })
-      .catch((error) => {
-        console.error("Error signing out:", error);
-      });
-  }
+}
+function toggleSignOut() {
+  showSignOut.value = !showSignOut.value;
+}
+function confirmSignOut() {
+  axios
+    .post("/logout")
+    .then((response) => {
+      console.log("Sign out successful:", response.data.message);
+      router.push("/login");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+    });
+}
 
 // Job Listings Logic
-  async function fetchJobs() {
-    try {
-      const response = await axios.get('/applicant/jobdisplay');
+async function fetchJobs() {
+  try {
+    const response = await axios.get("/applicant/jobdisplay");
 
-      console.log(response.data);
+    console.log(response.data);
 
-      recommendedJobs.value=response.data.matchedjobs;
-      otherJobs.value=response.data.otherjobs;
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-      alert("Failed to fetch jobs. Please try again later.");
-    }
+    recommendedJobs.value = response.data.matchedjobs;
+    otherJobs.value = response.data.otherjobs;
+  } catch (error) {
+    console.error("Error fetching jobs:", error);
+    alert("Failed to fetch jobs. Please try again later.");
   }
+}
 
 // Job Application Logic
-  function applyToJob(jobId) {
-    selectedJobId.value = jobId;
-    showApplyPopup.value = true;
+function applyToJob(jobId) {
+  selectedJobId.value = jobId;
+  showApplyPopup.value = true;
+}
+
+async function submitApplication() {
+  if (!coverLetterFile.value) {
+    alert("Please include a cover letter.");
+    return;
   }
 
-  async function submitApplication() {
-    if (!coverLetter.value) {
-      alert("Please include a cover letter.");
-      return;
-    }
-    const formData = new FormData();
-    formData.append("job_id", selectedJobId.value);
-    formData.append("cover_letter", coverLetter.value);
+  const formData = new FormData();
+  formData.append("job_id", selectedJobId.value);
+  formData.append("cover_letter", coverLetterFile.value); // 👈 MUST be File
 
-    if (resumeFile.value) {
-      formData.append("resume", resumeFile.value);
-    }
-
-    try{
-      const response = await axios.post('/applicant/jobapply', formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      alert(response.data.message);
-      closeApplyPopup();
-      console.log("Application submitted successfully:", response.data);
-    } catch (error) {
-      console.error("Error submitting application:", error);
-      alert(error.response.data.error);
-    }
-
-  }
-  function handleFileUpload(event) {
-    resumeFile.value = event.target.files[0];
+  if (resumeFile.value) {
+    formData.append("resume", resumeFile.value); // 👈 MUST be File
   }
 
-  function closeApplyPopup() {
-    showApplyPopup.value = false;
-    resumeFile.value = null;
-    selectedJobId.value = null;
-    coverLetter.value = "";
+  try {
+    const response = await axios.post("/applicant/jobapply", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    alert(response.data.message);
+    closeApplyPopup();
+    console.log("Application submitted successfully:", response.data);
+  } catch (error) {
+    console.error("Error submitting application:", error);
+    alert(error.response?.data?.error || "An unknown error occurred.");
   }
+}
+
+function handleFileUploadResume(event) {
+  resumeFile.value = event.target.files[0];
+}
+
+function handleFileUploadCoverLetter(event) {
+  coverLetterFile.value = event.target.files[0];
+}
+
+function closeApplyPopup() {
+  showApplyPopup.value = false;
+  resumeFile.value = null;
+  selectedJobId.value = null;
+  coverLetterFile.value = "";
+}
 
 // Notification Logic
-  async function fetchNotifications() {
-    try {
-      const response = await axios.get('/notifications');
-      notifications.value = response.data.notifications;
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
-  }
+function pluralizeType(type, count) {
+  const formatted = formatType(type).toLowerCase();
+  return count > 1 ? `${formatted}s` : formatted;
+}
 
-  function formatType(type){
-    switch(type){
-      case "job_application":
-        return "Job Application";
-      case "inquiry":
-        return "Inquiry";
-      case "application_update":
-        return "Application Update";
-      case "message":
-        return "Message";
-      case "other":
-        return "Other";
-    }
+const filteredNotifications = computed(() =>
+  notifications.value.filter(
+    (notif) =>
+      notif && ["message", "inquiry", "application_update"].includes(notif.type)
+  )
+);
+
+async function fetchNotifications() {
+  try {
+    const response = await axios.get("/notifications");
+    const rawNotifications = response.data.notifications || [];
+
+    const grouped = new Map();
+
+    rawNotifications.forEach((notif) => {
+      if (!notif || !notif.type) return;
+
+      const key = `${notif.sender_id || "system"}_${notif.type}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          ...notif,
+          count: 1,
+          latestContent: notif.content,
+        });
+      } else {
+        const existing = grouped.get(key);
+        existing.count += 1;
+        existing.latestContent = notif.content; // latest content
+        grouped.set(key, existing);
+      }
+    });
+
+    notifications.value = Array.from(grouped.values());
+    newNotifications.value = notifications.value.length;
+
+    console.log("Fetched notifications:", rawNotifications);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
   }
+}
+
+function formatType(type) {
+  switch (type) {
+    case "job_application":
+      return "Job Application";
+    case "inquiry":
+      return "Inquiry";
+    case "application_update":
+      return "Application Update";
+    case "message":
+      return "Message";
+    case "other":
+      return "Other";
+  }
+}
 
 // Message Logic
 function sendMessage(companyId) {
@@ -403,16 +428,16 @@ function sendMessage(companyId) {
   showMessagePopup.value = true;
 }
 
-async function sendActualMessage(){
+async function sendActualMessage() {
   try {
-    const response = await axios.post('/message/send', {
+    const response = await axios.post("/message/send", {
       receiver_id: selectedCompanyId.value,
       message: messageContent.value,
     });
 
+    console.log("Message Sent:", response.data);
     showMessagePopup.value = false;
     messageContent.value = "";
-    
   } catch (error) {
     console.error("Error sending message:", error);
     alert("Failed to send message. Please try again later.");
@@ -423,7 +448,6 @@ onMounted(() => {
   fetchJobs();
   fetchNotifications();
 });
-
 
 // function selectIndustry(industry) {
 //   selectedIndustry.value = industry;
@@ -449,7 +473,6 @@ onMounted(() => {
 // });
 </script>
 
-
 <style scoped>
 * {
   box-sizing: border-box;
@@ -468,8 +491,9 @@ body,
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
-  border-right: 1px solid #ccc;
-  flex-shrink: 0;
+  border-radius: 2vh;
+  border-right: 3.5px solid #045d56;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .logo {
@@ -513,7 +537,7 @@ body,
   cursor: pointer;
   transition: transform 0.3s ease, background-color 0.3s ease;
   padding: 15px 20px;
-  margin-top: 32.5vh;
+  margin-top: 15vh;
   margin-left: 8.5vh;
   border-radius: 10px;
 }
@@ -658,6 +682,7 @@ body,
   text-align: left;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   animation: popIn 0.3s ease;
+  resize: none;
 }
 
 .popup h3 {
@@ -684,10 +709,60 @@ body,
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  margin-right: 2vh;
 }
 
 .popup button:hover {
   background-color: #033f3a;
+}
+
+.apply-popup {
+  background-color: #fff;
+  padding: 30px 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.apply-popup h3 {
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.apply-popup span {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+  color: #333;
+}
+
+.apply-popup input[type="file"] {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.apply-popup button {
+  padding: 10px 20px;
+  border: none;
+  margin-right: 2vh;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #045d56;
+  color: #fff;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.apply-popup button:hover {
+  background-color: #f1f1f1;
+  color: #045d56;
 }
 
 @keyframes popIn {
@@ -712,8 +787,16 @@ body,
 
 .left-content {
   flex: 3;
+  background: white;
+  border-radius: 10px;
+  border-bottom: #045d56 4px solid;
+  padding: 15px;
+  overflow: auto;
 }
 
+.left-content h3 {
+  margin-bottom: 2vh;
+}
 .company-name {
   font-size: 20px;
   font-weight: bold;
@@ -741,7 +824,7 @@ body,
   background-color: #045d56;
   color: #fff;
   width: 15%;
-  margin-left: 88vh;
+  margin-left: 70vh;
   margin-right: 5vh;
   border: none;
   padding: 6px 10px;
@@ -759,19 +842,21 @@ body,
 .job-box {
   border: 1px solid #ddd;
   padding: 15px;
-  max-width: 100%;
+  max-width: 90%;
+  margin-left: 5vh;
   margin-bottom: 20px;
   border-radius: 12px;
+  border-bottom: #045d56 4px solid;
   background-color: #fff;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
-.job-card {
+/* .job-card {
   border: 1px solid #ddd;
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 20px;
   background-color: #fff;
-}
+} */
 .job-header {
   display: flex;
   align-items: center;
@@ -1072,7 +1157,7 @@ label {
   .sidebar.active {
     transform: translateX(0);
   }
-.popup {
+  .popup {
     width: 80%;
   }
   .topbar input[type="text"] {

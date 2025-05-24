@@ -14,6 +14,11 @@
             <img src="/public/mail.png" class="ikon" /> MESSAGES
           </router-link>
         </li>
+        <li>
+          <router-link to="/Application" class="sidenav-text">
+            <img src="/public/resume.png" class="ikon" /> APPLICATION
+          </router-link>
+        </li>
         <li style="font-weight: bold">
           <router-link to="/Applicantprofile" class="sidenav-text">
             <img src="/public/user.png" class="ikon" />
@@ -50,42 +55,6 @@
           <input type="text" placeholder="Search..." />
         </div>
         <div class="icons-right">
-          <div class="icon industry-dropdown">
-            <img src="/public/search.png" />
-            <div class="custom-dropdown">
-              <div class="dropdown-label">Industry</div>
-              <ul class="dropdown-options">
-                <li @click="filterBy('Tech Field')">Tech Field</li>
-                <li @click="filterBy('Hospitality & Tourism Management')">
-                  Hospitality & Tourism Management
-                </li>
-                <li @click="filterBy('Education, Arts & Sciences')">
-                  Education, Arts & Sciences
-                </li>
-                <li @click="filterBy('Business & Accountancy')">
-                  Business & Accountancy
-                </li>
-                <li @click="filterBy('Health Profession')">
-                  Health Profession
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="icon industry-dropdown">
-            <img src="/public/company.png" />
-            <div class="custom-dropdown">
-              <div class="dropdown-label">Company</div>
-              <ul class="dropdown-options">
-                <li>Estaciong Co.</li>
-                <li>Barbatos Co.</li>
-                <li>Lopez Co.</li>
-                <li>Cordova Co.</li>
-                <li>ong co.</li>
-              </ul>
-            </div>
-          </div>
-
           <div class="icon" @click="toggleMail">
             <img src="/public/mail.png" />
             <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
@@ -219,7 +188,7 @@ export default {
       newNotifications: 0,
       profileImage: null,
       isEditing: false,
-      isSidenavOpen: false,
+      isSidenavOpen: true,
     };
   },
 
@@ -291,8 +260,9 @@ body,
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
-  border-right: 1px solid #ccc;
-  flex-shrink: 0;
+  border-radius: 2vh;
+  border-right: 3.5px solid #045d56;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .logo {
@@ -336,7 +306,7 @@ body,
   cursor: pointer;
   transition: transform 0.3s ease, background-color 0.3s ease;
   padding: 15px 20px;
-  margin-top: 32.5vh;
+  margin-top: 15vh;
   margin-left: 8.5vh;
   border-radius: 10px;
 }
@@ -599,6 +569,7 @@ body,
   border: 1px solid #ccc;
   border-radius: 2rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  border-left: #045d56 4px solid;
   padding: 2rem;
   height: 100%;
   width: 100%;
