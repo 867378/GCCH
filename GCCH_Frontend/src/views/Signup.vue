@@ -30,13 +30,14 @@
         <!-- APPLICANT FORM  -->
         <div v-else-if="currentStep === 'applicant'" class="form-view">
           <h2 class="title">Applicant Information</h2>
-          <form @submit.prevent = "submitApplicantForm">
+          <form @submit.prevent="submitApplicantForm">
             <input placeholder="First Name" v-model="form.firstName" required />
             <input
               placeholder="Middle Name (optional)"
               v-model="form.middleName"
             />
             <input placeholder="Last Name" v-model="form.lastName" required />
+            <span class="bday">BIRTHDAY</span>
             <input type="date" v-model="form.birthday" required />
             <select v-model="form.gender" required>
               <option value="" disabled selected>Select Gender</option>
@@ -91,7 +92,7 @@
         <!-- COMPANY FORM  -->
         <div v-else-if="currentStep === 'company'" class="form-view">
           <h2 class="title">Company Information</h2>
-          <form @submit.prevent = "submitCompanyForm">
+          <form @submit.prevent="submitCompanyForm">
             <input
               placeholder="Company Name"
               v-model="form.companyName"
@@ -115,7 +116,7 @@
               required
             />
             <input placeholder="City" v-model="form.city" required />
-            <input placeholder="Province" v-model="form.province" required/>
+            <input placeholder="Province" v-model="form.province" required />
             <input placeholder="Country" v-model="form.country" required />
             <input
               placeholder="Industry Type"
@@ -137,7 +138,7 @@
 </template>
 
 <script setup>
-import { ref,onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 
@@ -160,33 +161,37 @@ const form = ref({
   city: "",
   province: "",
   country: "",
-  industry_type: "", 
-})
+  industry_type: "",
+});
 
 if (!userId) {
   alert("User ID not found. Please log in again.");
   router.push("/login");
 }
 
-const continueAction = async() => {
+const continueAction = async () => {
   try {
-    await axios.post(`user/set-role/${userId}`, {
-      role: selectedRole.value,
-    }, {withCredentials: true});
+    await axios.post(
+      `user/set-role/${userId}`,
+      {
+        role: selectedRole.value,
+      },
+      { withCredentials: true }
+    );
 
     currentStep.value = selectedRole.value;
   } catch (error) {
     console.error("Error setting role:", error);
     alert(error.response.data.message || "An error occurred");
   }
-}
+};
 const goBack = () => {
   currentStep.value = "select";
-}
+};
 
-const submitApplicantForm = async() => {
+const submitApplicantForm = async () => {
   try {
-    const response = await axios.post(`user/applicant/profile/${userId}`,{
+    const response = await axios.post(`user/applicant/profile/${userId}`, {
       first_name: form.value.firstName,
       middle_name: form.value.middleName,
       last_name: form.value.lastName,
@@ -203,11 +208,11 @@ const submitApplicantForm = async() => {
     console.error("Error submitting form:", error);
     alert(error.response.data.message || "An error occurred");
   }
-}
+};
 
-const submitCompanyForm = async() => {
+const submitCompanyForm = async () => {
   try {
-    const response = await axios.post(`user/company/profile/${userId}`,{
+    const response = await axios.post(`user/company/profile/${userId}`, {
       company_name: form.value.companyName,
       company_telephone: form.value.telephone,
       street_address: form.value.address,
@@ -224,7 +229,7 @@ const submitCompanyForm = async() => {
     console.error("Error submitting form:", error);
     alert(error.response.data.message);
   }
-}
+};
 </script>
 
 <style scoped>
@@ -241,8 +246,8 @@ const submitCompanyForm = async() => {
 
 .main-wrapper {
   display: flex;
-  width: 100%;
-  max-width: 1000px;
+  width: 60%;
+  max-width: 60%;
   background-color: #ffffff;
   border-radius: 1rem;
   overflow: hidden;
@@ -280,6 +285,16 @@ const submitCompanyForm = async() => {
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 1rem;
+}
+
+.bday{
+  display: block;
+  text-align: left;
+  padding-left: 0.5rem;
+  margin-top: 0.5rem;
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .dropdown,
@@ -395,5 +410,197 @@ select:focus {
   height: 100%;
   border-radius: 1rem;
   object-fit: contain;
+}
+
+  @media (max-width: 1024px) {
+    .main-wrapper {
+      display: flex;
+      width: 90%;
+      max-width: 90%;
+      min-height: 70vh;
+      overflow: hidden;
+      margin: 2rem auto;
+    }
+  
+    .photo-panel {
+      width: 45%;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  
+    .photo-panel img {
+      max-width: 80%;
+      height: auto;
+      object-fit: contain;
+    }
+  
+    .kontinue-btn {
+      width: 30%;
+      margin-top: 1rem;
+    }
+  
+    .content-box {
+      max-width: 450px;
+      margin-top: 2vh;
+      padding: 2rem;
+    }
+  }
+
+
+@media (max-width: 768px) {
+  .main-wrapper {
+    flex-direction: column;
+    padding: 1.5rem;
+    width: 95%;
+    height: 90vh;
+    max-width: 50%;
+    background-color: #ffffff;
+    overflow: auto;
+  }
+
+  .photo-panel {
+    width: 90%;
+    max-height: 25vh;
+    padding: 0.5rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9fafb;
+  }
+
+  .photo-panel img {
+    max-width: 45%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .content-box {
+    width: 90%;
+    max-width: 90%;
+    padding: 1rem;
+    margin: 1vh auto 0;
+    box-shadow: none;
+  }
+
+  .title {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 0 1rem;
+  }
+
+  .kontinue-btn,
+  .back-btn {
+    width: 45%;
+    margin: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-wrapper {
+    width: 90%;
+    max-width: 90%;
+    padding: 1rem;
+    height: 85vh;
+    margin: 2rem auto;
+  }
+
+  .photo-panel {
+    width: 90%;
+    max-height: 15vh;
+    padding: 0.5rem;
+  }
+
+  .photo-panel img {
+    max-width: 35%;
+    height: auto;
+  }
+
+  .content-box {
+    width: 90%;
+    padding: 0.75rem;
+    margin: 0.5rem auto;
+    box-shadow: none;
+  }
+
+  .title {
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .dropdown,
+  input,
+  select {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0;
+    margin-top: 0.75rem;
+  }
+
+  .kontinue-btn,
+  .back-btn {
+    width: 100%;
+    margin: 0;
+    padding: 0.6rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .main-wrapper {
+    width: 85%;
+    height: 80vh;
+    padding: 0.5rem;
+    margin: 1rem auto;
+  }
+
+  .photo-panel {
+    max-height: 12vh;
+  }
+
+  .photo-panel img {
+    max-width: 30%;
+  }
+
+  .content-box {
+    width: 95%;
+    padding: 0.5rem;
+  }
+
+  .title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .dropdown,
+  input,
+  select {
+    font-size: 0.85rem;
+    padding: 0.4rem;
+  }
+
+  .kontinue-btn,
+  .back-btn {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+
+  .button-group {
+    gap: 0.3rem;
+  }
 }
 </style>
