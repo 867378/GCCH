@@ -187,7 +187,7 @@
                         type="checkbox"
                         :value="course"
                         :checked="selectedCourses.includes(course)"
-                        @change="handleCheckboxChange($event,course)"
+                        @change="handleCheckboxChange($event, course)"
                       />
                       {{ course }}
                     </label>
@@ -287,24 +287,43 @@ const showCourseDropdown = ref(false);
 const selectedCourses = ref([]);
 
 const courseOptions = [
-  "BSIT", "BSCS", "BSEMC", "BSN", "BSM", "BSA",
-  "BSBA-FM", "BSBA-HRM", "BSBA-MM", "BSCA", "BSHM",
-  "BSTM", "BAComm", "BECEd", "BCAEd", "BPEd", "BEED",
-  "BSEd-Eng", "BSEd-Math", "BSEd-Fil", "BSEd-SS", "BSEd-Sci", "Other"
+  "BSIT",
+  "BSCS",
+  "BSEMC",
+  "BSN",
+  "BSM",
+  "BSA",
+  "BSBA-FM",
+  "BSBA-HRM",
+  "BSBA-MM",
+  "BSCA",
+  "BSHM",
+  "BSTM",
+  "BAComm",
+  "BECEd",
+  "BCAEd",
+  "BPEd",
+  "BEED",
+  "BSEd-Eng",
+  "BSEd-Math",
+  "BSEd-Fil",
+  "BSEd-SS",
+  "BSEd-Sci",
+  "Other",
 ];
 
-const handleCheckboxChange = (event,course) => {
-  if(event.target.checked){
-    if(selectedCourses.value.length < 3){
-      selectedCourses.value.push(course)
+const handleCheckboxChange = (event, course) => {
+  if (event.target.checked) {
+    if (selectedCourses.value.length < 3) {
+      selectedCourses.value.push(course);
     } else {
       selectedCourses.value.shift();
       selectedCourses.value.push(course);
     }
-  } else{
-    selectedCourses.value = selectedCourses.value.filter(c => c!== course)
+  } else {
+    selectedCourses.value = selectedCourses.value.filter((c) => c !== course);
   }
-}
+};
 
 const jobData = ref({
   job_title: "",
@@ -973,27 +992,90 @@ body,
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 200px;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
 
   .sidebar.active {
+    transition: transform 0.3s ease;
     transform: translateX(0);
   }
+
   .logo {
-    margin-top: 8vh;
+    margin-top: 4vh;
     margin-left: 4vh;
-    margin-bottom: 10vh;
+    margin-bottom: 8vh;
   }
-  label {
-    margin-right: 45vh;
+
+  .content {
+    padding: 15px;
+    gap: 15px;
   }
+
+  .post-box {
+    width: 100%;
+    padding: 15px;
+  }
+
   .cards {
-    font-size: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
   }
-  .sign-out {
-    margin-left: 7.5vh;
+
+  .card {
+    min-width: 200px;
+    font-size: 0.6rem;
+  }
+
+  .form-row {
+    grid-template-columns: 2fr, 3;
+    gap: 2vh;
+  }
+
+  .job-input,
+  .salary-input,
+  .slot-input {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .job-type,
+  .salary-range {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .dropdown-checkbox {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .dropdown-btn {
+    width: 100%;
+  }
+
+  .posted-jobs-box {
+    width: 35vh;
+    margin: 10px;
+  }
+
+  .right-content {
+    padding: 15px;
+  }
+
+  .main {
+    margin-left: 0;
+  }
+
+  .topbar {
+    left: 0;
+    padding: 0 15px;
+  }
+
+  .avatar {
+    width: 25px;
+    height: 25px;
   }
 }
 
@@ -1002,12 +1084,17 @@ body,
     display: flex;
     z-index: 1001;
   }
-  .content {
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
-  }
 
+  .content {
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    padding: 20px;
+    margin-top: 10px;
+    overflow: auto;
+  }
+  .left-content {
+    flex: 1;
+  }
   .sidebar {
     font-size: 10px;
     position: fixed;
@@ -1035,18 +1122,35 @@ body,
   }
 
   .post-box {
-    margin-bottom: 15px;
+    width: 90%;
+    padding: 15px;
     border-radius: 2vh;
+    margin: 0 auto 15px;
+    overflow: visible;
   }
+
   .post-box textarea {
-    margin-top: 2vh;
     height: 20vh;
+  }
+
+  .post-box h3 {
+    font-size: 24px;
   }
   .post-box button {
     padding: 6px 15px;
     margin-top: 10px;
   }
-
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2vh;
+    width: 100%;
+    margin: 2vh 0;
+    align-items: center;
+  }
+  .dropdown-checkbox {
+    margin-top: 0vh;
+  }
   .icon img {
     width: 20px;
     height: 20px;
@@ -1056,7 +1160,10 @@ body,
     margin-right: 13vh;
   }
   .cards {
-    height: 9vh;
+    height: 5vh;
+    width: 90%;
+    margin-bottom: 7vh;
+    padding-left: 5.6vh;
     font-size: 8px;
   }
 
@@ -1071,6 +1178,22 @@ body,
     width: 30px;
     height: 30px;
   }
+
+  .right-content {
+    padding: 15px;
+    height: auto;
+    min-height: 300px;
+    width: 90%;
+    margin-left: 5vh;
+    overflow: auto;
+  }
+  .posted-jobs-box {
+    width: 100%;
+    margin: 10px 0;
+    padding: 15px;
+    font-size: 12px;
+  }
+
   .sign-out {
     width: 60px;
     height: 40px;
@@ -1078,7 +1201,7 @@ body,
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 435px) {
   .hamburger {
     display: flex;
     z-index: 1001;
@@ -1088,6 +1211,11 @@ body,
     margin-left: 5vh;
     margin-top: 5vh;
     margin-bottom: 5vh;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: (2, 1fr);
+    width: 90%;
   }
 
   .sidebar {
@@ -1105,8 +1233,9 @@ body,
   }
 
   .post-box {
+    margin-top: 33vh;
     margin-bottom: 10px;
-    border-radius: 2vh;
+    border-radius: 1vh;
   }
   .post-box textarea {
     margin-top: 2vh;
@@ -1115,6 +1244,29 @@ body,
   .post-box button {
     padding: 6px 10px;
     margin-top: 10px;
+    font-size: 10px;
+  }
+
+  .right-content {
+    width: 90%;
+    margin-left: 3vh;
+    overflow: auto;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 2vh;
+    width: 100%;
+    margin: 2vh 0;
+    align-items: center;
+  }
+
+  .posted-jobs-box {
+    width: 90%;
+    margin: 10px 0;
+    padding: 15px;
+    font-size: 12px;
+    margin-left: 2vh;
   }
 }
 @media (max-width: 375px) {
