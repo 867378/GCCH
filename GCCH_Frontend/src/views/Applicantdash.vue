@@ -55,56 +55,6 @@
           <input type="text" placeholder="Search..." />
         </div>
         <div class="icons-right">
-          <div class="icon industry-dropdown">
-            <img src="/public/search.png" />
-            <div class="custom-dropdown">
-              <button @click="clearFilters" class="clear-btn">
-                Clear Filters
-              </button>
-
-              <div class="dropdown-label">Industry</div>
-              <ul class="dropdown-options">
-                <li @click="selectIndustry('Techfield')">Tech Field</li>
-                <li @click="selectIndustry('Hospitality & Tourism Management')">
-                  Hospitality & Tourism Management
-                </li>
-                <li @click="selectIndustry('Education, Arts & Sciences')">
-                  Education, Arts & Sciences
-                </li>
-                <li @click="selectIndustry('Business & Accountancy')">
-                  Business & Accountancy
-                </li>
-                <li @click="selectIndustry('Health Profession')">
-                  Health Profession
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="icon industry-dropdown">
-            <img src="/public/company.png" />
-            <div class="custom-dropdown">
-              <button @click="clearFilters" class="clear-btn">
-                Clear Filters
-              </button>
-
-              <div class="dropdown-label">Company</div>
-              <ul class="dropdown-options">
-                <li @click="selectCompany('Tech Solutions Inc.')">
-                  Tech Solutions Inc.
-                </li>
-                <li @click="selectCompany('Tech Solutions Inc.')">
-                  Barbatos Co.
-                </li>
-                <li @click="selectCompany('Tech Solutions Inc.')">Lopez Co.</li>
-                <li @click="selectCompany('Tech Solutions Inc.')">Dior</li>
-                <li @click="selectCompany('Tech Solutions Inc.')">
-                  Louis Vuitton
-                </li>
-              </ul>
-            </div>
-          </div>
-
           <div class="icon" @click="toggleMail">
             <img src="/public/mail.png" />
             <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
@@ -177,11 +127,21 @@
               </div>
 
               <!-- Job Slots -->
-              <p>{{ matchedJob.filled_slots }}/{{ matchedJob.total_slots }}</p>
-
+              <div class="job-info">
+                <div class="job-detail">
+                  <img src="/public/people.png" class="ikon" />
+                  <p>
+                    {{ matchedJob.filled_slots }}/{{ matchedJob.total_slots }}
+                  </p>
+                </div>
+              </div>
               <!--  -->
-              <p>Status: {{ matchedJob.status }}</p>
-
+              <div class="job-info">
+                <div class="job-detail">
+                  <img src="/public/updates.png" class="ikon" />
+                  <p>Status: {{ matchedJob.status }}</p>
+              </div>
+            </div>
               <!-- Job Description -->
               <p class="job-description">{{ matchedJob.job_description }}</p>
 
@@ -235,17 +195,18 @@
   >
     <div class="apply-popup">
       <h3>📄 Upload Your Resume</h3>
+      <span>Resume </span>
       <input type="file" @change="handleFileUploadResume" accept=".pdf" />
       <br /><br />
-      <input type="file" @change="handleFileUploadCoverLetter" accept=".pdf,.doc,.docx" />
+      <span>Cover Letter </span>
+      <input
+        type="file"
+        @change="handleFileUploadCoverLetter"
+        accept=".pdf,.doc,.docx"
+      />
       <br /><br />
       <button @click="submitApplication">Apply</button>
-      <button
-        style="margin-left: 10px; background-color: gray"
-        @click="closeApplyPopup"
-      >
-        Cancel
-      </button>
+      <button @click="closeApplyPopup">Cancel</button>
     </div>
   </div>
 
@@ -261,14 +222,11 @@
         v-model="messageContent"
         placeholder="Type your message here..."
         rows="5"
-        style="width: 100%; padding: 8px"
+        style="width: 100%; padding: 8px; resize: none"
       ></textarea>
       <br /><br />
       <button @click="sendActualMessage">Send</button>
-      <button
-        style="margin-left: 10px; background-color: gray"
-        @click="showMessagePopup = false"
-      >
+      <button @click="showMessagePopup = false" class="cancel-btn">
         Cancel
       </button>
     </div>
@@ -357,7 +315,6 @@ function applyToJob(jobId) {
   showApplyPopup.value = true;
 }
 
-
 async function submitApplication() {
   if (!coverLetterFile.value) {
     alert("Please include a cover letter.");
@@ -366,10 +323,10 @@ async function submitApplication() {
 
   const formData = new FormData();
   formData.append("job_id", selectedJobId.value);
-  formData.append("cover_letter", coverLetterFile.value);  // 👈 MUST be File
+  formData.append("cover_letter", coverLetterFile.value); // 👈 MUST be File
 
   if (resumeFile.value) {
-    formData.append("resume", resumeFile.value);  // 👈 MUST be File
+    formData.append("resume", resumeFile.value); // 👈 MUST be File
   }
 
   try {
@@ -388,12 +345,11 @@ async function submitApplication() {
   }
 }
 
-
 function handleFileUploadResume(event) {
   resumeFile.value = event.target.files[0];
 }
 
-function handleFileUploadCoverLetter(event){
+function handleFileUploadCoverLetter(event) {
   coverLetterFile.value = event.target.files[0];
 }
 
@@ -726,6 +682,7 @@ body,
   text-align: left;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   animation: popIn 0.3s ease;
+  resize: none;
 }
 
 .popup h3 {
@@ -752,6 +709,7 @@ body,
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  margin-right: 2vh;
 }
 
 .popup button:hover {
@@ -760,72 +718,53 @@ body,
 
 .apply-popup {
   background-color: #fff;
-  position: relative;
-  padding: 25px;
-  border-radius: 15px;
-  width: 38%;
-  height: 45vh;
-  overflow-y: auto;
-  text-align: left;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  animation: popIn 0.3s ease;
+  padding: 30px 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .apply-popup h3 {
-  margin-bottom: 5vh;
-  font-size: 20px;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.apply-popup span {
+  display: block;
+  margin-bottom: 6px;
   font-weight: bold;
-  color: #045d56;
+  color: #333;
 }
 
-/* File Input */
 .apply-popup input[type="file"] {
-  background-color: #045d56;
-  border: 2px #999;
-  padding: 12px 16px;
-  margin-left: 18vh;
-  width: 50%;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 14px;
-  color: #e9e4e4;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
-}
-
-/* Cover Letter Input */
-.apply-popup input[type="text"] {
-  margin-top: 15px;
-  margin-left: 18vh;
-
-  width: 50%;
-  padding: 10px;
-  font-size: 14px;
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 16px;
   border: 1px solid #ccc;
-  border-radius: 6px;
-  box-sizing: border-box;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
-
+  border-radius: 8px;
 }
 
-/* Buttons */
 .apply-popup button {
-  margin-top: 20px;
   padding: 10px 20px;
   border: none;
-  border-radius: 6px;
-  margin-left: 25vh;
+  margin-right: 2vh;
+  border-radius: 8px;
+  cursor: pointer;
   background-color: #045d56;
   color: #fff;
-  font-size: 14px;
-  cursor: pointer;
+  font-weight: bold;
   transition: background-color 0.2s ease;
 }
 
 .apply-popup button:hover {
-  background-color: #e0f2f1;
+  background-color: #f1f1f1;
   color: #045d56;
 }
+
 @keyframes popIn {
   from {
     opacity: 0;
@@ -850,6 +789,7 @@ body,
   flex: 3;
   background: white;
   border-radius: 10px;
+  border-bottom: #045d56 4px solid;
   padding: 15px;
   overflow: auto;
 }

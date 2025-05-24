@@ -597,21 +597,24 @@ body,
 .resume-box {
   background: white;
   padding: 20px;
-  margin-bottom: 10px;
+  border-radius: 10px;
+  margin-bottom: 20px;
   border-radius: 3vh;
   border-bottom: #045d56 4px solid;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
+  width: 95%;
+  height: 80vh;
+  margin-left: 3vh;
+  overflow: auto;
 }
 .resumeh3 {
   text-align: left;
   font-size: 1.7rem;
   margin-bottom: 2vh;
+  text-transform: uppercase;
 }
 .resume-list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(1, 1fr);
   gap: 10px;
   margin-top: 3vh;
   max-height: 100%;
@@ -631,53 +634,25 @@ body,
   align-self: flex-start;
   border-left: 4px solid #045d56;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  max-width: 58%;
+  max-width: 60%;
   height: 100%;
-  margin-left: 13vh;
-  margin-bottom: 20px;
+  margin-left: 25vh;
+  margin-bottom: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.resume-item button {
-  background-color: #045d56;
-  color: white;
-  border: none;
-  margin-right: 1vh;
-  padding: 4px 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-top: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.resume-item button:hover {
-  background-color: #033f3a;
-  transform: translateY(-2px);
-}
-
-.status-select {
-  padding: 6px 12px;
-  font-size: 14px;
-  border: 1px solid #bbb;
-  border-radius: 6px;
-  background-color: #f9f9f9;
-  color: #333;
-  cursor: pointer;
-  margin-top: 1vh;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.status-select:focus {
-  outline: none;
-  border-color: #045d56;
-  box-shadow: 0 0 3px rgba(4, 93, 86, 0.5);
+.resume-item.received:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
 }
 
 .right-content {
   flex: 1;
   background: white;
   border-radius: 10px;
+  border-left: #045d56 4px solid;
   padding: 20px;
+  width: 40vh;
   height: 80vh;
   overflow: auto;
 }
@@ -712,7 +687,7 @@ body,
   padding: 20px;
   font-size: 10px;
   margin-top: 2vh;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }

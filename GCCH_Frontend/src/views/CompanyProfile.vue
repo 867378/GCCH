@@ -15,6 +15,11 @@
           </router-link>
         </li>
         <li>
+          <router-link to="/companyaccepted" class="sidenav-text">
+            <img src="/public/agreement.png" class="ikon" /> ACCEPTED
+          </router-link>
+        </li>
+        <li>
           <router-link to="/CompanyMessage" class="sidenav-text">
             <img src="/public/message.png" class="ikon" />
             MESSAGES

@@ -15,6 +15,11 @@
           </router-link>
         </li>
         <li>
+          <router-link to="/companyaccepted" class="sidenav-text">
+            <img src="/public/agreement.png" class="ikon" /> ACCEPTED
+          </router-link>
+        </li>
+        <li>
           <router-link to="/companymessage" class="sidenav-text">
             <img src="/public/message.png" class="ikon" />
             MESSAGES
@@ -165,102 +170,28 @@
                   <option value="contract">Contract</option>
                 </select>
 
-                <select
-                  v-model="jobData.recommended_course"
-                  class="job-form job-type"
-                  id="recommended_course"
-                >
-                  <option disabled selected value="">Recommended Course</option>
-                  <option value="BSIT">BSIT</option>
-                  <option value="BSCS">BSCS</option>
-                  <option value="BSEMC">BSEMC</option>
-                  <option value="BSN">BSN</option>
-                  <option value="BSM">BSM</option>
-                  <option value="BSA">BSA</option>
-                  <option value="BSBA-FM">BSBA-FM</option>
-                  <option value="BSBA-HRM">BSBA-HRM</option>
-                  <option value="BSBA-MM">BSBA-MM</option>
-                  <option value="BSCA">BSCA</option>
-                  <option value="BSHM">BSHM</option>
-                  <option value="BSTM">BSTM</option>
-                  <option value="BAComm">BAComm</option>
-                  <option value="BECEd">BECEd</option>
-                  <option value="BCAEd">BCAEd</option>
-                  <option value="BPEd">BPEd</option>
-                  <option value="BEED">BEED</option>
-                  <option value="BSEd-Eng">BSEd-Eng</option>
-                  <option value="BSEd-Math">BSEd-Math</option>
-                  <option value="BSEd-Fil">BSEd-Fil</option>
-                  <option value="BSEd-SS">BSEd-SS</option>
-                  <option value="BSEd-Sci">BSEd-Sci</option>
-                  <option value="Other">Other</option>
-                </select>
-
-                <select
-                  v-model="jobData.recommended_course_2"
-                  class="job-form job-type"
-                  id="recommended_course_2"
-                >
-                  <option disabled selected value="">
-                    Recommended Course 2
-                  </option>
-                  <option value="BSIT">BSIT</option>
-                  <option value="BSCS">BSCS</option>
-                  <option value="BSEMC">BSEMC</option>
-                  <option value="BSN">BSN</option>
-                  <option value="BSM">BSM</option>
-                  <option value="BSA">BSA</option>
-                  <option value="BSBA-FM">BSBA-FM</option>
-                  <option value="BSBA-HRM">BSBA-HRM</option>
-                  <option value="BSBA-MM">BSBA-MM</option>
-                  <option value="BSCA">BSCA</option>
-                  <option value="BSHM">BSHM</option>
-                  <option value="BSTM">BSTM</option>
-                  <option value="BAComm">BAComm</option>
-                  <option value="BECEd">BECEd</option>
-                  <option value="BCAEd">BCAEd</option>
-                  <option value="BPEd">BPEd</option>
-                  <option value="BEED">BEED</option>
-                  <option value="BSEd-Eng">BSEd-Eng</option>
-                  <option value="BSEd-Math">BSEd-Math</option>
-                  <option value="BSEd-Fil">BSEd-Fil</option>
-                  <option value="BSEd-SS">BSEd-SS</option>
-                  <option value="BSEd-Sci">BSEd-Sci</option>
-                  <option value="Other">Other</option>
-                </select>
-
-                <select
-                  v-model="jobData.recommended_course_3"
-                  class="job-form job-type"
-                  id="recommended_course_3"
-                >
-                  <option disabled selected value="">
-                    Recommended Course 3
-                  </option>
-                  <option value="BSIT">BSIT</option>
-                  <option value="BSCS">BSCS</option>
-                  <option value="BSEMC">BSEMC</option>
-                  <option value="BSN">BSN</option>
-                  <option value="BSM">BSM</option>
-                  <option value="BSA">BSA</option>
-                  <option value="BSBA-FM">BSBA-FM</option>
-                  <option value="BSBA-HRM">BSBA-HRM</option>
-                  <option value="BSBA-MM">BSBA-MM</option>
-                  <option value="BSCA">BSCA</option>
-                  <option value="BSHM">BSHM</option>
-                  <option value="BSTM">BSTM</option>
-                  <option value="BAComm">BAComm</option>
-                  <option value="BECEd">BECEd</option>
-                  <option value="BCAEd">BCAEd</option>
-                  <option value="BPEd">BPEd</option>
-                  <option value="BEED">BEED</option>
-                  <option value="BSEd-Eng">BSEd-Eng</option>
-                  <option value="BSEd-Math">BSEd-Math</option>
-                  <option value="BSEd-Fil">BSEd-Fil</option>
-                  <option value="BSEd-SS">BSEd-SS</option>
-                  <option value="BSEd-Sci">BSEd-Sci</option>
-                  <option value="Other">Other</option>
-                </select>
+                <div class="dropdown-checkbox">
+                  <button
+                    type="button"
+                    @click="toggleCourseDropdown"
+                    class="dropdown-btn"
+                  >
+                    Recommended Courses
+                    <span v-if="selectedCourses.length"
+                      >({{ selectedCourses.length }})</span
+                    >
+                  </button>
+                  <div v-if="showCourseDropdown" class="dropdown-list">
+                    <label v-for="course in courseOptions" :key="course">
+                      <input
+                        type="checkbox"
+                        :value="course"
+                        v-model="selectedCourses"
+                      />
+                      {{ course }}
+                    </label>
+                  </div>
+                </div>
 
                 <input
                   v-model="jobData.job_location"
@@ -276,10 +207,11 @@
                   class="salary-input"
                 />
 
-                <input 
+                <input
                   type="number"
                   v-model="jobData.total_slots"
                   placeholder="Hiring Slot"
+                  class="slot-input"
                 />
               </div>
             </div>
@@ -303,11 +235,22 @@
               <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
               <p><strong>Status:</strong> {{ job.status }}</p>
-              <p><strong>Slot: {{ job.filled_slots }}/{{ job.total_slots }}</strong></p>
-              <p><strong>Recommended courses:</strong>
-                {{ [job.recommended_course, job.recommended_course_2, job.recommended_course_3]
-                  .filter(course => course)
-                  .join(', ') }}
+              <p>
+                <strong
+                  >Slot: {{ job.filled_slots }}/{{ job.total_slots }}</strong
+                >
+              </p>
+              <p>
+                <strong>Recommended courses:</strong>
+                {{
+                  [
+                    job.recommended_course,
+                    job.recommended_course_2,
+                    job.recommended_course_3,
+                  ]
+                    .filter((course) => course)
+                    .join(", ")
+                }}
               </p>
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
@@ -338,6 +281,17 @@ const isSidenavOpen = ref(true);
 const messages = ref([]);
 const notifications = ref({});
 const postedJobs = ref([]);
+//coirse dropdown
+
+const showCourseDropdown = ref(false);
+const selectedCourses = ref([]);
+
+const courseOptions = [
+  "BSIT", "BSCS", "BSEMC", "BSN", "BSM", "BSA",
+  "BSBA-FM", "BSBA-HRM", "BSBA-MM", "BSCA", "BSHM",
+  "BSTM", "BAComm", "BECEd", "BCAEd", "BPEd", "BEED",
+  "BSEd-Eng", "BSEd-Math", "BSEd-Fil", "BSEd-SS", "BSEd-Sci", "Other"
+];
 
 const jobData = ref({
   job_title: "",
@@ -348,8 +302,12 @@ const jobData = ref({
   recommended_course: "",
   recommended_course_2: "",
   recommended_course_3: "",
-  total_slots: ""
+  total_slots: "",
 });
+
+function toggleCourseDropdown() {
+  showCourseDropdown.value = !showCourseDropdown.value;
+}
 
 function toggleMail() {
   showMail.value = !showMail.value;
@@ -377,6 +335,13 @@ function confirmSignOut() {
       console.error("Error signing out:", error);
     });
 }
+//checkbox logic
+// async function postJob() {
+//   jobData.value.recommended_course = selectedCourses.value[0] || null;
+//   jobData.value.recommended_course_2 = selectedCourses.value[1] || null;
+//   jobData.value.recommended_course_3 = selectedCourses.value[2] || null;
+
+// }
 
 // Notification Logic
 async function fetchNotifications() {
@@ -434,7 +399,7 @@ async function postJob() {
       recommended_course: "",
       recommended_course_2: "",
       recommended_course_3: "",
-      total_slots:"",
+      total_slots: "",
     };
   } catch (error) {
     console.error("Error posting job:", error);
@@ -712,6 +677,7 @@ body,
   border-radius: 5vh;
   width: 130vh;
   border-bottom: #045d56 solid 4px;
+  overflow: auto;
 }
 .post-box textarea {
   width: 100%;
@@ -749,7 +715,7 @@ body,
 
 .form-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 3fr);
   gap: 1vh;
   align-items: center;
   margin-top: 3vh;
@@ -809,7 +775,7 @@ body,
   color: #000;
 }
 .job-input {
-  width: 32vh;
+  width: 44vh;
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #ccc;
@@ -817,8 +783,50 @@ body,
   color: #333;
   margin-left: 2.5vh;
 }
+
+.dropdown-checkbox {
+  position: relative;
+  display: flex;
+  margin-top: 4vh;
+}
+
+.dropdown-btn {
+  padding: 10px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  width: 80%;
+  text-align: left;
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  width: 80%;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.dropdown-list label {
+  display: block;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
 .salary-input {
-  width: 32vh;
+  width: 44vh;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  margin-left: 2.5vh;
+}
+.slot-input {
+  width: 44vh;
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #ccc;
@@ -858,6 +866,7 @@ body,
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
   overflow: hidden;
+  text-transform: uppercase;
   border-left: #045d56 solid 5px;
 }
 

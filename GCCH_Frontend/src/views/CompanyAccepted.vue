@@ -9,12 +9,12 @@
             HOME
           </router-link>
         </li>
-        <li style="font-weight: bold">
+        <li>
           <router-link to="/companypost" class="sidenav-text">
             <img src="/public/laptop.png" class="ikon" /> POSTED JOBS
           </router-link>
         </li>
-        <li>
+        <li style="font-weight: bold">
           <router-link to="/companyaccepted" class="sidenav-text">
             <img src="/public/agreement.png" class="ikon" /> ACCEPTED
           </router-link>
@@ -98,17 +98,8 @@
       <div class="content">
         <div class="left-content">
           <div v-if="selectedJob" class="selected-job-box">
-            <h2>{{ selectedJob.job_title }}</h2>
-            <p>{{ selectedJob.job_description }}</p>
-            <p><strong>Location:</strong> {{ selectedJob.job_location }}</p>
-            <p><strong>Type:</strong> {{ selectedJob.job_type }}</p>
-            <p>
-              <strong>Monthly Salary:</strong> ₱{{ selectedJob.monthly_salary }}
-            </p>
-            <p><strong>Date Posted:</strong> {{ selectedJob.date_posted }}</p>
-            <p><strong>Status:</strong> {{ selectedJob.status }}</p>
-
-            <h3>Applicants</h3>
+           
+            <h3>Accepted Applicants</h3>
             <ul v-if="jobApplicants.length > 0">
               <li
                 v-for="application in jobApplicants"
@@ -137,114 +128,8 @@
                   ><strong>Schedule: </strong
                   >{{ application.scheduled_at }}</span
                 ><br />
-
-                <div>
-                  <a :href="application.cover_letter.embed_url" target="_blank">
-                    📄 View Cover Letter
-                  </a>
-                </div>
-                <div v-if="application.resume">
-                  <a :href="application.resume.embed_url" target="_blank"
-                    >📄 View Resume</a
-                  >
-                </div>
-
-                <div>
-                  <button
-                    v-if="!showStatusOptions"
-                    @click="showStatusOptions = true"
-                  >
-                    Select Status
-                  </button>
-
-                  <div v-else>
-                    <div class="button-group">
-                      <button
-                        @click="openConfirmModal(application.id, 'accepted')"
-                      >
-                        ✅ Accept
-                      </button>
-                      <button
-                        @click="openConfirmModal(application.id, 'rejected')"
-                      >
-                        ❌ Reject
-                      </button>
-                      <button @click="scheduleInterview(application.id)">
-                        📅 Schedule Interview
-                      </button>
-                      <button @click="scheduleAssessment(application.id)">
-                        📝 Schedule Assessment
-                      </button>
-                    </div>
-
-                    <textarea
-                      v-model="comment"
-                      placeholder="Add a comment (optional)"
-                      rows="3"
-                      class="border p-2 mt-2 w-full"
-                    ></textarea>
-
-                    <button
-                      @click="showStatusOptions = false"
-                      class="cancel-button"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      @click="
-                        assessApplication(application.id, 'comment', comment)
-                      "
-                    >
-                      Submit Comment
-                    </button>
-                  </div>
-                </div>
               </li>
             </ul>
-
-            <p v-else>No applicants have applied yet.</p>
-          </div>
-          <div v-else>
-            <p>Select a job to view details and applicants.</p>
-          </div>
-
-          <!-- Confirmation Modal -->
-          <div v-if="showConfirmModal" class="modal-overlay">
-            <div class="modal-content">
-              <p>
-                Are you sure you want to
-                <strong>{{
-                  decisionType === "accepted" ? "accept" : "reject"
-                }}</strong>
-                this applicant?
-              </p>
-              <div class="modal-buttons">
-                <button @click="confirmDecision">Yes</button>
-                <button @click="closeConfirmModal">Cancel</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- JOB DISPLAY -->
-        <div class="right-content">
-          <h3>POSTED JOBS</h3>
-          <div class="posted-jobs">
-            <div
-              class="posted-jobs-box"
-              v-for="(job, index) in postedJobs"
-              :key="index"
-              @click="selectJob(job)"
-            >
-              <h2>{{ job.job_title }}</h2>
-              <p>{{ job.job_description }}</p>
-              <p><strong>Location:</strong> {{ job.job_location }}</p>
-              <p><strong>Type:</strong> {{ job.job_type }}</p>
-              <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
-              <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
-              <p>Status: {{ job.status }}</p>
-            </div>
-            <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
         </div>
       </div>
@@ -276,31 +161,6 @@ const postedJobs = ref([]);
 
 const showStatusOptions = ref(false);
 const comment = ref("");
-
-//popup confirmation
-const showConfirmModal = ref(false);
-const selectedApplicationId = ref(null);
-const decisionType = ref("");
-
-function openConfirmModal(applicationId, type) {
-  selectedApplicationId.value = applicationId;
-  decisionType.value = type;
-  showConfirmModal.value = true;
-}
-
-function closeConfirmModal() {
-  showConfirmModal.value = false;
-}
-
-function confirmDecision() {
-  assessApplication(
-    selectedApplicationId.value,
-    decisionType.value,
-    null,
-    comment.value
-  );
-  closeConfirmModal();
-}
 
 function toggleMail() {
   showMail.value = !showMail.value;
@@ -724,7 +584,7 @@ body,
   border-radius: 10px;
   border: 2px solid #e0e6ed;
   border-bottom: #045d56 4px solid;
-  width: 60vh;
+  width: 40vh;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -783,34 +643,6 @@ body,
 
 .selected-job-box a:hover {
   text-decoration: underline;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-.modal-content {
-  background: #fff;
-  padding: 20px 30px;
-  border-radius: 10px;
-  text-align: center;
-}
-.modal-buttons button {
-  margin: 20px 20px;
-  padding: 6px 15px;
-  background-color: #d32f2f;
-  color: white;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
 }
 
 textarea {
