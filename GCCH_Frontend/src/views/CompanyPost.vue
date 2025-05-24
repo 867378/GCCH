@@ -94,7 +94,7 @@
         </div>
       </div>
 
-      <!-- JOB POSTING -->
+      <!-- POSTED JOBS DISPLAY -->
       <div class="content">
         <div class="left-content">
           <div v-if="selectedJob" class="selected-job-box">
@@ -108,7 +108,7 @@
             <p><strong>Date Posted:</strong> {{ selectedJob.date_posted }}</p>
             <p><strong>Status:</strong> {{ selectedJob.status }}</p>
 
-            <h3>Applicants</h3>
+            <h3>Ongoing Applications</h3>
             <ul v-if="jobApplicants.length > 0">
               <li
                 v-for="application in jobApplicants"
@@ -139,9 +139,11 @@
                 ><br />
 
                 <div>
-                  <a :href="application.cover_letter.embed_url" target="_blank">
+                  <!-- <a :href="application.cover_letter.embed_url" target="_blank">
                     📄 View Cover Letter
-                  </a>
+                  </a> -->
+
+                  <iframe :src="application.cover_letter.embed_url" width="100%" height="600"></iframe>
                 </div>
                 <div v-if="application.resume">
                   <a :href="application.resume.embed_url" target="_blank"
@@ -237,7 +239,6 @@
               @click="selectJob(job)"
             >
               <h2>{{ job.job_title }}</h2>
-              <p>{{ job.job_description }}</p>
               <p><strong>Location:</strong> {{ job.job_location }}</p>
               <p><strong>Type:</strong> {{ job.job_type }}</p>
               <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
@@ -337,7 +338,7 @@ async function fetchApplicants(jobId) {
   try {
     const response = await axios.get(`/job/${jobId}/applications`);
     jobApplicants.value = response.data.applications.filter(
-      (applicant) => applicant.status !== "rejected"
+      (applicant) => applicant.status !== "rejected" && applicant.status !== "accepted"
     );
     console.log(response.data);
   } catch (error) {

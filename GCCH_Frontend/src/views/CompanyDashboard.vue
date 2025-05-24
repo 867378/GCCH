@@ -176,7 +176,7 @@
                     @click="toggleCourseDropdown"
                     class="dropdown-btn"
                   >
-                    Recommended Courses
+                    Recommended Programs
                     <span v-if="selectedCourses.length"
                       >({{ selectedCourses.length }})</span
                     >
@@ -186,7 +186,8 @@
                       <input
                         type="checkbox"
                         :value="course"
-                        v-model="selectedCourses"
+                        :checked="selectedCourses.includes(course)"
+                        @change="handleCheckboxChange($event,course)"
                       />
                       {{ course }}
                     </label>
@@ -229,7 +230,6 @@
               @click="selectJob(job)"
             >
               <h2>{{ job.job_title }}</h2>
-              <p>{{ job.job_description }}</p>
               <p><strong>Location:</strong> {{ job.job_location }}</p>
               <p><strong>Type:</strong> {{ job.job_type }}</p>
               <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
@@ -241,7 +241,7 @@
                 >
               </p>
               <p>
-                <strong>Recommended courses:</strong>
+                <strong>Recommended programs:</strong>
                 {{
                   [
                     job.recommended_course,
@@ -293,6 +293,19 @@ const courseOptions = [
   "BSEd-Eng", "BSEd-Math", "BSEd-Fil", "BSEd-SS", "BSEd-Sci", "Other"
 ];
 
+const handleCheckboxChange = (event,course) => {
+  if(event.target.checked){
+    if(selectedCourses.value.length < 3){
+      selectedCourses.value.push(course)
+    } else {
+      selectedCourses.value.shift();
+      selectedCourses.value.push(course);
+    }
+  } else{
+    selectedCourses.value = selectedCourses.value.filter(c => c!== course)
+  }
+}
+
 const jobData = ref({
   job_title: "",
   job_description: "",
@@ -335,13 +348,6 @@ function confirmSignOut() {
       console.error("Error signing out:", error);
     });
 }
-//checkbox logic
-// async function postJob() {
-//   jobData.value.recommended_course = selectedCourses.value[0] || null;
-//   jobData.value.recommended_course_2 = selectedCourses.value[1] || null;
-//   jobData.value.recommended_course_3 = selectedCourses.value[2] || null;
-
-// }
 
 // Notification Logic
 async function fetchNotifications() {
@@ -374,6 +380,10 @@ onMounted(() => {
 
 async function postJob() {
   try {
+    jobData.value.recommended_course = selectedCourses.value[0] || null;
+    jobData.value.recommended_course_2 = selectedCourses.value[1] || null;
+    jobData.value.recommended_course_3 = selectedCourses.value[2] || null;
+
     const response = await axios.post("/company/postjob", {
       job_title: jobData.value.job_title,
       job_description: jobData.value.job_description,
