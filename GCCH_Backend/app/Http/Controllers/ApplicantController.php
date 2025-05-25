@@ -35,6 +35,43 @@ class ApplicantController extends Controller
         return response()->json($user);
     }
 
+    public function listedJobs(){
+        $user = Auth::user();
+
+        $jobCount = Application::whereHas('applicant', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->count();
+
+        return response()->json(['total_jobs_applied' => $jobCount]);
+    }
+
+    public function acceptedCount(){
+        $user = Auth::user();
+
+        $acceptedCount = Application::where('status', 'accepted')
+            ->whereHas('applicant', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->count();
+
+        return response()->json(['accepted_jobs_count' => $acceptedCount]);
+    }
+
+    public function matchedJobs(){
+        $user = Auth::user();
+
+      
+        if (!$user->applicant) {
+            return response()->json(['matched_jobs_count' => 0]);
+        }
+
+        $applicantCourse = $user->applicant->course;
+
+        $matchedCount = Job::where('matchedJob', 'LIKE', '%' . $applicantCourse . '%')->count();
+
+        return response()->json(['matched_jobs_count' => $matchedCount]);
+    }
+
+
     public function jobapply(Request $request)
     {
         try {

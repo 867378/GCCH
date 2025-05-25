@@ -39,11 +39,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 //Applicant routes
 Route::middleware(['auth:sanctum','applicant'])->group(function () {
-
     Route::post('/applicant/jobapply', [ApplicantController::class, 'jobapply'])->name('applicant.jobapply');
     Route::get('/applicant/jobdisplay', [ApplicantController::class, 'jobdisplay'])->name('applicant.jobdisplay');
     Route::get('/applicant/jobdisplay/{id}', [ApplicantController::class, 'jobdisplay'])->name('applicant.jobdisplay');
     Route::get('/applicant/applications', [ApplicantController::class, 'applicationStatus'])->name('applicant.applicationStatus');
+    Route::get('/applicant/total-jobs', [ApplicantController::class, 'listedJobs'])->name('applicant.listedJobs');
+    Route::get('/applicant/accepted-count', [ApplicantController::class, 'acceptedCount'])->name('applicant.acceptedCountS');
+    Route::get('/applicant/matched-jobs', [ApplicantController::class, 'matchedJobs'])->name('applicant.matchedJobs');
 });
 
 //Company routes
