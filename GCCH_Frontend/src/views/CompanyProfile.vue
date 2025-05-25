@@ -589,6 +589,12 @@ body,
   color: #374151;
 }
 
+.form-group input::placeholder{
+  color: #000000;
+  text-align: center;
+  text-transform: capitalize;
+}
+
 .form-group input,
 .form-group select {
   padding: 0.6rem;

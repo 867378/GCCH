@@ -95,7 +95,7 @@
       <div class="content">
         <div class="left-content">
           <div class="resume-box">
-            <h3 class="resumeh3">Applications</h3>
+            <h3 class="resumeh3">Ongoing Applications</h3>
             <div class="form-row">
               <div class="resume-list">
                 <div
@@ -122,26 +122,33 @@
               </div>
             </div>
           </div>
-        </div>
-        <!-- Notifications -->
-        <div class="right-content">
-          <h3>CHECK THIS OUT</h3>
-          <div class="updates-list">
-            <div
-              v-for="(notif, index) in filteredNotifications"
-              :key="index"
-              @click="openChat(notif)"
-              style="cursor: pointer"
-              class="update-box"
-            >
-              <h2>{{ formatType(notif.type) }}</h2>
-              <p>
-                {{ notif.latestContent }}
-                <span v-if="notif.count > 1">
-                  ({{ notif.count }} new
-                  {{ pluralizeType(notif.type, notif.count) }})
-                </span>
-              </p>
+
+          <div class="resume-box">
+            <h3 class="resumeh3">Accepted Applications</h3>
+            <div class="form-row">
+              <div class="resume-list">
+                <div
+                  v-for="application in applications"
+                  :key="index"
+                  class="resume-item received"
+                >
+                  <h4>Job Application for : {{ application.job_title }}</h4>
+                  <p><strong>Job Title:</strong> {{ application.job_title }}</p>
+                  <p><strong>Status:</strong> {{ application.status }}</p>
+                  <p>
+                    <strong>Schedule:</strong>
+                    {{ application.schedule || "To be announced" }}
+                  </p>
+                  <p>
+                    <strong>Comments:</strong>
+                    {{ application.comments || "No comments yet." }}
+                  </p>
+                  <p>
+                    <strong>Updated At:</strong>
+                    {{ formatDate(application.updated_at) }}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -573,7 +580,7 @@ body,
   border-radius: 3vh;
   border-bottom: #045d56 4px solid;
   width: 95%;
-  height: 80vh;
+  height: 40vh;
   margin-left: 3vh;
   overflow: auto;
 }
@@ -585,11 +592,11 @@ body,
 }
 .resume-list {
   display: grid;
-  grid-template-columns: repeat(1, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  margin-top: 3vh;
+  margin-top: 1vh;
   max-height: 100%;
-  max-width: 100%;
+  width: 85%;
 }
 
 .resume-item {
@@ -610,8 +617,7 @@ body,
   margin-left: 25vh;
   margin-bottom: 10px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-    text-transform: capitalize;
-
+  text-transform: capitalize;
 }
 
 .resume-item.received:hover {
@@ -619,16 +625,6 @@ body,
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
 }
 
-.right-content {
-  flex: 1;
-  background: white;
-  border-radius: 10px;
-  border-left: #045d56 4px solid;
-  padding: 20px;
-  width: 40vh;
-  height: 80vh;
-  overflow: auto;
-}
 .icons-right {
   display: flex;
   gap: 20px;
@@ -653,24 +649,6 @@ body,
   padding: 2px 5px;
 }
 
-.update-box {
-  background-color: #f4f8fc;
-  border-bottom: 4px solid #045d56;
-  border-radius: 1vh;
-  padding: 20px;
-  font-size: 10px;
-  margin-top: 2vh;
-  margin-bottom: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  text-transform: capitalize;
-}
-
-.update-box:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
-}
-
 .app-overlay {
   position: fixed;
   top: 0;
@@ -682,39 +660,6 @@ body,
   justify-content: center;
   align-items: center;
   z-index: 1000;
-}
-
-.app {
-  background: white;
-  padding: 25px;
-  border: 1px solid #ccc;
-  border-radius: 15px;
-  max-width: 80%;
-  max-height: 100%;
-  overflow-y: auto;
-  text-align: left;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  animation: popIn 0.3s ease;
-}
-
-.app h3 {
-  margin-bottom: 15px;
-  font-size: 22px;
-  color: #045d56;
-}
-
-.app button {
-  background-color: #045d56;
-  color: rgb(247, 245, 245);
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.app button:hover {
-  background-color: #033f3a;
 }
 
 @keyframes popIn {
@@ -772,13 +717,17 @@ body,
     display: flex;
     z-index: 1001;
   }
+  .content {
+    gap: 0;
+    overflow: hidden;
+  }
 
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -788,13 +737,14 @@ body,
   }
 
   .logo {
-    margin-top: 8vh;
+    margin-top: 4vh;
     margin-left: 4vh;
-    margin-bottom: 10vh;
+    margin-bottom: 8vh;
   }
 
   .resume-box {
-    width: 100%;
+    width: 80%;
+    margin-left: 17vh;
     max-height: 85vh;
     overflow-y: auto;
   }
@@ -819,12 +769,12 @@ body,
   }
 
   .sidebar {
-    font-size: 10px;
+    font-size: 14px;
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 28vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -855,7 +805,7 @@ body,
     height: 30px;
   }
   .resume-box {
-    width: 95%;
+    width: 75%;
     max-height: 85vh;
     overflow-y: auto;
   }
@@ -875,22 +825,16 @@ body,
     align-self: flex-start;
     border-left: 4px solid #045d56;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    max-width: 80%;
+    max-width: 90%;
     height: 100%;
-    margin-left: 5vh;
+    margin-left: 12vh;
     margin-bottom: 20px;
   }
-  .resume-item button {
-    font-size: 10px;
-    padding: 4px 10px;
-  }
-  .status-select {
-    font-size: 10px;
-    padding: 6px 10px;
-  }
-  .update-box {
-    font-size: 8px;
-    padding: 10px;
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
   .sign-out {
@@ -905,41 +849,56 @@ body,
     display: flex;
     z-index: 1001;
   }
-
+  .topbar {
+    height: 12.5vh;
+  }
   .content {
-    overflow: hidden;
-    display: flex;
+    display: grid;
     flex-direction: column;
   }
-
   .logo {
     margin-left: 5vh;
     margin-top: 5vh;
     margin-bottom: 5vh;
   }
-
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
+  .left-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: -14vh;
+  }
   .resume-box {
     overflow: auto;
+    width: 80%;
   }
-
-  .right-content {
-    overflow: auto;
-    width: 60vh;
-    margin-left: 1vh;
-    margin-bottom: 5vh;
+  .resume-item.received {
+    width: 80%;
+    margin-left: 10vh;
+    margin-bottom: 2vh;
   }
-  .update-box {
-    font-size: 8px;
-    padding: 5px;
+  .resume-list {
+    grid-template-columns: repeat(1, 1fr);
+    width: 100%;
+  }
+  .resumeh3 {
+    font-size: 1.6rem;
+    margin-bottom: 2vh;
+    text-align: center;
+  }
+  .sign-out {
+    width: 40px;
+    height: 40px;
+    margin-left: 5vh;
   }
 
   .sidebar.active {
@@ -949,8 +908,14 @@ body,
 
 @media (max-width: 385px) {
   .sidebar {
-    width: 21vh;
-    font-size: 8px;
+    font-size: 12px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
   }
   .logo {
     height: 6vh;
@@ -958,22 +923,29 @@ body,
     margin-left: 3vh;
     margin-bottom: 5vh;
   }
+  .ikon {
+    height: 20px;
+    width: 20px;
+  }
   .resume-box {
-    width: 95%;
+    width: 75%;
     max-height: 50vh;
+    margin-right: 2vh;
+  }
+  .resumeh3 {
+    font-size: 1.4rem;
+    margin-bottom: 2vh;
+    text-align: center;
   }
 
   .resume-list {
     grid-template-columns: repeat(1, 1fr);
   }
 
-  .left-content {
-    flex: 1;
-  }
-  .right-content {
-    width: 45vh;
-    margin-left: 5vh;
-    margin-bottom: 5vh;
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
   }
 }
 </style>

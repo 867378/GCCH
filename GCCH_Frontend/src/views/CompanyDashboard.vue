@@ -1025,7 +1025,6 @@ body,
   }
 
   .sidebar.active {
-    transition: transform 0.3s ease;
     transform: translateX(0);
   }
 

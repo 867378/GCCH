@@ -920,13 +920,17 @@ body,
     display: flex;
     z-index: 1001;
   }
+  .content {
+    gap: 0;
+    overflow: hidden;
+  }
 
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -936,11 +940,33 @@ body,
   }
 
   .logo {
-    margin-top: 8vh;
+    margin-top: 4vh;
     margin-left: 4vh;
-    margin-bottom: 10vh;
+    margin-bottom: 8vh;
   }
-
+  .right-content {
+    padding-top: 3vh;
+    margin-right: 1vh;
+    max-height: 85vh;
+    width: 50vh;
+    overflow: auto;
+  }
+  .message-box {
+    height: 78vh;
+    overflow-y: hidden;
+  }
+  .chat-box {
+    width: 100%;
+    height: 63vh;
+    overflow-y: auto;
+    margin-top: 2vh;
+  }
+  .update-box {
+    width: 35vh;
+    height: auto;
+    margin: 10px;
+    font-size: 14px;
+  }
   .sign-out {
     margin-left: 7.5vh;
   }
@@ -951,14 +977,21 @@ body,
     display: flex;
     z-index: 1001;
   }
+  .content {
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    padding: 20px;
+    margin-top: 10px;
+    overflow: auto;
+  }
 
   .sidebar {
-    font-size: 10px;
+    font-size: 14px;
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 28vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -988,19 +1021,9 @@ body,
     width: 30px;
     height: 30px;
   }
-  .popup {
-    width: 50%;
-  }
-  .topbar input[type="text"] {
-    width: 30vh;
-  }
-  .update-box {
-    font-size: 8px;
-    padding: 10px;
-  }
 
   .message-box {
-    width: 95%;
+    width: 93%;
   }
   .message-item {
     padding: 10px 5px;
@@ -1012,10 +1035,26 @@ body,
   .form-row {
     margin-left: -10vh;
   }
+
+  .right-content {
+    padding: 15px;
+    height: auto;
+    min-height: 300px;
+    width: 90%;
+    margin-left: 5vh;
+    overflow: auto;
+  }
+  .update-box {
+    width: 100%;
+    margin: 10px 0;
+    padding: 8px;
+    font-size: 12px;
+  }
+
   .sign-out {
     width: 60px;
     height: 40px;
-    margin-left: 5.5vh;
+    margin-left: 7.5vh;
   }
 }
 
@@ -1024,9 +1063,11 @@ body,
     display: flex;
     z-index: 1001;
   }
-
+  .topbar {
+    height: 12.5vh;
+  }
   .content {
-    display: flex;
+    display: grid;
     flex-direction: column;
   }
   .logo {
@@ -1034,13 +1075,19 @@ body,
     margin-top: 5vh;
     margin-bottom: 5vh;
   }
-
+  .ikon {
+    height: 15px;
+    width: 15px;
+  }
+  .topbar input[type="text"] {
+    width: 35vh;
+  }
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -1048,45 +1095,123 @@ body,
   .sidebar.active {
     transform: translateX(0);
   }
-  .popup {
-    width: 80%;
-  }
-  .topbar input[type="text"] {
-    width: 20vh;
-  }
 
   .message-box {
-    width: 90%;
+    width: 95%;
+    margin: 10px auto;
+    padding: 15px;
+    height: auto;
+    min-height: 70vh;
   }
+
+  .messages-list {
+    margin-left: 0;
+    width: 100%;
+    padding: 10px;
+  }
+
   .message-item {
-    padding: 10px 5px;
+    padding: 10px 15px;
+    font-size: 12px;
+    width: 100%;
+    margin: 5px 0;
+  }
+
+  .message-item.received {
+    max-width: 80%;
+    margin-right: auto;
+    margin-left: 0;
+  }
+
+  .message-item.sent {
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: 0;
+    text-align: right;
+  }
+
+  .chat-box {
+    height: 60vh;
+    margin-top: 15px;
+  }
+
+  .reply-box {
+    padding: 10px;
+  }
+
+  .reply-box textarea {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .reply-box button {
+    padding: 8px 12px;
     font-size: 12px;
   }
-  .message-item.received {
-    width: 100%;
-  }
-  .form-row {
-    margin-left: -10vh;
+
+  .right-content {
+    width: 90%;
+    margin-left: 3vh;
+    overflow: auto;
   }
 
   .update-box {
-    font-size: 8px;
-    padding: 10px;
+    width: 90%;
+    margin: 10px 0;
+    padding: 15px;
+    font-size: 12px;
+    margin-left: 2vh;
+  }
+
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
   }
 }
+
 @media (max-width: 385px) {
-  .sidebar {
-    width: 20vh;
-    font-size: 8px;
-  }
   .logo {
     height: 6vh;
     width: 10vh;
     margin-left: 3vh;
     margin-bottom: 5vh;
   }
+  .ikon {
+    height: 20px;
+    width: 20px;
+  }
+
   .topbar input[type="text"] {
-    width: 10vh;
+    width: 25vh;
+  }
+  .sidebar {
+    font-size: 12px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .right-content {
+    flex: 1;
+    margin-left: 3.5vh;
+    padding-top: 3vh;
+    height: auto;
+    overflow: auto;
+  }
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
+  }
+}
+@media (max-width: 320px) {
+  .topbar input[type="text"] {
+    width: 15vh;
   }
 }
 </style>

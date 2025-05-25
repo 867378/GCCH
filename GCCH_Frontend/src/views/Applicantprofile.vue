@@ -52,7 +52,6 @@
             <span></span>
           </div>
           <img class="avatar" src="/public/user.png" alt="Avatar" />
-          <input type="text" placeholder="Search..." />
         </div>
         <div class="icons-right">
           <div class="icon" @click="toggleMail">
@@ -96,7 +95,7 @@
             <div class="form-group">
               <label class="profile-avatar-label">
                 <img
-                  src='/public/user.png'
+                  src="/public/user.png"
                   alt="Profile"
                   class="profile-avatar"
                 />
@@ -106,43 +105,66 @@
             <div class="profile-form" v-if="applicant.applicant">
               <div class="form-group">
                 <label>Full Name</label>
-                <p>{{ applicant.applicant.first_name }} {{ applicant.applicant.middle_name }} {{ applicant.applicant.last_name }}</p>
+                <!-- <p>
+                  {{ applicant.applicant.first_name }}
+                  {{ applicant.applicant.middle_name }}
+                  {{ applicant.applicant.last_name }}
+                </p> -->
+
+                 <input
+                    type="text"
+                    :readonly="!isEditing"
+                    v-model="fullName"
+                    :placeholder="`${applicant.applicant?.first_name || ''} ${applicant.applicant?.middle_name || ''} ${applicant.applicant?.last_name || ''}`"
+                  />
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label>Date of Birth</label>
-                  <p>{{
-                      applicant.applicant?.date_of_birth
-                        ? new Date(applicant.applicant.date_of_birth)
-                            .toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: '2-digit',
-                              day: '2-digit',
-                            })
-                        : ''
-                    }}
-                  </p>
+                  <input
+                    type="text"
+                    :readonly="!isEditing"
+                    v-model="dateOfBirth"
+                    :placeholder="applicant.applicant?.date_of_birth ? new Date(applicant.applicant.date_of_birth).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit'
+                    }) : ''"
+                  />
                 </div>
-
                 <div class="form-group">
                   <label>Sex</label>
-                  <p>{{ formatType(applicant.applicant.sex) }}</p>
+                  <input
+                    type="text"
+                    :readonly="!isEditing"
+                    v-model="sex"
+                    :placeholder="formatType(applicant.applicant?.sex)"
+                  />
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label>Phone Number</label>
-                  <p>{{ applicant.applicant.phone_number }}</p>
+                  <input
+                    type="text"
+                    :readonly="!isEditing"
+                    v-model="phoneNumber"
+                    :placeholder="applicant.applicant?.phone_number || ''"
+                  />
                 </div>
                 <div class="form-group">
                   <label>Email Address</label>
-                  <p>{{ applicant.email }}</p>
+                  <input
+                    type="email"
+                    :readonly="!isEditing"
+                    v-model="email"
+                    :placeholder="applicant.email || ''"
+                  />
                 </div>
               </div>
-              <div class="btn-group">
-              </div>
+              <div class="btn-group"></div>
             </div>
           </div>
         </div>
@@ -201,15 +223,15 @@ function confirmSignOut() {
 }
 
 async function fetchUserData() {
-  try{
-    const userId = localStorage.getItem('user_id')
-    const response = await axios.get(`user/applicant/${userId}`)
+  try {
+    const userId = localStorage.getItem("user_id");
+    const response = await axios.get(`user/applicant/${userId}`);
 
-    applicant.value = response.data
-    console.log("Fetched User Data", response.data)
+    applicant.value = response.data;
+    console.log("Fetched User Data", response.data);
   } catch (error) {
-    console.error("Failed to fetch user data", error)
-  } 
+    console.error("Failed to fetch user data", error);
+  }
 }
 
 async function fetchNotifications() {
@@ -253,7 +275,7 @@ function formatType(type) {
     case "male":
       return "Male";
     case "female":
-      return "Female"
+      return "Female";
     case "other":
       return "Other";
   }
@@ -262,7 +284,7 @@ function formatType(type) {
 onMounted(() => {
   fetchUserData();
   fetchNotifications();
-})
+});
 </script>
 
 <style scoped>
@@ -442,12 +464,6 @@ body,
   background: #ffffff;
   border-radius: 50%;
 }
-.topbar input[type="text"] {
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  width: 300px;
-}
 
 .popup-overlay {
   position: fixed;
@@ -592,20 +608,19 @@ body,
   border: 1px solid #ccc;
   border-radius: 2rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-  border-left: #045d56 4px solid;
+  border-left: #045d56 solid 4px;
   padding: 2rem;
-  height: 100%;
+  height: 95%;
   width: 100%;
-  margin-left: 28vh;
+  margin-left: 35vh;
   gap: 3rem;
 }
-
 .profile-avatar {
   width: 30vh;
   height: 30vh;
   object-fit: cover;
   margin-top: 2vh;
-  margin-left: 45vh;
+  margin-left: 33vh;
   margin-bottom: 3vh;
   border-radius: 50%;
   border: 4px solid #045d56;
@@ -631,6 +646,12 @@ body,
 .form-group label {
   font-weight: 600;
   color: #374151;
+}
+
+.form-group input::placeholder{
+  color: #000000;
+  text-align: center;
+  text-transform: capitalize;
 }
 
 .form-group input,
@@ -701,13 +722,16 @@ body,
     display: flex;
     z-index: 1001;
   }
-
+  .content {
+    gap: 0;
+    overflow: hidden;
+  }
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -717,17 +741,19 @@ body,
   }
 
   .logo {
-    margin-top: 8vh;
+    margin-top: 4vh;
     margin-left: 4vh;
-    margin-bottom: 10vh;
+    margin-bottom: 8vh;
   }
 
   .profile-card {
-    margin-left: 17vh;
-    width: 90%;
+    margin-left: 27vh;
+    width: 100%;
+    height: 100%;
+  
   }
   .profile-avatar {
-    margin-left: 27vh;
+    margin-left: 35vh;
   }
   .sign-out {
     margin-left: 7.5vh;
@@ -739,14 +765,20 @@ body,
     display: flex;
     z-index: 1001;
   }
+  .content {
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    padding: 20px;
+    margin-top: 10px;
+    overflow: auto;
+  }
 
   .sidebar {
-    font-size: 10px;
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -776,13 +808,6 @@ body,
     width: 30px;
     height: 30px;
   }
-  .popup {
-    width: 50%;
-  }
-  .topbar input[type="text"] {
-    width: 30vh;
-  }
-
   .profile-card {
     margin-left: 8vh;
     width: 90%;
@@ -797,11 +822,10 @@ body,
     gap: 0.5rem;
     font-size: 15px;
   }
-
   .sign-out {
     width: 60px;
     height: 40px;
-    margin-left: 5.5vh;
+    margin-left: 7.5vh;
   }
 }
 
@@ -810,15 +834,19 @@ body,
     display: flex;
     z-index: 1001;
   }
-
-  .content {
-    display: flex;
-    flex-direction: column;
+  .topbar {
+    height: 12.5vh;
   }
+
   .logo {
     margin-left: 5vh;
     margin-top: 5vh;
     margin-bottom: 5vh;
+  }
+
+  .ikon {
+    height: 15px;
+    width: 15px;
   }
 
   .sidebar {
@@ -826,19 +854,13 @@ body,
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
 
   .sidebar.active {
     transform: translateX(0);
-  }
-  .popup {
-    width: 80%;
-  }
-  .topbar input[type="text"] {
-    width: 20vh;
   }
 
   .profile-card {
@@ -855,11 +877,23 @@ body,
     gap: 0.5rem;
     font-size: 15px;
   }
+
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
+  }
 }
 @media (max-width: 385px) {
-  .sidebar {
-    width: 20vh;
-    font-size: 8px;
+   .sidebar {
+    font-size: 12px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
   }
   .logo {
     height: 6vh;
@@ -867,7 +901,10 @@ body,
     margin-left: 3vh;
     margin-bottom: 5vh;
   }
-
+  .ikon {
+    height: 20px;
+    width: 20px;
+  }
   .profile-card {
     margin-left: 1vh;
     width: 100%;
@@ -882,5 +919,41 @@ body,
     gap: 0.5rem;
     font-size: 15px;
   }
+
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
+  }
+}
+
+@media (max-width: 320px) {
+  .sidebar {
+    font-size: 12px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+  .logo {
+    height: 6vh;
+    width: 10vh;
+    margin-left: 3vh;
+    margin-bottom: 5vh;
+  }
+  .ikon {
+    height: 20px;
+    width: 20px;
+  }
+
+  .profile-avatar {
+    height: 20vh;
+    width: 20vh;
+    margin-left: 6vh;
+  }
+  
 }
 </style>
