@@ -114,7 +114,7 @@
               </label>
             </div>
 
-            <div class="profile-form">
+            <div class="profile-form" v-if="company.company">
               <div class="form-row">
                 <div class="form-group">
                   <label>Company Name</label>
@@ -122,6 +122,7 @@
                     type="text"
                     :readonly="!isEditing"
                     v-model="fullName"
+                    :placeholder = "company.company.company_name"
                   />
                 </div>
                 <div class="form-group">
@@ -130,7 +131,7 @@
                     type="text"
                     :readonly="!isEditing"
                     v-model="type"
-                    placeholder="Enter industry type"
+                    :placeholder="company.company.industry_type"
                   />
                 </div>
               </div>
@@ -142,7 +143,7 @@
                     oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                     maxlength="11"
                     :readonly="!isEditing"
-                    placeholder="Enter phone number"
+                    :placeholder="company.company.company_telephone"
                   />
                 </div>
                 <div class="form-group">
@@ -151,7 +152,7 @@
                     type="email"
                     :readonly="!isEditing"
                     v-model="email"
-                    placeholder="Example@gmail.com"
+                    :placeholder="company.email"
                   />
                 </div>
               </div>
@@ -163,7 +164,7 @@
                     type="text"
                     :readonly="!isEditing"
                     v-model="location"
-                    placeholder="Street Address"
+                    :placeholder="company.company.street_address"
                   />
                 </div>
               </div>
@@ -174,7 +175,7 @@
                     type="text"
                     :readonly="!isEditing"
                     v-model="location"
-                    placeholder="City"
+                    :placeholder="company.company.city"
                   />
                 </div>
                 <div class="form-group">
@@ -182,7 +183,7 @@
                     type="text"
                     :readonly="!isEditing"
                     v-model="location"
-                    placeholder="Province"
+                    :placeholder="company.company.province"
                   />
                 </div>
                 <div class="form-group">
@@ -190,7 +191,7 @@
                     type="text"
                     :readonly="!isEditing"
                     v-model="location"
-                    placeholder="Country"
+                    :placeholder="company.company.country"
                   />
                 </div>
               </div>
@@ -204,70 +205,118 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      showMail: false,
-      showNotif: false,
-      showSignOut: false,
-      unreadMessages: 0,
-      newNotifications: 0,
-      profileImage: null,
-      isSidenavOpen: true,
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
-      messages: [
-        "Jape: Interested in your post.",
-        "Paulo: Sent a resume for the job.",
-        "Cj: Asking about job requirements.",
-      ],
+const router = useRouter();
 
-      notifications: ["3 new applicants this week", "Job Posted", "bengbeng"],
-    };
-  },
+// Reactive state variables
+const showMail = ref(false);
+const showNotif = ref(false);
+const showSignOut = ref(false);
+const unreadMessages = ref(0);
+const newNotifications = ref(0);
+const isSidenavOpen = ref(true);
 
-  methods: {
-    toggleSidenav() {
-      this.issidenavOpen = !this.issidenavOpen;
-    },
-    toggleMail() {
-      this.showMail = !this.showMail;
-      if (this.showMail) {
-        this.unreadMessages = 0;
+//For Notifications
+const notifications = ref([]);
+
+//User Data
+const company = ref({});
+
+// NavBar Logic
+function toggleMail() {
+  showMail.value = !showMail.value;
+  if (showMail.value) {
+    unreadMessages.value = 0;
+  }
+}
+function toggleNotif() {
+  showNotif.value = !showNotif.value;
+  if (showNotif.value) {
+    newNotifications.value = 0;
+  }
+}
+function toggleSignOut() {
+  showSignOut.value = !showSignOut.value;
+}
+function confirmSignOut() {
+  axios
+    .post("/logout")
+    .then((response) => {
+      console.log("Sign out successful:", response.data.message);
+      router.push("/login");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+    });
+}
+
+async function fetchUserData() {
+  try {
+    const userId = localStorage.getItem("user_id");
+    const response = await axios.get(`user/company/${userId}`);
+
+    company.value = response.data;
+    console.log("Fetched User Data", response.data);
+  } catch (error) {
+    console.error("Failed to fetch user data", error);
+  }
+}
+
+async function fetchNotifications() {
+  try {
+    const response = await axios.get("/notifications");
+    const rawNotifications = response.data.notifications || [];
+
+    const grouped = new Map();
+
+    rawNotifications.forEach((notif) => {
+      if (!notif || !notif.type) return;
+
+      const key = `${notif.sender_id || "system"}_${notif.type}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          ...notif,
+          count: 1,
+          latestContent: notif.content,
+        });
+      } else {
+        const existing = grouped.get(key);
+        existing.count += 1;
+        existing.latestContent = notif.content; // latest content
+        grouped.set(key, existing);
       }
-    },
-    toggleNotif() {
-      this.showNotif = !this.showNotif;
-      if (this.showNotif) {
-        this.newNotifications = 0;
-      }
-    },
-    toggleSignOut() {
-      this.showSignOut = !this.showSignOut;
-    },
-    confirmSignOut() {
-      console.log("Signing out...");
-      window.location.href = "/login";
-    },
-    onImageChange(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          this.profileImage = event.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    },
-  },
+    });
 
-  mounted() {
-    setInterval(() => {
-      this.unreadMessages += 1;
-      this.newNotifications += 1;
-    }, 10000);
-  },
-};
+    notifications.value = Array.from(grouped.values());
+    newNotifications.value = notifications.value.length;
+
+    console.log("Fetched notifications:", rawNotifications);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+  }
+}
+
+function formatType(type) {
+  switch (type) {
+    case "prefer_to_not_say":
+      return "Prefer Not to Say";
+    case "male":
+      return "Male";
+    case "female":
+      return "Female";
+    case "other":
+      return "Other";
+  }
+}
+
+onMounted(() => {
+  fetchUserData();
+  fetchNotifications();
+});
 </script>
 
 <style scoped>
