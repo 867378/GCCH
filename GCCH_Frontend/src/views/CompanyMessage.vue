@@ -1130,10 +1130,6 @@ body,
 }
 
 @media (max-width: 385px) {
-.sidebar {
-    width: 20vh;
-    font-size: 8px;
-  }
   .logo {
     height: 6vh;
     width: 10vh;

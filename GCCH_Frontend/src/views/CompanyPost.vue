@@ -107,11 +107,13 @@
             </p>
             <p><strong>Date Posted:</strong> {{ selectedJob.date_posted }}</p>
             <p><strong>Status:</strong> {{ selectedJob.status }}</p>
-            <p><strong>Slots:</strong>{{ selectedJob.filled_slots }}/{{ selectedJob.total_slots }}</p>
-
+            <p>
+              <strong>Slots:</strong>{{ selectedJob.filled_slots }}/{{
+                selectedJob.total_slots
+              }}
+            </p>
           </div>
           <div v-if="selectedJob" class="selected-job-box">
-
             <h3>Ongoing Applications</h3>
             <ul v-if="jobApplicants.length > 0">
               <li
@@ -246,8 +248,11 @@
               <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
               <p><strong>Status:</strong> {{ job.status }}</p>
-              <p><strong>Slots:</strong>{{ job.filled_slots }}/{{ job.total_slots }}</p>
-              
+              <p>
+                <strong>Slots:</strong>{{ job.filled_slots }}/{{
+                  job.total_slots
+                }}
+              </p>
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
@@ -1095,7 +1100,7 @@ textarea {
     margin-left: 3vh;
     margin-bottom: 5vh;
   }
-    .ikon {
+  .ikon {
     height: 20px;
     width: 20px;
   }
