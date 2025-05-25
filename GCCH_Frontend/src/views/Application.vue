@@ -99,7 +99,7 @@
             <div class="form-row">
               <div class="resume-list">
                 <div
-                  v-for="application in applications"
+                  v-for="application in ongoingApplications"
                   :key="index"
                   class="resume-item received"
                 >
@@ -128,21 +128,13 @@
             <div class="form-row">
               <div class="resume-list">
                 <div
-                  v-for="application in applications"
+                  v-for="application in acceptedApplications"
                   :key="index"
                   class="resume-item received"
                 >
                   <h4>Job Application for : {{ application.job_title }}</h4>
                   <p><strong>Job Title:</strong> {{ application.job_title }}</p>
                   <p><strong>Status:</strong> {{ application.status }}</p>
-                  <p>
-                    <strong>Schedule:</strong>
-                    {{ application.schedule || "To be announced" }}
-                  </p>
-                  <p>
-                    <strong>Comments:</strong>
-                    {{ application.comments || "No comments yet." }}
-                  </p>
                   <p>
                     <strong>Updated At:</strong>
                     {{ formatDate(application.updated_at) }}
@@ -171,7 +163,10 @@ const newNotifications = ref(0);
 
 const messages = ref([]);
 const notifications = ref([]);
+
 const applications = ref([]);
+const ongoingApplications = ref([]);
+const acceptedApplications = ref([]);
 
 const router = useRouter();
 
@@ -204,18 +199,18 @@ function confirmSignOut() {
     });
 }
 
-// Notification Logic
-function pluralizeType(type, count) {
-  const formatted = formatType(type).toLowerCase();
-  return count > 1 ? `${formatted}s` : formatted;
-}
+// // Notification Logic
+// function pluralizeType(type, count) {
+//   const formatted = formatType(type).toLowerCase();
+//   return count > 1 ? `${formatted}s` : formatted;
+// }
 
-const filteredNotifications = computed(() =>
-  notifications.value.filter(
-    (notif) =>
-      notif && ["message", "inquiry", "application_update"].includes(notif.type)
-  )
-);
+// const filteredNotifications = computed(() =>
+//   notifications.value.filter(
+//     (notif) =>
+//       notif && ["message", "inquiry", "application_update"].includes(notif.type)
+//   )
+// );
 
 async function fetchNotifications() {
   try {
@@ -270,7 +265,17 @@ async function fetchJobApplications() {
   try {
     const response = await axios.get("/applicant/applications");
     console.log("Success", response.data);
+    
     applications.value = response.data.applications;
+
+    acceptedApplications.value = applications.value.filter(
+      (app) => app.status === "accepted"
+    );
+
+    ongoingApplications.value = applications.value.filter(
+      (app) => app.status !== "accepted"
+    );
+
   } catch (error) {
     console.error("Error Occured", error);
   }
