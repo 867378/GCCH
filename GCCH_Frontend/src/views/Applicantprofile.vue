@@ -89,85 +89,59 @@
           </div>
         </div>
       </div>
+
       <div class="content">
         <div class="profile-wrapper">
           <div class="profile-card">
             <div class="form-group">
               <label class="profile-avatar-label">
                 <img
-                  :src="profileImage || '/public/user.png'"
+                  src='/public/user.png'
                   alt="Profile"
                   class="profile-avatar"
-                />
-                <input
-                  v-if="isEditing"
-                  type="file"
-                  accept="image/*"
-                  @change="onImageChange"
-                  style="display: none"
                 />
               </label>
             </div>
 
-            <div class="profile-form">
+            <div class="profile-form" v-if="applicant.applicant">
               <div class="form-group">
                 <label>Full Name</label>
-                <input type="text" :readonly="!isEditing" v-model="fullName" />
+                <p>{{ applicant.applicant.first_name }} {{ applicant.applicant.middle_name }} {{ applicant.applicant.last_name }}</p>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
-                  <label>Age</label>
-                  <select :disabled="!isEditing" v-model="age">
-                    <option disabled>Select age</option>
-                    <option v-for="n in 43" :key="n">{{ n + 17 }}</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
                   <label>Date of Birth</label>
-                  <input type="date" v-model="profile" :readonly="!isEditing" />
+                  <p>{{
+                      applicant.applicant?.date_of_birth
+                        ? new Date(applicant.applicant.date_of_birth)
+                            .toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                            })
+                        : ''
+                    }}
+                  </p>
                 </div>
 
                 <div class="form-group">
-                  <label>Gender</label>
-                  <select v-model="profile" :disabled="!isEditing">
-                    <option>MALE</option>
-                    <option>FEMALE</option>
-                    <option>NON-BINARY</option>
-                    <option>PREFER NOT TO SAY</option>
-                  </select>
+                  <label>Sex</label>
+                  <p>{{ formatType(applicant.applicant.sex) }}</p>
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label>Phone Number</label>
-                  <input
-                    type="text"
-                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                    maxlength="11"
-                    :readonly="!isEditing"
-                    placeholder="Enter phone number"
-                  />
+                  <p>{{ applicant.applicant.phone_number }}</p>
                 </div>
                 <div class="form-group">
                   <label>Email Address</label>
-                  <input
-                    type="email"
-                    :readonly="!isEditing"
-                    v-model="email"
-                    placeholder="Example@gmail.com"
-                  />
+                  <p>{{ applicant.email }}</p>
                 </div>
               </div>
               <div class="btn-group">
-                <button v-if="!isEditing" class="edit-btn" @click="toggleEdit">
-                  EDIT
-                </button>
-                <button v-if="isEditing" class="save-btn" @click="saveChanges">
-                  SAVE
-                </button>
               </div>
             </div>
           </div>
@@ -177,69 +151,118 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      showMail: false,
-      showNotif: false,
-      showSignOut: false,
-      unreadMessages: 0,
-      newNotifications: 0,
-      profileImage: null,
-      isEditing: false,
-      isSidenavOpen: true,
-    };
-  },
+<script setup>
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
-  methods: {
-    toggleSidenav() {
-      this.issidenavOpen = !this.issidenavOpen;
-    },
-    toggleMail() {
-      this.showMail = !this.showMail;
-      if (this.showMail) {
-        this.unreadMessages = 0;
-      }
-    },
-    toggleNotif() {
-      this.showNotif = !this.showNotif;
-      if (this.showNotif) {
-        this.newNotifications = 0;
-      }
-    },
-    toggleSignOut() {
-      this.showSignOut = !this.showSignOut;
-    },
-    confirmSignOut() {
-      console.log("Signing out...");
-      window.location.href = "/login";
-    },
-    onImageChange(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          this.profileImage = event.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    },
-    toggleEdit() {
-      this.isEditing = !this.isEditing;
-    },
-    saveChanges() {
-      this.isEditing = false;
-    },
-  },
+const router = useRouter();
 
-  mounted() {
-    setInterval(() => {
-      this.unreadMessages += 1;
-      this.newNotifications += 1;
-    }, 20000);
-  },
-};
+// Reactive state variables
+const showMail = ref(false);
+const showNotif = ref(false);
+const showSignOut = ref(false);
+const unreadMessages = ref(0);
+const newNotifications = ref(0);
+const isSidenavOpen = ref(true);
+
+//For Notifications
+const notifications = ref([]);
+
+//User Data
+const applicant = ref({});
+
+// NavBar Logic
+function toggleMail() {
+  showMail.value = !showMail.value;
+  if (showMail.value) {
+    unreadMessages.value = 0;
+  }
+}
+function toggleNotif() {
+  showNotif.value = !showNotif.value;
+  if (showNotif.value) {
+    newNotifications.value = 0;
+  }
+}
+function toggleSignOut() {
+  showSignOut.value = !showSignOut.value;
+}
+function confirmSignOut() {
+  axios
+    .post("/logout")
+    .then((response) => {
+      console.log("Sign out successful:", response.data.message);
+      router.push("/login");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+    });
+}
+
+async function fetchUserData() {
+  try{
+    const userId = localStorage.getItem('user_id')
+    const response = await axios.get(`user/applicant/${userId}`)
+
+    applicant.value = response.data
+    console.log("Fetched User Data", response.data)
+  } catch (error) {
+    console.error("Failed to fetch user data", error)
+  } 
+}
+
+async function fetchNotifications() {
+  try {
+    const response = await axios.get("/notifications");
+    const rawNotifications = response.data.notifications || [];
+
+    const grouped = new Map();
+
+    rawNotifications.forEach((notif) => {
+      if (!notif || !notif.type) return;
+
+      const key = `${notif.sender_id || "system"}_${notif.type}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          ...notif,
+          count: 1,
+          latestContent: notif.content,
+        });
+      } else {
+        const existing = grouped.get(key);
+        existing.count += 1;
+        existing.latestContent = notif.content; // latest content
+        grouped.set(key, existing);
+      }
+    });
+
+    notifications.value = Array.from(grouped.values());
+    newNotifications.value = notifications.value.length;
+
+    console.log("Fetched notifications:", rawNotifications);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+  }
+}
+
+function formatType(type) {
+  switch (type) {
+    case "prefer_to_not_say":
+      return "Prefer Not to Say";
+    case "male":
+      return "Male";
+    case "female":
+      return "Female"
+    case "other":
+      return "Other";
+  }
+}
+
+onMounted(() => {
+  fetchUserData();
+  fetchNotifications();
+})
 </script>
 
 <style scoped>
