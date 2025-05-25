@@ -98,7 +98,7 @@
       <div class="content">
         <div class="left-content">
           <div v-if="selectedJob" class="selected-job-box">
-            <h3>Accepted Applicants</h3>
+            <h3>Accepted Applicants for {{ selectedJob.job_title }}</h3>
             <ul v-if="jobApplicants.length > 0">
               <li
                 v-for="application in jobApplicants"
@@ -251,6 +251,12 @@ async function fetchPostedJobs() {
     console.error("Error fetching posted jobs:", error);
   }
 }
+
+function selectJob(job) {
+  selectedJob.value = job;
+  fetchApplicants(job.id);
+}
+
 onMounted(fetchPostedJobs);
 </script>
 
