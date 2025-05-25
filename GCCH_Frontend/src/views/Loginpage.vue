@@ -427,6 +427,45 @@ section {
   transition: background-color 0.3s ease;
 }
 
+.google-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 14px;
+  background-color: #ffffff;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-top: 8vh;
+  position: relative;
+}
+
+.google-login-btn::before {
+  content: "";
+  background-image: url("/public/google.png");
+  background-size: 18px;
+  background-repeat: no-repeat;
+  width: 18px;
+  height: 18px;
+  position: absolute;
+  left: 5vh;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.google-login-btn:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+
 .about-section {
   flex-grow: 1;
 }
@@ -594,35 +633,6 @@ section {
   font-weight: 500;
 }
 
-/* Add responsive styles */
-@media (max-width: 768px) {
-  .datetime-container {
-    padding: 8px 15px;
-  }
-
-  .time-display {
-    font-size: 1rem;
-  }
-
-  .date-display {
-    font-size: 0.75rem;
-  }
-}
-
-@media (max-width: 425px) {
-  .datetime-container {
-    padding: 6px 12px;
-    margin-right: 10px;
-  }
-
-  .time-display {
-    font-size: 0.9rem;
-  }
-
-  .date-display {
-    font-size: 0.7rem;
-  }
-}
 
 @media (max-width: 1024px) {
   /* login part */
@@ -850,20 +860,30 @@ section {
     line-height: 1.6;
     text-align: justify;
   }
+    .datetime-container {
+    padding: 8px 15px;
+  }
+
+  .time-display {
+    font-size: 1rem;
+  }
+
+  .date-display {
+    font-size: 0.75rem;
+  }
 }
 
-@media (max-width: 425px) {
-  /* Your existing login responsiveness */
+@media (max-width: 480px) {
   .welcome-text {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: bold;
     color: #fff;
-    margin-top: 5vh;
+    margin-top: 10vh;
     text-align: center;
   }
 
   .welcome-text p {
-    font-size: 1rem;
+    font-size: 0.9rem;
     margin-top: 1vh;
     text-align: center;
   }
@@ -871,7 +891,7 @@ section {
     top: 65%;
     left: 50%;
     padding: 2rem;
-    height: 49vh;
+    height: 29vh;
     width: 30vh;
   }
 
@@ -942,6 +962,34 @@ section {
     line-height: 1.6;
     text-align: justify;
   }
+    .datetime-container {
+    padding: 6px 12px;
+    margin-right: 10px;
+  }
+
+  .time-display {
+    font-size: 0.9rem;
+  }
+
+  .date-display {
+    font-size: 0.7rem;
+  }
+
+  .nav-links{
+    display: none;
+  }
+
+  .google-login-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .google-login-btn::before {
+    left: 10px;
+    background-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
 }
 
 @media (max-width: 320px) {
@@ -959,69 +1007,4 @@ section {
   }
 }
 
-.google-login-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 12px 24px;
-  background-color: #ffffff;
-  color: #3c4043;
-  border: 1px solid #dadce0;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  margin-top: 8vh;
-  position: relative;
-}
-
-.google-login-btn::before {
-  content: "";
-  background-image: url("/public/google.png");
-  background-size: 18px;
-  background-repeat: no-repeat;
-  width: 18px;
-  height: 18px;
-  position: absolute;
-  left: 5vh;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.google-login-btn:hover {
-  background-color: #f8f9fa;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
-}
-
-@media (max-width: 768px) {
-  .google-login-btn {
-    padding: 10px 20px;
-    font-size: 14px;
-  }
-
-  .google-login-btn::before {
-    left: 20px;
-    background-size: 16px;
-    width: 16px;
-    height: 16px;
-  }
-}
-
-@media (max-width: 425px) {
-  .google-login-btn {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-
-  .google-login-btn::before {
-    left: 16px;
-    background-size: 14px;
-    width: 14px;
-    height: 14px;
-  }
-}
 </style>

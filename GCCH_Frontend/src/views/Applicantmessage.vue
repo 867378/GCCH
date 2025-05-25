@@ -160,7 +160,7 @@
 
         <!-- Notifications -->
         <div class="right-content">
-          <h3>Contacts</h3>
+          <h3>CONTACTS</h3>
           <div class="updates-list">
             <div
               v-for="(notif, index) in filteredNotifications"
@@ -532,7 +532,7 @@ body,
 }
 
 .hamburger {
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: space-between;
   width: 25px;
@@ -779,6 +779,7 @@ body,
   border-radius: 10px;
   padding: 20px;
   height: fit-content;
+  border-left: #045d56 4px solid;
 }
 .icons-right {
   display: flex;
@@ -857,6 +858,7 @@ body,
   margin-bottom: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-transform: capitalize;
 }
 
 .update-box:hover {
