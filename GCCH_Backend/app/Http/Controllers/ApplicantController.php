@@ -28,10 +28,11 @@ class ApplicantController extends Controller
     {
         $this->googleDriveService = $googleDriveService;
     }
-    
 
-    public function index(){
-        return view('dashboard.applicant-dashboard');
+    public function fetchApplicantData($id)
+    {
+        $user = User::with('applicant')->findOrFail($id);
+        return response()->json($user);
     }
 
     public function jobapply(Request $request)
@@ -47,7 +48,7 @@ class ApplicantController extends Controller
                 $validated = $request->validate([
                     'job_id' => 'required|exists:jobs,id',
                     'resume' => 'nullable|file|mimes:pdf|max:2048',
-                    'cover_letter' => 'required|file|mimes:pdf,docx,doc',
+                    'cover_letter' => 'required|file|mimes:pdf,docx,doc|max:2048',
                 ]);
             } catch (ValidationException $e) {
                 return response()->json([
@@ -55,13 +56,6 @@ class ApplicantController extends Controller
                     'messages' => $e->errors()
                 ], 422);
             }
-
-            // Log::info('Received job application files', [
-            //     'has_cover_letter' => $request->hasFile('cover_letter'),
-            //     'has_resume' => $request->hasFile('resume'),
-            //     'applicant_id' => $applicant->id,
-            //     'job_id' => $validated['job_id']
-            // ]);
 
             $job = Job::find($validated['job_id']);
 
@@ -145,8 +139,6 @@ class ApplicantController extends Controller
             return response()->json(['error' => 'An error occurred while applying for the job'], 500);
         }
     }
-
-
 
     public function jobdisplay(){
         try{

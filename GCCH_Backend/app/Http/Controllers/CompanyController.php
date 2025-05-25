@@ -24,9 +24,43 @@ class CompanyController extends Controller
         $this->googleDriveService = $googleDriveService;
     }
 
-    public function index(){
-        return view('dashboard.company-dashboard');
+    public function fetchCompanyData($id)
+    {
+        $user = User::with('company')->findOrFail($id);
+        return response()->json($user);
     }
+
+    public function totalClients()
+    {
+        $companyId = auth()->id();
+        $clients = JobApplication::whereHas('job', function ($q) use ($companyId) {
+            $q->where('company_id', $companyId);
+        })->distinct('applicant_id')->count('applicant_id');
+
+        return response()->json(['count' => $clients]);
+    }
+
+    public function totalJobs()
+    {
+        $companyId = auth()->id();
+        $jobs = Job::where('company_id', $companyId)->count();
+
+        return response()->json(['count' => $jobs]);
+    }
+
+    public function pendingApplications()
+{
+    $companyId = auth()->id();
+
+    $total = JobApplication::whereIn('status', ['applied', 'interview', 'assessment'])
+        ->whereHas('job', function ($query) use ($companyId) {
+            $query->where('company_id', $companyId);
+        })
+        ->count();
+
+    return response()->json(['total' => $total]);
+}
+
 
     public function postjob(){
         try{
@@ -120,7 +154,7 @@ class CompanyController extends Controller
                 }
 
                 if ($coverLetterFile) {
-                    $embedUrlCoverLetter = $this->googleDriveService->getFileEmbedUrl($resumeFile->drive_file_id);
+                    $embedUrlCoverLetter = $this->googleDriveService->getFileEmbedUrl($coverLetterFile->drive_file_id);
                 }
 
                 return [
@@ -191,7 +225,7 @@ class CompanyController extends Controller
 
                 $job->increment('filled_slots');
 
-                if ($job->filled_slots >= $job->total_slots) {
+                if ($job->filled_slots > $job->total_slots) {
                     $job->status = 'closed';
                     $job->save();
 

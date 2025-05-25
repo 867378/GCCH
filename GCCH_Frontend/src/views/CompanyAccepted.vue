@@ -117,6 +117,10 @@
                   ><strong>Phone:</strong>
                   {{ application.applicant.phone_number }}</span
                 >
+                <span
+                  ><strong>Gmail:</strong>
+                  {{ applicantUsers[application.applicant.user_id]?.email  }}</span
+                >
               </li>
             </ul>
           </div>
@@ -163,6 +167,7 @@ const isSidenavOpen = ref(true);
 
 const selectedJob = ref(null);
 const jobApplicants = ref([]);
+const applicantUsers = ref({});
 const messages = ref([]);
 
 const notifications = ref([]);
@@ -199,14 +204,30 @@ function confirmSignOut() {
     });
 }
 
-//Get Applicants of a Certain Job
 async function fetchApplicants(jobId) {
   try {
     const response = await axios.get(`/job/${jobId}/applications`);
-    jobApplicants.value = response.data.applications.filter(
-      (applicant) => applicant.status !== "rejected"
+    const acceptedApplicants = response.data.applications.filter(
+      (applicant) => applicant.status === "accepted"
     );
-    console.log(response.data);
+
+    jobApplicants.value = acceptedApplicants;
+
+    // Fetch detailed applicant info
+    for (const app of acceptedApplicants) {
+      const applicantId = app.applicant.user_id;
+      if (applicantId) {
+        try {
+          const userResponse = await axios.get(`user/applicant/${applicantId}`);
+          applicantUsers.value[applicantId] = userResponse.data;
+          console.log('Gathered user data', userResponse.data);
+
+        } catch (err) {
+          console.error(`Failed to fetch user ${applicantId}`, err);
+        }
+      }
+    }
+
   } catch (error) {
     console.error("Failed to fetch applicants", error);
     jobApplicants.value = [];

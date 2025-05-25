@@ -83,7 +83,6 @@ class UserController extends Controller
         ]);
     }
 
-
     public function completeApplicantProfile(Request $request, User $user){
         $request->validate([
             'first_name' => 'required|string|max:255',
@@ -149,23 +148,26 @@ class UserController extends Controller
         }
     }
 
-    public function showApplicantProfileForm(User $user) {
-        return view('auth.applicant-profile', compact('user'));
+    public function getUserById($id){
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        return response()->json($user);
     }
-    
-    public function showCompanyProfileForm(User $user) {
-        return view('auth.company-profile', compact('user'));
-    }
+
     
     public function logout(Request $request)
-{
-    Auth::guard('web')->logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+    {
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-    return response()->json([
-        'message' => 'Logged out successfully',
-    ]);
-}
+        return response()->json([
+            'message' => 'Logged out successfully',
+        ]);
+    }
 
 }
