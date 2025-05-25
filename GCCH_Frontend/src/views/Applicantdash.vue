@@ -205,18 +205,24 @@
 
         <!-- Notifications -->
         <div class="right-content">
-          <div class="hired-status-box">
-            <div class="hired-header">
-              <img src="/public/checked.png" alt="success icon" class="ikon" />
-              <h3>YOU'RE HIRED!</h3>
-            </div>
-            <div class="hired-content">
-              <p>Company: {{ hiredCompany }}</p>
-              <p>Position: {{ hiredPosition }}</p>
-              <p>Start Date: {{ startDate }}</p>
+          <div class="hired">
+            <div class="hired-status-box">
+              <div class="hired-header">
+                <img
+                  src="/public/checked.png"
+                  alt="success icon"
+                  class="ikon"
+                />
+                <h3>YOU'RE HIRED!</h3>
+              </div>
+              <div class="hired-content">
+                <p>Company: {{ hiredCompany }}</p>
+                <p>Position: {{ hiredPosition }}</p>
+                <p>Start Date: {{ startDate }}</p>
+              </div>
             </div>
           </div>
-
+          <div class="upd-content">
           <h3>CHECK THIS OUT</h3>
           <div class="updates-list">
             <div
@@ -235,6 +241,7 @@
                 </span>
               </p>
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -981,14 +988,20 @@ label {
 
 .right-content {
   flex: 1;
-  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  height: fit-content;
+  margin-top: -2vh;
+}
+.upd-content{
+  flex: 1;
+  background-color: white;
   border-radius: 10px;
   padding: 20px;
   height: fit-content;
 }
-
 .hired-status-box {
-  background-color: #e8f5e9;
+  background-color: white;
   border-bottom: 4px solid #2e7d32;
   border-radius: 1vh;
   padding: 20px;
