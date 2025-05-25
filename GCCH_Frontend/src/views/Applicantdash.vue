@@ -92,73 +92,131 @@
 
       <div class="content">
         <div class="left-content">
-          <h3>RECOMMENDED JOBS</h3>
-          <div
-            class="job-box"
-            v-for="matchedJob in recommendedJobs"
-            :key="matchedJob.id"
-          >
-            <div class="job-card">
-              <!-- Header -->
-              <div class="job-header">
-                <div class="job-title-section">
-                  <img src="/public/user.png" class="ikon" />
-                  <h3 class="company-name">{{ matchedJob.job_title }}</h3>
+          <div class="cards">
+            <div class="card">
+              <p>
+                <strong>
+                  <img
+                    src="/public/people.png"
+                    alt="total clients Icon"
+                    class="ikon"
+                  />
+                  JOB APPLIED COUNT</strong
+                >
+              </p>
+              <p>{{ totalClients }}</p>
+            </div>
+            <div class="card">
+              <p>
+                <strong>
+                  <img
+                    src="/public/checklist.png"
+                    alt="total job listings Icon"
+                    class="ikon"
+                  />
+                  MATCHING JOB COUNT</strong
+                >
+              </p>
+              <p>{{ totalJobs }}</p>
+            </div>
+            <div class="card">
+              <p>
+                <strong>
+                  <img
+                    src="/public/buffer.png"
+                    alt="pending applications Icon"
+                    class="ikon"
+                  />
+                  APPLICATIONS COUNT</strong
+                >
+              </p>
+              <p>{{ pendingApplications }}</p>
+            </div>
+          </div>
+          <div class="job-content">
+            <h3>RECOMMENDED JOBS</h3>
+            <div
+              class="job-box"
+              v-for="matchedJob in recommendedJobs"
+              :key="matchedJob.id"
+            >
+              <div class="job-card">
+                <!-- Header -->
+                <div class="job-header">
+                  <div class="job-title-section">
+                    <img src="/public/user.png" class="ikon" />
+                    <h3 class="company-name">{{ matchedJob.job_title }}</h3>
+                  </div>
+
+                  <!-- Apply and Message Buttons -->
+                  <div class="button-group">
+                    <button
+                      class="message-btn"
+                      @click="sendMessage(matchedJob.company_id)"
+                    >
+                      Send Message
+                    </button>
+                    <button
+                      class="apply-btn"
+                      @click="applyToJob(matchedJob.id)"
+                    >
+                      Apply
+                    </button>
+                  </div>
                 </div>
 
-                <!-- Apply and Message Buttons -->
-                <div class="button-group">
-                  <button
-                    class="message-btn"
-                    @click="sendMessage(matchedJob.company_id)"
-                  >
-                    Send Message
-                  </button>
-                  <button class="apply-btn" @click="applyToJob(matchedJob.id)">
-                    Apply
-                  </button>
+                <!-- Move salary here BELOW description -->
+                <div class="job-info">
+                  <div class="job-detail">
+                    <img src="/public/briefcase.png" class="ikon" />
+                    <span class="job-type">{{ matchedJob.job_type }}</span>
+                  </div>
                 </div>
-              </div>
 
-              <!-- Move salary here BELOW description -->
-              <div class="job-info">
-                <div class="job-detail">
-                  <img src="/public/briefcase.png" class="ikon" />
-                  <span class="job-type">{{ matchedJob.job_type }}</span>
+                <div class="job-info">
+                  <div class="job-detail">
+                    <img src="/public/money.png" class="ikon" />
+                    <span class="salary">₱{{ matchedJob.monthly_salary }}</span>
+                  </div>
                 </div>
-              </div>
 
-              <div class="job-info">
-                <div class="job-detail">
-                  <img src="/public/money.png" class="ikon" />
-                  <span class="salary">₱{{ matchedJob.monthly_salary }}</span>
+                <!-- Job Slots -->
+                <div class="job-info">
+                  <div class="job-detail">
+                    <img src="/public/people.png" class="ikon" />
+                    <p>
+                      {{ matchedJob.filled_slots }}/{{ matchedJob.total_slots }}
+                    </p>
+                  </div>
                 </div>
-              </div>
-
-              <!-- Job Slots -->
-              <div class="job-info">
-                <div class="job-detail">
-                  <img src="/public/people.png" class="ikon" />
-                  <p>
-                    {{ matchedJob.filled_slots }}/{{ matchedJob.total_slots }}
-                  </p>
+                <!--  -->
+                <div class="job-info">
+                  <div class="job-detail">
+                    <img src="/public/updates.png" class="ikon" />
+                    <p>Status: {{ matchedJob.status }}</p>
+                  </div>
                 </div>
+                <!-- Job Description -->
+                <p class="job-description">{{ matchedJob.job_description }}</p>
               </div>
-              <!--  -->
-              <div class="job-info">
-                <div class="job-detail">
-                  <img src="/public/updates.png" class="ikon" />
-                  <p>Status: {{ matchedJob.status }}</p>
-                </div>
-              </div>
-              <!-- Job Description -->
-              <p class="job-description">{{ matchedJob.job_description }}</p>
             </div>
           </div>
         </div>
 
         <!-- Notifications -->
         <div class="right-content">
+          <div class="hired-status-box">
+            <div class="hired-header">
+              <img src="/public/checked.png" alt="success icon" class="ikon" />
+              <h3>YOU'RE HIRED!</h3>
+            </div>
+            <div class="hired-content">
+              <p>Company: {{ hiredCompany }}</p>
+              <p>Position: {{ hiredPosition }}</p>
+              <p>Start Date: {{ startDate }}</p>
+            </div>
+          </div>
+
           <h3>CHECK THIS OUT</h3>
           <div class="updates-list">
             <div
@@ -240,6 +298,10 @@ const unreadMessages = ref(0);
 const newNotifications = ref(0);
 const showApplyPopup = ref(false);
 const isSidenavOpen = ref(true);
+// COUNTS
+const totalClients = ref(0);
+const totalJobs = ref(0);
+const pendingApplications = ref(0);
 
 //for Message Popup
 const showMessagePopup = ref(false);
@@ -763,16 +825,34 @@ body,
 
 .left-content {
   flex: 3;
-  background: white;
-  border-radius: 10px;
-  border-bottom: #045d56 4px solid;
-  padding: 15px;
-  overflow: auto;
 }
 
 .left-content h3 {
   margin-bottom: 2vh;
 }
+
+.cards {
+  display: flex;
+  gap: 15px;
+}
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 3vh;
+  text-align: center;
+  flex: 1;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+  margin-bottom: 1vh;
+  border-bottom: #045d56 solid 4px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
 .company-name {
   font-size: 20px;
   font-weight: bold;
@@ -814,6 +894,15 @@ body,
   background-color: #f1f1f1;
   color: #045d56;
   transform: scale(1.08);
+}
+
+.job-content {
+  flex: 3;
+  background: white;
+  border-radius: 10px;
+  border-bottom: #045d56 4px solid;
+  padding: 15px;
+  overflow: auto;
 }
 .job-box {
   border: 1px solid #ddd;
@@ -897,6 +986,24 @@ label {
   padding: 20px;
   height: fit-content;
 }
+
+.hired-status-box {
+  background-color: #e8f5e9;
+  border-bottom: 4px solid #2e7d32;
+  border-radius: 1vh;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.hired-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
 .icons-right {
   display: flex;
   gap: 20px;
@@ -1222,7 +1329,7 @@ label {
   }
 }
 @media (max-width: 320px) {
-.company-name{
+  .company-name {
     font-size: 10px;
     margin-top: 2.5vh;
   }

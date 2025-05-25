@@ -133,12 +133,38 @@
                   class="resume-item received"
                 >
                   <h4>Job Application for : {{ application.job_title }}</h4>
-                  <p><strong>Job Title:</strong> {{ application.job_title }}</p>
                   <p><strong>Status:</strong> {{ application.status }}</p>
                   <p>
                     <strong>Updated At:</strong>
                     {{ formatDate(application.updated_at) }}
                   </p>
+                  <div class="button-group">
+                    <button
+                      v-if="!showDownloadButton.get(application.id)"
+                      class="acrj-btn"
+                      @click="handleAccept(application.id)"
+                    >
+                      accept
+                    </button>
+                    <button
+                      v-if="showDownloadButton.get(application.id)"
+                      class="dl-btn"
+                      @click="downloadCertificate(application.id)"
+                    >
+                      <img
+                        src="/public/file.png"
+                        alt="download"
+                        class="btn-icon"
+                      />
+                      Download Certificate
+                    </button>
+                    <button
+                      v-if="!showDownloadButton.get(application.id)"
+                      class="acrj-btn"
+                    >
+                      reject
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -168,9 +194,15 @@ const applications = ref([]);
 const ongoingApplications = ref([]);
 const acceptedApplications = ref([]);
 
+const showDownloadButton = ref(new Map());
+
 const router = useRouter();
 
 //Methods for Nav Bars
+
+function handleAccept(applicationId) {
+  showDownloadButton.value.set(applicationId, true);
+}
 function toggleMail() {
   showMail.value = !showMail.value;
   if (showMail.value) {
@@ -265,7 +297,7 @@ async function fetchJobApplications() {
   try {
     const response = await axios.get("/applicant/applications");
     console.log("Success", response.data);
-    
+
     applications.value = response.data.applications;
 
     acceptedApplications.value = applications.value.filter(
@@ -275,7 +307,6 @@ async function fetchJobApplications() {
     ongoingApplications.value = applications.value.filter(
       (app) => app.status !== "accepted"
     );
-
   } catch (error) {
     console.error("Error Occured", error);
   }
@@ -629,6 +660,38 @@ body,
   transform: translateY(-5px);
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
 }
+
+.acrj-btn {
+  background-color: #045d56;
+  color: #fff;
+  width: auto;
+  margin-left: 5vh;
+  margin-top: 2vh;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  transform: scale(1);
+}
+.dl-btn {
+  background-color: #f1f1f1;
+  color: #033f3a;
+  width: auto;
+  margin-left: 5vh;
+  margin-top: 2vh;
+  border:#033f3a 1px solid;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  transform: scale(1);
+}
+.btn-icon {
+  width: 16px;
+  height: 16px;
+}
+
 
 .icons-right {
   display: flex;
