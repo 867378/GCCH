@@ -115,39 +115,28 @@
             </div>
 
             <div class="profile-form">
-              <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" :readonly="!isEditing" v-model="fullName" />
-              </div>
-
               <div class="form-row">
                 <div class="form-group">
-                  <label>Age</label>
-                  <select :disabled="!isEditing" v-model="age">
-                    <option disabled>Select age</option>
-                    <option v-for="n in 43" :key="n">{{ n + 17 }}</option>
-                  </select>
+                  <label>Company Name</label>
+                  <input
+                    type="text"
+                    :readonly="!isEditing"
+                    v-model="fullName"
+                  />
                 </div>
-
                 <div class="form-group">
-                  <label>Date of Birth</label>
-                  <input type="date" v-model="profile" :readonly="!isEditing" />
-                </div>
-
-                <div class="form-group">
-                  <label>Gender</label>
-                  <select v-model="profile" :disabled="!isEditing">
-                    <option>MALE</option>
-                    <option>FEMALE</option>
-                    <option>NON-BINARY</option>
-                    <option>PREFER NOT TO SAY</option>
-                  </select>
+                  <label>Industry Type</label>
+                  <input
+                    type="text"
+                    :readonly="!isEditing"
+                    v-model="type"
+                    placeholder="Enter industry type"
+                  />
                 </div>
               </div>
-
               <div class="form-row">
                 <div class="form-group">
-                  <label>Phone Number</label>
+                  <label>Company Telephone</label>
                   <input
                     type="text"
                     oninput="this.value = this.value.replace(/[^0-9]/g, '')"
@@ -157,7 +146,7 @@
                   />
                 </div>
                 <div class="form-group">
-                  <label>Email Address</label>
+                  <label> Company Email Address</label>
                   <input
                     type="email"
                     :readonly="!isEditing"
@@ -166,14 +155,47 @@
                   />
                 </div>
               </div>
-              <div class="btn-group">
-                <button v-if="!isEditing" class="edit-btn" @click="toggleEdit">
-                  EDIT
-                </button>
-                <button v-if="isEditing" class="save-btn" @click="saveChanges">
-                  SAVE
-                </button>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Location</label>
+                  <input
+                    type="text"
+                    :readonly="!isEditing"
+                    v-model="location"
+                    placeholder="Street Address"
+                  />
+                </div>
               </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <input
+                    type="text"
+                    :readonly="!isEditing"
+                    v-model="location"
+                    placeholder="City"
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    type="text"
+                    :readonly="!isEditing"
+                    v-model="location"
+                    placeholder="Province"
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    type="text"
+                    :readonly="!isEditing"
+                    v-model="location"
+                    placeholder="Country"
+                  />
+                </div>
+              </div>
+
+              <div class="btn-group"></div>
             </div>
           </div>
         </div>
@@ -192,7 +214,6 @@ export default {
       unreadMessages: 0,
       newNotifications: 0,
       profileImage: null,
-      isEditing: false,
       isSidenavOpen: true,
 
       messages: [
@@ -237,13 +258,6 @@ export default {
         };
         reader.readAsDataURL(file);
       }
-    },
-    toggleEdit() {
-      this.isEditing = !this.isEditing;
-    },
-    saveChanges() {
-      this.isEditing = false;
-      // Save logic here (e.g., send to backend)
     },
   },
 
@@ -433,12 +447,6 @@ body,
   background: #ffffff;
   border-radius: 50%;
 }
-.topbar input[type="text"] {
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  width: 300px;
-}
 
 .popup-overlay {
   position: fixed;
@@ -457,8 +465,7 @@ body,
   background: white;
   padding: 25px;
   border-radius: 15px;
-  width: 25%;
-  margin-left: 10%;
+  width: 350px;
   max-height: 400px;
   overflow-y: auto;
   text-align: left;
@@ -532,48 +539,6 @@ body,
   padding: 2px 5px;
 }
 
-.custom-dropdown {
-  position: absolute;
-  top: 30px;
-  right: 10%;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  display: none;
-  width: 200px;
-  z-index: 10;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.custom-dropdown .dropdown-label {
-  padding: 8px 12px;
-  background-color: #045d56;
-  color: white;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  font-weight: bold;
-}
-
-.custom-dropdown .dropdown-options {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.custom-dropdown .dropdown-options li {
-  padding: 10px 12px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.custom-dropdown .dropdown-options li:hover {
-  background-color: #e0f2f1;
-}
-
-.industry-dropdown:hover .custom-dropdown {
-  display: block;
-}
-
 .profile-wrapper {
   justify-content: center;
 }
@@ -585,9 +550,9 @@ body,
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
   border-left: #045d56 solid 4px;
   padding: 2rem;
-  height: 100%;
+  height: 95%;
   width: 100%;
-  margin-left: 30vh;
+  margin-left: 27vh;
   gap: 3rem;
 }
 
@@ -611,7 +576,7 @@ body,
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 2vh;
 }
 
 .form-group {
@@ -622,6 +587,12 @@ body,
 .form-group label {
   font-weight: 600;
   color: #374151;
+}
+
+.form-group input::placeholder{
+  color: #000000;
+  text-align: center;
+  text-transform: capitalize;
 }
 
 .form-group input,
@@ -650,55 +621,21 @@ body,
   min-width: 200px;
 }
 
-.btn-group {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.edit-btn,
-.save-btn {
-  padding: 0.7rem 1.5rem;
-  border-radius: 0.5rem;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.edit-btn {
-  background: #045d56;
-  color: #e0f2f1;
-}
-
-.edit-btn:hover {
-  background: #d1d5db;
-  color: #045d56;
-}
-
-.save-btn {
-  background: #045d56;
-  color: #e0f2f1;
-}
-
-.save-btn:hover {
-  background: #d1d5db;
-  color: #045d56;
-}
-
 @media (max-width: 1024px) {
   .hamburger {
     display: flex;
     z-index: 1001;
   }
-
+  .content {
+    gap: 0;
+    overflow: hidden;
+  }
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -708,17 +645,18 @@ body,
   }
 
   .logo {
-    margin-top: 8vh;
+    margin-top: 4vh;
     margin-left: 4vh;
-    margin-bottom: 10vh;
+    margin-bottom: 8vh;
   }
 
   .profile-card {
     margin-left: 17vh;
     width: 90%;
+    height: 100%;
   }
   .profile-avatar {
-    margin-left: 27vh;
+    margin-left: 40vh;
   }
   .sign-out {
     margin-left: 7.5vh;
@@ -730,14 +668,20 @@ body,
     display: flex;
     z-index: 1001;
   }
+  .content {
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    padding: 20px;
+    margin-top: 10px;
+    overflow: auto;
+  }
 
   .sidebar {
-    font-size: 10px;
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -784,7 +728,7 @@ body,
   .sign-out {
     width: 60px;
     height: 40px;
-    margin-left: 5.5vh;
+    margin-left: 7.5vh;
   }
 }
 
@@ -793,6 +737,9 @@ body,
     display: flex;
     z-index: 1001;
   }
+  .topbar {
+    height: 12.5vh;
+  }
 
   .logo {
     margin-left: 5vh;
@@ -800,12 +747,17 @@ body,
     margin-bottom: 5vh;
   }
 
+  .ikon {
+    height: 15px;
+    width: 15px;
+  }
+
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -828,17 +780,33 @@ body,
     gap: 0.5rem;
     font-size: 15px;
   }
+
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
+  }
 }
 @media (max-width: 385px) {
-  .sidebar {
-    width: 20vh;
-    font-size: 8px;
+   .sidebar {
+    font-size: 12px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
   }
   .logo {
     height: 6vh;
     width: 10vh;
     margin-left: 3vh;
     margin-bottom: 5vh;
+  }
+  .ikon {
+    height: 20px;
+    width: 20px;
   }
   .profile-card {
     margin-left: 1vh;
@@ -854,5 +822,41 @@ body,
     gap: 0.5rem;
     font-size: 15px;
   }
+
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
+  }
+}
+
+@media (max-width: 320px) {
+  .sidebar {
+    font-size: 12px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+  .logo {
+    height: 6vh;
+    width: 10vh;
+    margin-left: 3vh;
+    margin-bottom: 5vh;
+  }
+  .ikon {
+    height: 20px;
+    width: 20px;
+  }
+
+  .profile-avatar {
+    height: 20vh;
+    width: 20vh;
+    margin-left: 6vh;
+  }
+  
 }
 </style>

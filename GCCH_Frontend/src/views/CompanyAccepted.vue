@@ -706,25 +706,25 @@ textarea {
   }
   .content {
     gap: 0;
+    overflow: hidden;
   }
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
-
   .sidebar.active {
     transform: translateX(0);
   }
 
   .logo {
-    margin-top: 8vh;
+    margin-top: 4vh;
     margin-left: 4vh;
-    margin-bottom: 10vh;
+    margin-bottom: 8vh;
   }
 
   .post-box {
@@ -746,19 +746,23 @@ textarea {
   }
 
   .posted-jobs-box {
+    width: 35vh;
+    height: auto;
+    margin: 10px;
+    font-size: 14px;
+  }
+  .selected-job-box {
+    width: 95%;
+    max-height: 43vh;
     margin-left: 2vh;
-    width: 25vh;
-    padding: 10px 20px;
+    font-size: 14px;
+    padding: 20px;
+    border-radius: 3vh;
+  }
+  .selected-job-box h3 {
+    font-size: 30px;
   }
 
-  .label {
-    padding: 10px 10px;
-    margin-right: 2vh;
-  }
-
-  .form-row {
-    gap: 10vh;
-  }
   .sign-out {
     margin-left: 7.5vh;
   }
@@ -770,17 +774,20 @@ textarea {
     z-index: 1001;
   }
   .content {
-    gap: 0;
-    padding: 10px;
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    padding: 20px;
+    margin-top: 10px;
+    overflow: auto;
   }
 
   .sidebar {
-    font-size: 10px;
+    font-size: 14px;
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 28vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -806,37 +813,20 @@ textarea {
     margin-bottom: 10vh;
   }
 
-  .post-box {
-    border-radius: 3vh;
-    width: 95%;
-  }
-  .post-box textarea {
-    width: 100%;
-    margin-top: 1vh;
-    height: 20vh;
-  }
-
   .right-content {
-    padding-top: 3vh;
-    height: 80vh;
+    padding: 15px;
+    height: auto;
+    min-height: 300px;
+    width: 90%;
+    margin-left: 5vh;
     overflow: auto;
   }
 
   .posted-jobs-box {
-    font-size: 10px;
-    width: 20vh;
-    padding: 10px 10px;
-  }
-
-  .upload-media,
-  .job-type,
-  .salary-range {
-    font-size: 10px;
-    padding: 8px 10px;
-  }
-
-  .form-row {
-    gap: 5vh;
+    width: 100%;
+    margin: 10px 0;
+    padding: 8px;
+    font-size: 12px;
   }
 
   .avatar {
@@ -850,7 +840,7 @@ textarea {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 435px) {
   .hamburger {
     display: flex;
     z-index: 1001;
@@ -859,7 +849,6 @@ textarea {
     height: 12.5vh;
   }
   .content {
-    overflow: hidden;
     display: flex;
     flex-direction: column;
   }
@@ -878,7 +867,7 @@ textarea {
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -886,23 +875,28 @@ textarea {
   .sidebar.active {
     transform: translateX(0);
   }
-
-  .post-box {
-    width: 95%;
-    margin-bottom: 10px;
-    border-radius: 2vh;
+  .selected-job-box {
+    width: 90%;
+    max-height: 50vh;
+    margin-left: 1.5vh;
+    font-size: 12px;
+    padding: 15px;
+    border-radius: 3vh;
   }
-
-  .post-box button {
-    padding: 6px 10px;
-    margin-top: -5vh;
+  .selected-job-box h3 {
+    font-size: 20px;
+  }
+  .selected-job-box p {
+    font-size: 10px;
+  }
+  .selected-job-box li {
+    font-size: 10px;
+    width: 100%;
   }
 
   .right-content {
-    flex: 1;
-    margin-left: 7vh;
-    padding-top: 3vh;
-    height: auto;
+    width: 85%;
+    margin-left: 5vh;
     overflow: auto;
   }
 
@@ -912,12 +906,10 @@ textarea {
     width: 40vh;
     padding: 10px 10px;
   }
-
-  .upload-media,
-  .job-type,
-  .salary-range {
-    font-size: 6px;
-    padding: 6px 8px;
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
   }
 }
 @media (max-width: 385px) {
@@ -931,29 +923,37 @@ textarea {
     margin-left: 3vh;
     margin-bottom: 5vh;
   }
-
-  .post-box {
-    margin-bottom: 5px;
-    border-radius: 2vh;
+  .ikon {
+    height: 20px;
+    width: 20px;
   }
-  .post-box h3 {
-    font-size: 25px;
-  }
-  .post-box textarea {
-    margin-top: 2vh;
-    height: 12vh;
-  }
-  .post-box button {
-    font-size: 6px;
-    padding: 8px 10px;
-    margin-top: -4vh;
+  .sidebar {
+    font-size: 12px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
   }
   .right-content {
     flex: 1;
-    margin-left: 3.5vh;
+    margin-left: 4vh;
     padding-top: 3vh;
     height: auto;
     overflow: auto;
+  }
+  .posted-jobs-box {
+    width: 100%;
+    margin: 10px 0;
+    padding: 8px;
+    font-size: 12px;
+  }
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
   }
 }
 </style>

@@ -1019,13 +1019,12 @@ body,
     top: 0;
     left: 0;
     height: 100vh;
-    width: 200px;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
 
   .sidebar.active {
-    transition: transform 0.3s ease;
     transform: translateX(0);
   }
 
@@ -1042,7 +1041,11 @@ body,
 
   .post-box {
     width: 100%;
+    height: 70%;
     padding: 15px;
+  }
+  .post-box textarea {
+    height: 20vh;
   }
 
   .cards {
@@ -1057,7 +1060,9 @@ body,
 
   .form-row {
     grid-template-columns: 2fr, 3;
-    gap: 2vh;
+    width: 90%;
+    margin-left: 5vh;
+    gap: 3vh;
   }
 
   .job-input,
@@ -1084,6 +1089,7 @@ body,
 
   .posted-jobs-box {
     width: 35vh;
+    height: auto;
     margin: 10px;
   }
 
@@ -1097,13 +1103,9 @@ body,
 
   .topbar {
     left: 0;
-    padding: 0 15px;
   }
 
-  .avatar {
-    width: 25px;
-    height: 25px;
-  }
+
 }
 
 @media (max-width: 768px) {
@@ -1123,12 +1125,12 @@ body,
     flex: 1;
   }
   .sidebar {
-    font-size: 10px;
+    font-size: 14px;
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 28vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -1214,21 +1216,20 @@ body,
     margin-left: 5vh;
     overflow: auto;
   }
-  .posted-jobs-box {
+ .posted-jobs-box {
     width: 100%;
     margin: 10px 0;
-    padding: 15px;
+    padding: 8px;
     font-size: 12px;
   }
-
   .sign-out {
     width: 60px;
     height: 40px;
-    margin-left: 5.5vh;
+    margin-left: 7.5vh;
   }
 }
 
-@media (max-width: 435px) {
+@media (max-width: 445px) {
   .hamburger {
     display: flex;
     z-index: 1001;
@@ -1250,7 +1251,7 @@ body,
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -1296,9 +1297,20 @@ body,
     margin-left: 2vh;
   }
 }
-@media (max-width: 375px) {
+@media (max-width: 380px) {
+    .ikon {
+    height: 20px;
+    width: 20px;
+  }
   .sidebar {
-    width: 20vh;
+    font-size: 12px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
   }
   .logo {
     height: 6vh;

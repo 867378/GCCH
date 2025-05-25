@@ -195,11 +195,7 @@
       <input type="file" @change="handleFileUploadResume" accept=".pdf" />
       <br /><br />
       <span>Cover Letter </span>
-      <input
-        type="file"
-        @change="handleFileUploadCoverLetter"
-        accept=".pdf"
-      />
+      <input type="file" @change="handleFileUploadCoverLetter" accept=".pdf" />
       <br /><br />
       <button @click="submitApplication">Apply</button>
       <button @click="closeApplyPopup">Cancel</button>
@@ -327,10 +323,9 @@ async function submitApplication() {
 
   try {
     const response = await axios.post("/applicant/jobapply", formData, {
-      headers:
-        {
-          "Content-Type": "multipart/form-data",
-        },
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     });
 
     alert(response.data.message);
@@ -339,7 +334,7 @@ async function submitApplication() {
   } catch (error) {
     if (error.response && error.response.status === 422) {
       const errors = error.response.data.error;
-      let errorMessages = Object.values(errors).flat().join('\n');
+      let errorMessages = Object.values(errors).flat().join("\n");
       alert("Validation Error:\n" + errorMessages);
     } else {
       console.error("Unexpected error:", error);
@@ -452,7 +447,6 @@ onMounted(() => {
   fetchJobs();
   fetchNotifications();
 });
-
 </script>
 
 <style scoped>
@@ -469,21 +463,9 @@ body,
   height: 100vh;
   overflow: hidden;
 }
-.container {
-  position: relative;
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-  background: #e6f0ea;
-}
 
 .sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  height: 100vh;
   width: 200px;
-  z-index: 1000;
   background: #fafafa;
   padding: 20px 0;
   border-radius: 2vh;
@@ -595,7 +577,6 @@ body,
   margin-right: 10px;
 }
 .main {
-  margin-left: 200px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -845,14 +826,13 @@ body,
   border-left: #045d56 4px solid;
   background-color: #fff;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    text-transform: capitalize;
-
+  text-transform: capitalize;
 }
 
 .job-header {
   display: flex;
   align-items: center;
-  justify-content: space-between; 
+  justify-content: space-between;
   width: 100%;
   margin-bottom: 10px;
 }
@@ -994,8 +974,7 @@ label {
   margin-bottom: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-    text-transform: capitalize;
-
+  text-transform: capitalize;
 }
 
 .update-box:hover {
@@ -1004,12 +983,51 @@ label {
 }
 
 @media (max-width: 1024px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+
   .sidebar {
-    width: 200px; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .logo {
+    margin-top: 4vh;
+    margin-left: 4vh;
+    margin-bottom: 8vh;
+  }
+
+  .content {
+    padding: 15px;
+    gap: 15px;
+  }
+  .update-box {
+    font-size: 12px;
+    padding: 15px;
+  }
+  .left-content {
+    flex: 3;
+    padding: 20px;
+    overflow-y: auto;
   }
 
   .main {
-    margin-left: 200px; 
+    margin-left: 0;
+  }
+
+  .topbar {
+    left: 0;
   }
 }
 
@@ -1019,13 +1037,21 @@ label {
     z-index: 1001;
   }
 
+  .content {
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    padding: 20px;
+    margin-top: 10px;
+    overflow: auto;
+  }
+
   .sidebar {
-    font-size: 10px;
+    font-size: 14px;
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 28vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -1038,19 +1064,12 @@ label {
     height: 15px;
     width: 15px;
   }
-
-  .icon img {
-    width: 20px;
-    height: 20px;
-  }
-
   .logo {
     height: 8vh;
     width: 13vh;
     margin-left: 4vh;
     margin-bottom: 10vh;
   }
-
   .avatar {
     width: 30px;
     height: 30px;
@@ -1062,38 +1081,39 @@ label {
     width: 30vh;
   }
 
-  .company-name {
-    font-size: 12px;
-  }
-
   .message-btn {
     margin-left: 0;
     font-size: 8px;
   }
   .apply-btn {
     margin-left: 0;
-    font-size: 8px;
-  }
-  .salary,
-  .job-type {
     font-size: 10px;
   }
-  .job-description {
+  .job-detail {
     font-size: 12px;
+    margin-right: 5vh;
+  }
+  .job-description {
+    font-size: 14px;
     margin-left: 5vh;
     margin-right: 5vh;
   }
-  .job-media {
-    margin-left: 5vh;
+  .left-content {
+    padding: 15px;
+    height: 60vh;
+  }
+  .right-content {
+    padding: 15px;
+    height: 60vh;
   }
   .update-box {
-    font-size: 8px;
+    font-size: 10px;
     padding: 10px;
   }
   .sign-out {
     width: 60px;
     height: 40px;
-    margin-left: 5.5vh;
+    margin-left: 7.5vh;
   }
 }
 
@@ -1103,14 +1123,15 @@ label {
     z-index: 1001;
   }
 
-  .content {
-    display: flex;
-    flex-direction: column;
-  }
   .logo {
     margin-left: 5vh;
     margin-top: 5vh;
     margin-bottom: 5vh;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: (2, 1fr);
+    width: 90%;
   }
 
   .sidebar {
@@ -1118,7 +1139,7 @@ label {
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -1126,27 +1147,34 @@ label {
   .sidebar.active {
     transform: translateX(0);
   }
+
   .popup {
     width: 80%;
   }
   .topbar input[type="text"] {
     width: 20vh;
   }
-  .company-name {
-    font-size: 8px;
-  }
 
   .message-btn {
     margin-left: 0;
-    font-size: 4px;
+    font-size: 6px;
   }
   .apply-btn {
     margin-left: 0;
-    font-size: 4px;
+    font-size: 7px;
   }
-  .salary,
-  .job-type {
-    font-size: 8px;
+  .company-name {
+    font-size: 14px;
+    margin-top: 2.5vh;
+    margin-left: -2vh;
+  }
+  .job-box {
+    margin-left: 2vh;
+    white-space: pre-line;
+  }
+  .job-detail {
+    font-size: 12px;
+    margin-right: 5vh;
   }
   .job-description {
     font-size: 10px;
@@ -1160,17 +1188,43 @@ label {
     font-size: 8px;
     padding: 10px;
   }
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
+  }
 }
 @media (max-width: 385px) {
+  .ikon {
+    height: 20px;
+    width: 20px;
+  }
   .sidebar {
-    width: 20vh;
-    font-size: 8px;
+    font-size: 12px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
   }
   .logo {
     height: 6vh;
     width: 10vh;
     margin-left: 3vh;
     margin-bottom: 5vh;
+  }
+  .button-group {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+}
+@media (max-width: 320px) {
+.company-name{
+    font-size: 10px;
+    margin-top: 2.5vh;
   }
 }
 </style>
