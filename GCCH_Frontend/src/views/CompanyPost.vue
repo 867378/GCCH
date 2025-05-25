@@ -436,21 +436,8 @@ body,
   height: 100vh;
   overflow: hidden;
 }
-.container {
-  position: relative;
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-  background: #e6f0ea;
-}
-
 .sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  height: 100vh;
   width: 200px;
-  z-index: 1000;
   background: #fafafa;
   padding: 20px 0;
   border-radius: 2vh;
@@ -561,25 +548,11 @@ body,
   margin-right: 10px;
 }
 .main {
-  margin-left: 200px; 
-  flex: 1;
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
+  background-color: #eaf4f2;
 }
-
-.topbar {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 200px;
-  height: 60px;
-  z-index: 999;
-  background: #fafafa;
-  border-bottom: 1px solid #ccc;
-}
-
 .topbar {
   height: 60px;
   background: #fafafa;
@@ -591,7 +564,7 @@ body,
 }
 
 .hamburger {
-  display: none;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 25px;
@@ -693,15 +666,11 @@ body,
 }
 
 .content {
-  margin-top: 60px;
-  margin-bottom: 5px;
-  height: calc(100vh - 60px);
   padding: 20px;
   display: flex;
   gap: 20px;
-  overflow-y: auto;
+  overflow: auto;
 }
-
 .left-content {
   flex: 3;
 }
@@ -709,11 +678,13 @@ body,
 .selected-job-box {
   background: white;
   padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 3vh;
   border-radius: 3vh;
-  border-bottom: #045d56 4px solid;
-  width: 85%;
-  margin-left: 10vh;
-  margin-bottom: 1vh;
+  border-left: #045d56 4px solid;
+  width: 95%;
+  max-height: 80vh;
+  margin-left: 3vh;
   overflow-y: auto;
   text-transform: capitalize;
 }
@@ -749,14 +720,14 @@ body,
   padding: 16px;
   border-radius: 10px;
   border: 2px solid #e0e6ed;
-  border-left: #045d56 4px solid;
+  border-bottom: #045d56 4px solid;
   width: 60vh;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .selected-job-box li:hover {
   transform: scale(1.03);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
 }
 
 .selected-job-box li strong {
@@ -909,20 +880,62 @@ textarea {
 }
 
 @media (max-width: 1024px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+  .content {
+    gap: 0;
+    overflow: hidden;
+  }
   .sidebar {
-    transform: translateX(-100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
   }
 
   .sidebar.active {
     transform: translateX(0);
   }
 
-  .main {
-    margin-left: 0;
+  .logo {
+    margin-top: 4vh;
+    margin-left: 4vh;
+    margin-bottom: 8vh;
   }
 
-  .topbar {
-    left: 0;
+  .right-content {
+    padding-top: 3vh;
+    margin-right: 1vh;
+    height: 85vh;
+    width: 50vh;
+    overflow: auto;
+  }
+
+  .posted-jobs-box {
+    width: 35vh;
+    height: auto;
+    margin: 10px;
+    font-size: 14px;
+  }
+  .selected-job-box {
+    width: 95%;
+    max-height: 43vh;
+    margin-left: 2vh;
+    font-size: 14px;
+    padding: 20px;
+    border-radius: 3vh;
+  }
+  .selected-job-box h3 {
+    font-size: 30px;
+  }
+
+  .sign-out {
+    margin-left: 7.5vh;
   }
 }
 
@@ -932,17 +945,20 @@ textarea {
     z-index: 1001;
   }
   .content {
-    gap: 0;
-    padding: 10px;
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    padding: 20px;
+    margin-top: 10px;
+    overflow: auto;
   }
 
   .sidebar {
-    font-size: 10px;
+    font-size: 14px;
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 28vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -968,37 +984,20 @@ textarea {
     margin-bottom: 10vh;
   }
 
-  .post-box {
-    border-radius: 3vh;
-    width: 95%;
-  }
-  .post-box textarea {
-    width: 100%;
-    margin-top: 1vh;
-    height: 20vh;
-  }
-
   .right-content {
-    padding-top: 3vh;
-    height: 80vh;
+    padding: 15px;
+    height: auto;
+    min-height: 300px;
+    width: 90%;
+    margin-left: 5vh;
     overflow: auto;
   }
 
   .posted-jobs-box {
-    font-size: 10px;
-    width: 20vh;
-    padding: 10px 10px;
-  }
-
-  .upload-media,
-  .job-type,
-  .salary-range {
-    font-size: 10px;
-    padding: 8px 10px;
-  }
-
-  .form-row {
-    gap: 5vh;
+    width: 100%;
+    margin: 10px 0;
+    padding: 8px;
+    font-size: 12px;
   }
 
   .avatar {
@@ -1008,11 +1007,11 @@ textarea {
   .sign-out {
     width: 60px;
     height: 40px;
-    margin-left: 5.5vh;
+    margin-left: 7.5vh;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 435px) {
   .hamburger {
     display: flex;
     z-index: 1001;
@@ -1021,26 +1020,24 @@ textarea {
     height: 12.5vh;
   }
   .content {
-    overflow: hidden;
-    display: flex;
+    display: grid;
     flex-direction: column;
-  }
-  .left-content {
-    padding-left: 3vh;
-    flex: 1;
   }
   .logo {
     margin-left: 5vh;
     margin-top: 5vh;
     margin-bottom: 5vh;
   }
-
+  .ikon {
+    height: 15px;
+    width: 15px;
+  }
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 25vh;
+    width: 35vh;
     z-index: 1000;
     transition: transform 0.3s ease;
   }
@@ -1048,38 +1045,43 @@ textarea {
   .sidebar.active {
     transform: translateX(0);
   }
-
-  .post-box {
-    width: 95%;
-    margin-bottom: 10px;
-    border-radius: 2vh;
+  .selected-job-box {
+    width: 80%;
+    max-height: 50vh;
+    margin-left: 5vh;
+    font-size: 12px;
+    padding: 15px;
+    border-radius: 3vh;
   }
-
-  .post-box button {
-    padding: 6px 10px;
-    margin-top: -5vh;
+  .selected-job-box h3 {
+    font-size: 20px;
+  }
+  .selected-job-box p {
+    font-size: 10px;
+  }
+  .selected-job-box li {
+    font-size: 10px;
+    width: 100%;
   }
 
   .right-content {
-    flex: 1;
-    margin-left: 7vh;
-    padding-top: 3vh;
-    height: auto;
+    width: 90%;
+    margin-left: 3vh;
     overflow: auto;
   }
 
   .posted-jobs-box {
-    margin-left: 3vh;
-    font-size: 10px;
-    width: 40vh;
-    padding: 10px 10px;
+    width: 90%;
+    margin: 10px 0;
+    padding: 15px;
+    font-size: 12px;
+    margin-left: 2vh;
   }
 
-  .upload-media,
-  .job-type,
-  .salary-range {
-    font-size: 6px;
-    padding: 6px 8px;
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
   }
 }
 @media (max-width: 385px) {
@@ -1093,29 +1095,32 @@ textarea {
     margin-left: 3vh;
     margin-bottom: 5vh;
   }
+    .ikon {
+    height: 20px;
+    width: 20px;
+  }
+  .sidebar {
+    font-size: 12px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
 
-  .post-box {
-    margin-bottom: 5px;
-    border-radius: 2vh;
-  }
-  .post-box h3 {
-    font-size: 25px;
-  }
-  .post-box textarea {
-    margin-top: 2vh;
-    height: 12vh;
-  }
-  .post-box button {
-    font-size: 6px;
-    padding: 8px 10px;
-    margin-top: -4vh;
-  }
   .right-content {
     flex: 1;
     margin-left: 3.5vh;
     padding-top: 3vh;
     height: auto;
     overflow: auto;
+  }
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
   }
 }
 </style>
