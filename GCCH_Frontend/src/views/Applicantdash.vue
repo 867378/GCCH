@@ -196,6 +196,13 @@
                     <p>Status: {{ matchedJob.status }}</p>
                   </div>
                 </div>
+                 <!--  -->
+                <div class="job-info">
+                  <div class="job-detail">
+                    <img src="/public/location.png" class="ikon" />
+                    <p>Location: {{ matchedJob.job_location}}</p>
+                  </div>
+                </div>
                 <!-- Job Description -->
                 <p class="job-description">{{ matchedJob.job_description }}</p>
               </div>
