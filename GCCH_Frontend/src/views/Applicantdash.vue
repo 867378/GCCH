@@ -230,7 +230,7 @@
               <p>Job Title: {{ hiredJobDetails.job_title }}</p>
               <p>Job Type: {{ formatType(hiredJobDetails.job_type) }}</p>
               <p>Started By: {{ formatDate(hiredJobDetails.created_at) }}</p>
-              <button @click="downloadCertificate">Download Certificate</button>
+              <button @click="downloadCertificate" class="download-btn">Download Certificate</button>
             </div>
           </div>
         </div>
@@ -1140,6 +1140,21 @@ label {
   margin-bottom: 15px;
 }
 
+.download-btn {
+  background-color: #045d56;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  margin-top: 3vh;
+  margin-left: 7vh;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.download-btn:hover {
+  background-color: #f1f1f1;
+  color: #045d56;
+}
 .icons-right {
   display: flex;
   gap: 20px;
