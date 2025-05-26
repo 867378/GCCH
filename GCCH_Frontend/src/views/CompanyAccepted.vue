@@ -98,7 +98,7 @@
       <div class="content">
         <div class="left-content">
           <div v-if="selectedJob" class="selected-job-box">
-            <h3>Accepted Applicants for {{ selectedJob.job_title }}</h3>
+            <h3>Hired Applicants for {{ selectedJob.job_title }}</h3>
             <ul v-if="jobApplicants.length > 0">
               <li
                 v-for="application in jobApplicants"
@@ -208,7 +208,7 @@ async function fetchApplicants(jobId) {
   try {
     const response = await axios.get(`/job/${jobId}/applications`);
     const acceptedApplicants = response.data.applications.filter(
-      (applicant) => applicant.status === "accepted"
+      (applicant) => applicant.status === "hired"
     );
 
     jobApplicants.value = acceptedApplicants;

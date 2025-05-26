@@ -138,16 +138,17 @@
                     <strong>Updated At:</strong>
                     {{ formatDate(application.updated_at) }}
                   </p>
+                  
                   <div class="button-group">
                     <button
                       v-if="!showDownloadButton.get(application.id)"
                       class="acrj-btn"
-                      @click="handleAccept(application.id)"
+                      @click="respondToOffer(application.id, 'accepted')"
                     >
-                      accept
+                      Accept Offer
                     </button>
                     <button
-                      v-if="showDownloadButton.get(application.id)"
+                      v-if="application.offer_status === 'accepted' && application.finalized"
                       class="dl-btn"
                       @click="downloadCertificate(application.id)"
                     >
@@ -161,10 +162,12 @@
                     <button
                       v-if="!showDownloadButton.get(application.id)"
                       class="acrj-btn"
+                      @click="respondToOffer(application.id,'rejected')"
                     >
-                      reject
+                      Reject Offer
                     </button>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -301,30 +304,32 @@ async function fetchJobApplications() {
     applications.value = response.data.applications;
 
     acceptedApplications.value = applications.value.filter(
-      (app) => app.status === "accepted"
+      (app) => app.status === "accepted" 
     );
 
     ongoingApplications.value = applications.value.filter(
-      (app) => app.status !== "accepted"
+      (app) => app.status !== "accepted" && app.status !=='hired' && app.offer_status !== 'none'
     );
   } catch (error) {
     console.error("Error Occured", error);
   }
 }
 
-// function viewResume(resumeLink, applicant) {
-//   selectedResume.value = resumeLink;
-//   selectedApplicant.value = applicant;
-//   showResumeModal.value = true;
-// }
-
-// function closeResume() {
-//   showResumeModal.value = false;
-//   selectedResume.value = null;
-//   selectedApplicant.value = null;
-// }
-
-// function saveStatus() {}
+async function respondToOffer(applicationId, response){
+  try{
+    const res = await axios.post(
+      `/applicant/job-application/respond-offer/${applicationId}`,
+      {
+        offer_status: response, // 'accepted' or 'rejected'
+      }
+    );
+    alert(res.data.message);
+    await fetchJobApplications();
+  } catch (error){
+    console.error("Error responding to offer", error.response?.data || error);
+    alert(error.response?.data?.error || "Something went wrong");
+  }
+}
 
 onMounted(() => {
   fetchJobApplications();

@@ -14,6 +14,8 @@ class JobApplication extends Model
         'status', // e.g., applied, interview, assessment, rejected, accepted
         'date_applied',
         'scheduled_at', // for interview or assessment
+        'offer_status',
+        'finalized',
         'comment', // for feedback or notes
     ];
 

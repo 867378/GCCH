@@ -43,9 +43,10 @@ Route::middleware(['auth:sanctum','applicant'])->group(function () {
     Route::get('/applicant/jobdisplay', [ApplicantController::class, 'jobdisplay'])->name('applicant.jobdisplay');
     Route::get('/applicant/jobdisplay/{id}', [ApplicantController::class, 'jobdisplay'])->name('applicant.jobdisplay');
     Route::get('/applicant/applications', [ApplicantController::class, 'applicationStatus'])->name('applicant.applicationStatus');
-    Route::get('/applicant/total-jobs', [ApplicantController::class, 'listedJobs'])->name('applicant.listedJobs');
-    Route::get('/applicant/accepted-count', [ApplicantController::class, 'acceptedCount'])->name('applicant.acceptedCountS');
+    Route::get('/applicant/ongoing-applications', [ApplicantController::class, 'listedJobs'])->name('applicant.listedJobs');
+    Route::get('/applicant/accepted-applications', [ApplicantController::class, 'acceptedCount'])->name('applicant.acceptedCountS');
     Route::get('/applicant/matched-jobs', [ApplicantController::class, 'matchedJobs'])->name('applicant.matchedJobs');
+    Route::post('/applicant/job-application/respond-offer/{application}', [ApplicantController::class, 'respondToOffer'])->name('applicant.jobOffer');
 });
 
 //Company routes
@@ -55,6 +56,7 @@ Route::middleware(['auth:sanctum','company'])->group(function () {
     Route::get('/company/jobdisplay/{id}', [CompanyController::class, 'jobdisplay'])->name('company.jobdisplay');
     Route::get('/job/{job}/applications', [CompanyController::class, 'viewJobApplications'])->name('company.jobapplications');
     Route::post('/company/job-applications/{jobApplication}/assess', [CompanyController::class, 'assessApplication'])->name('company.update.application');
+    Route::post('/company/offer-job/{id}',[CompanyController::class, 'offerJob'])->name('company.offerJob');
     Route::get('/company/total-clients', [CompanyController::class, 'totalClients']);
     Route::get('/company/total-jobs', [CompanyController::class, 'totalJobs']);
     Route::get('/company/pending-applications', [CompanyController::class, 'pendingApplications']);

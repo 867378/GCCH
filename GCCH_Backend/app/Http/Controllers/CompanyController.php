@@ -33,12 +33,18 @@ class CompanyController extends Controller
     public function totalClients()
     {
         $companyId = auth()->id();
+
         $clients = JobApplication::whereHas('job', function ($q) use ($companyId) {
-            $q->where('company_id', $companyId);
-        })->distinct('applicant_id')->count('applicant_id');
+                $q->where('company_id', $companyId);
+            })
+            ->where('offer_status', 'accepted')
+            ->where('finalized', true)
+            ->distinct('applicant_id')
+            ->count('applicant_id');
 
         return response()->json(['count' => $clients]);
     }
+
 
     public function totalJobs()
     {
@@ -52,7 +58,7 @@ class CompanyController extends Controller
 {
     $companyId = auth()->id();
 
-    $total = JobApplication::whereIn('status', ['applied', 'interview', 'assessment'])
+    $total = JobApplication::whereIn('status', ['applied', 'interview', 'assessment','accepted'])
         ->whereHas('job', function ($query) use ($companyId) {
             $query->where('company_id', $companyId);
         })
@@ -183,31 +189,30 @@ class CompanyController extends Controller
 
     public function assessApplication(Request $request, $applicationId){
         try{
-
             $application = JobApplication::with('job')->find($applicationId);
 
-            if(!$application){
+            if (!$application) {
                 return response()->json(['error' => 'Application not found'], 404);
             }
 
             $job = $application->job;
 
-            if ($application->status === 'accepted') {
-                return response()->json(['error' => 'Cannot update application. Applicant already accepted.'], 403);
+            if ($application->status === 'hired') {
+                return response()->json(['error' => 'Cannot update application. Applicant already hired.'], 403);
             }
 
             $validated = $request->validate([
-                'status'=>'required|in:applied,interview,assessment,rejected,accepted', //required|in:applied,for_interview,ongoing_assessment,rejected,accepted
-                'scheduled_at'=>'nullable|date_format:Y-m-d H:i:s',
-                'comment'=>'nullable|string',
+                'status' => 'required|in:applied,interview,assessment,rejected,accepted,hired',
+                'scheduled_at' => 'nullable|date_format:Y-m-d H:i:s',
+                'comment' => 'nullable|string',
             ]);
 
             $user = Auth::user();
             $company = $user->company;
 
-            if (!$company || $application->job->company_id !== $company->id) {
+            if (!$company || $job->company_id !== $company->id) {
                 return response()->json(['error' => 'Unauthorized'], 403);
-            } 
+            }
 
             if (in_array($validated['status'], ['interview', 'assessment'])) {
                 if (empty($validated['scheduled_at'])) {
@@ -218,20 +223,20 @@ class CompanyController extends Controller
                 $application->scheduled_at = null;
             }
 
-            if ($validated['status'] === 'accepted') {
+            if ($validated['status'] === 'hired') {
                 if ($job->status === 'closed') {
-                    return response()->json(['error' => 'Job is already closed. Cannot accept more applicants.'], 403);
+                    return response()->json(['error' => 'Job is already closed. Cannot hire more applicants.'], 403);
                 }
 
                 $job->increment('filled_slots');
 
-                if ($job->filled_slots > $job->total_slots) {
+                if ($job->filled_slots >= $job->total_slots) {
                     $job->status = 'closed';
                     $job->save();
 
-                    // Automatically reject all other pending applications
+                    // Automatically reject all other pending or accepted applications
                     JobApplication::where('job_id', $job->id)
-                        ->where('status', '!=', 'accepted') // Skip accepted
+                        ->whereNotIn('status', ['hired'])
                         ->update([
                             'status' => 'rejected',
                             'comment' => 'Job has reached its slot limit.'
@@ -242,25 +247,41 @@ class CompanyController extends Controller
             }
 
             $application->status = $validated['status'];
-            if(isset($validated['comment'])){
+
+            if (isset($validated['comment'])) {
                 $application->comment = $validated['comment'];
             }
 
             $application->save();
 
-            // Notify the applicant about the status change
+            // Notify applicant
             $notifier = new NotificationController();
-            $content = "Your application for " . $application->job->job_title . " has been updated";
+            $content = "Your application for " . $job->job_title . " has been updated";
             $notifier->notifyUser($application->applicant->user_id, $content, 'application_update');
 
             return response()->json([
                 'message' => 'Application status updated successfully',
                 'application' => $application
             ], 200);
+
         } catch (ValidationException $e){
             return response()->json(['error' => 'Could not update application status'], 422);
         }
     }
 
-    
+
+    public function offerJob($applicationId)
+    {
+        $application = JobApplication::findOrFail($applicationId);
+
+        if ($application->status !== 'accepted') {
+            return response()->json(['message' => 'Only accepted applications can be offered.'], 403);
+        }
+
+        $application->offer_status = 'offered';
+        $application->save();
+
+        return response()->json(['message' => 'Job offer sent successfully.']);
+    }
+
 }
