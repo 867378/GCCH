@@ -156,12 +156,18 @@
                 </div>
 
                 <div>
-                  <button
-                    v-if="!showStatusOptions"
-                    @click="showStatusOptions = true"
-                  >
-                    Select Status
-                  </button>
+                  <div v-if="!showStatusOptions">
+                    <button
+                      v-if="application.status !== 'accepted'"
+                      @click="showStatusOptions = true"
+                    >
+                      Select Status
+                    </button>
+                    <span v-else class="italic text-gray-600">
+                      ⏳ Waiting for the applicant's response to the job offer
+                    </span>
+                  </div>
+
 
                   <div v-else>
                     <div class="button-group">
@@ -231,11 +237,7 @@
           <div v-if="showConfirmModal" class="modal-overlay">
             <div class="modal-content">
               <p>
-                Are you sure you want to
-                <strong>{{
-                  decisionType === "accepted" ? "accept" : "reject"
-                }}</strong>
-                this applicant?
+                Are you sure you want to update the status of this application
               </p>
               <div class="modal-buttons">
                 <button @click="confirmDecision">Yes</button>
@@ -344,6 +346,11 @@ function confirmDecision() {
     comment.value
   );
   closeConfirmModal();
+}
+
+function getApplicationStatus(applicationId) {
+  const application = jobApplicants.value.find(app => app.id === applicationId);
+  return application ? application.status : null;
 }
 
 function toggleMail() {
@@ -838,6 +845,7 @@ body,
   margin-left: 5vh;
   margin-bottom: 1vh;
 }
+
 
 .button-group label {
   display: flex;

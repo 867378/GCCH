@@ -123,6 +123,7 @@
                 >
               </li>
             </ul>
+            <button @click="downloadJobReport">Download Job Report</button>
           </div>
         </div>
 
@@ -142,7 +143,8 @@
               <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
               <p>Status: {{ job.status }}</p>
-            </div>
+
+            </div>           
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
         </div>
@@ -233,6 +235,30 @@ async function fetchApplicants(jobId) {
     jobApplicants.value = [];
   }
 }
+
+const downloadJobReport = async () => {
+  if (!selectedJob.value) {
+    alert("No job selected.");
+    return;
+  }
+
+  try {
+    const response = await axios.get(`/report/job/${selectedJob.value.id}/download`, {
+      responseType: "blob",
+    });
+
+    const blob = new Blob([response.data], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${selectedJob.value.job_title}_report.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error("Error downloading job report:", error);
+  }
+};
 
 //Fetch Jobs
 async function fetchPostedJobs() {

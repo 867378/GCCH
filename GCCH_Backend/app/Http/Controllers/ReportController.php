@@ -11,7 +11,7 @@ class ReportController extends Controller
 {
     public function downloadReport($jobId){
         $job = Job::with(['applications' => function ($query) {
-            $query->where('status', 'accepted')->with('applicant.user');
+            $query->where('status', 'hired')->with('applicant.user');
         }])->findOrFail($jobId);
 
         $pdf = Pdf::loadView('reports.job_report', compact('job'));
@@ -22,7 +22,7 @@ class ReportController extends Controller
     {
         // Load relationships needed for the report
         $job->load(['applications' => function ($query) {
-            $query->where('status', 'accepted');
+            $query->where('status', 'hired');
         }, 'applications.applicant.user']);
 
         return view('reports.job_report', compact('job'));
@@ -31,7 +31,7 @@ class ReportController extends Controller
     public function downloadCertificate($applicationId)
     {
         $application = JobApplication::with(['job', 'applicant.user'])
-            ->where('status', 'accepted')
+            ->where('status', 'hired')
             ->findOrFail($applicationId);
 
         $pdf = Pdf::loadView('reports.acceptance_certificate', compact('application'));
@@ -41,7 +41,7 @@ class ReportController extends Controller
     public function previewCertificate($applicationId)
     {
         $application = JobApplication::with(['job', 'applicant.user'])
-            ->where('status', 'accepted')
+            ->where('status', 'hired')
             ->findOrFail($applicationId);
 
         $pdf = Pdf::loadView('reports.acceptance_certificate', compact('application'));

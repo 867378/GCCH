@@ -61,21 +61,23 @@ class ApplicantController extends Controller
     public function matchedJobs(){
         $user = Auth::user();
 
-      
         if (!$user->applicant) {
             return response()->json(['matched_jobs_count' => 0]);
         }
 
         $applicantCourse = $user->applicant->course;
 
-        $matchedCount = Job::where('recommended_course', 'LIKE', '%' . $applicantCourse . '%')
-            ->orWhere('recommended_course_2', 'LIKE', '%' . $applicantCourse . '%')
-            ->orWhere('recommended_course_3', 'LIKE', '%' . $applicantCourse . '%')
+        $matchedCount = Job::where('status', 'open')
+            ->where(function ($query) use ($applicantCourse) {
+                $query->where('recommended_course', 'LIKE', '%' . $applicantCourse . '%')
+                    ->orWhere('recommended_course_2', 'LIKE', '%' . $applicantCourse . '%')
+                    ->orWhere('recommended_course_3', 'LIKE', '%' . $applicantCourse . '%');
+            })
             ->count();
-
 
         return response()->json(['matched_jobs_count' => $matchedCount]);
     }
+
 
 
     public function jobapply(Request $request)
@@ -189,9 +191,12 @@ class ApplicantController extends Controller
 
             $course = $applicant->course;
 
-            $matchedJobs = Job::where('recommended_course', $course)
-                ->orWhere('recommended_course_2', $course)
-                ->orWhere('recommended_course_3', $course)
+            $matchedJobs = Job::with('company')
+                ->where(function ($query) use ($course) {
+                    $query->where('recommended_course', $course)
+                        ->orWhere('recommended_course_2', $course)
+                        ->orWhere('recommended_course_3', $course);
+                })
                 ->get();
 
             $matchedJobsIds = $matchedJobs->pluck('id');
@@ -225,6 +230,7 @@ class ApplicantController extends Controller
             $applicationsData = $applications->map(function ($application) {
                 return [
                     'id' => $application->id,
+                    'job_id' => $application->job_id,
                     'job_title' => $application->job->job_title,
                     'status' => $application->status,
                     'updated_at' => $application->created_at,
@@ -257,18 +263,35 @@ class ApplicantController extends Controller
         ]);
 
         if ($validated['offer_status'] === 'accepted') {
-            // Finalize this and reject all other offers
             $application->status = 'hired';
             $application->offer_status = 'accepted';
             $application->finalized = true;
             $application->save();
 
+            $job = $application->job;
+            $job->filled_slots += 1;
+
+            if ($job->filled_slots >= $job->total_slots) {
+                $job->status = 'closed';
+            }
+
+            $job->save();
+
             JobApplication::where('applicant_id', $application->applicant_id)
-                ->where('id', '!=', $application->id)
+            ->where('id', '!=', $application->id)
+            ->update([
+                'offer_status' => 'rejected',
+                'finalized' => true,
+            ]);
+
+            JobApplication::where('job_id', $job->id)
+                ->whereNotIn('status', ['hired', 'rejected'])
                 ->update([
+                    'status' => 'rejected',
                     'offer_status' => 'rejected',
                     'finalized' => true,
                 ]);
+
         } else {
             $application->offer_status = 'rejected';
             $application->status = 'rejected';
@@ -277,5 +300,6 @@ class ApplicantController extends Controller
 
         return response()->json(['message' => 'Offer response recorded successfully']);
     }
+
 
 }

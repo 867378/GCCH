@@ -137,7 +137,9 @@
             <h3>RECOMMENDED JOBS BASED ON COURSE</h3>
             <div
               class="job-box"
-              v-for="matchedJob in recommendedJobs"
+              v-for="matchedJob in recommendedJobs.filter(
+                (job) => job.status === 'open'
+              )"
               :key="matchedJob.id"
             >
               <div class="job-card">
@@ -165,6 +167,7 @@
                   </div>
                 </div>
 
+                <p>{{ matchedJob.company.company_name }}</p>
                 <!-- Move salary here BELOW description -->
                 <div class="job-info">
                   <div class="job-detail">
@@ -212,23 +215,37 @@
 
         <!-- Notifications -->
         <div class="right-content">
-          <div class="hired">
-            <div class="hired-status-box">
-              <div class="hired-header">
-                <img
-                  src="/public/checked.png"
-                  alt="success icon"
-                  class="ikon"
-                />
-                <h3>YOU'RE HIRED!</h3>
-              </div>
-              <div class="hired-content">
-                <p>Company: {{ hiredCompany }}</p>
-                <p>Position: {{ hiredPosition }}</p>
-                <p>Start Date: {{ startDate }}</p>
-              </div>
+          <div v-if="hiredApplication" class="hired">
+          <div class="hired-status-box">
+            <div class="hired-header">
+              <img
+                src="/public/checked.png"
+                alt="success icon"
+                class="ikon"
+              />
+              <h3>YOU'RE HIRED!</h3>
+            </div>
+            <div class="hired-content">
+              <p>Company Name: {{ hiredJobDetails.company.company_name }}</p>
+              <p>Job Title: {{ hiredJobDetails.job_title }}</p>
+              <p>Job Type: {{ formatType(hiredJobDetails.job_type) }}</p>
+              <p>Started By: {{ formatDate(hiredJobDetails.created_at) }}</p>
+              <button @click="downloadCertificate">Download Certificate</button>
             </div>
           </div>
+        </div>
+
+        <div v-else class="hired">
+        <div class="hired-status-box">
+          <div class="hired-header">
+            <h3>NO JOB YET</h3>
+          </div>
+          <div class="hired-content">
+            <p>You haven't been hired for any job at the moment. Keep applying!</p>
+          </div>
+        </div>
+      </div>
+
           <div class="upd-content">
           <h3>CHECK THIS OUT</h3>
           <div class="updates-list">
@@ -329,7 +346,8 @@ const coverLetterFile = ref(null);
 
 //for Job Listings
 const recommendedJobs = ref([]);
-const otherJobs = ref([]);
+const hiredApplication = ref(null);
+const hiredJobDetails = ref(null);
 
 //For Notifications
 const notifications = ref([]);
@@ -380,19 +398,19 @@ async function fetchDashboardCounts(){
 }
 
 // Job Listings Logic
-async function fetchJobs() {
-  try {
-    const response = await axios.get("/applicant/jobdisplay");
+  async function fetchJobs() {
+    try {
+      const response = await axios.get("/applicant/jobdisplay");
 
-    console.log(response.data);
+      console.log(response.data);
 
-    recommendedJobs.value = response.data.matchedjobs;
-    otherJobs.value = response.data.otherjobs;
-  } catch (error) {
-    console.error("Error fetching jobs:", error);
-    alert("Failed to fetch jobs. Please try again later.");
+      recommendedJobs.value = response.data.matchedjobs;
+
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      alert("Failed to fetch jobs. Please try again later.");
+    }
   }
-}
 
 // Job Application Logic
 function applyToJob(jobId) {
@@ -508,10 +526,89 @@ function formatType(type) {
       return "Application Update";
     case "message":
       return "Message";
+    case "full_time":
+      return "Full-Time";
+    case "part_time":
+      return "Part-Time";
+    case "internship":
+      return "Internship";
+    case "contract":
+      return "Contract";
     case "other":
       return "Other";
   }
 }
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+
+async function fetchHiredApplication() {
+  try {
+    const response = await axios.get("/applicant/applications");
+    console.log("Applications:", response.data.applications);
+
+    // Find the hired application object or null
+    hiredApplication.value = response.data.applications.find(
+      (app) => app.status === "hired"
+    ) || null;
+
+    // If hired application found, fetch job details
+    if (hiredApplication.value) {
+      await fetchJobs(hiredApplication.value.job_id);
+
+      const allJobs = [...recommendedJobs.value];
+      hiredJobDetails.value = allJobs.find(
+        (job) => job.id === hiredApplication.value.job_id
+      ) || null;
+
+      console.log("Hired job details:", hiredJobDetails.value);
+    }
+  } catch (error) {
+    console.error("Error Occurred fetching applications", error);
+  }
+}
+
+const downloadCertificate = async () => {
+  if (!hiredApplication.value || !hiredApplication.value.id) {
+    alert("No hired application found.");
+    return;
+  }
+
+  try {
+    const response = await axios.get(
+      `/certificate/download/${hiredApplication.value.id}`,
+      {
+        responseType: 'blob', // Important to receive binary data
+      }
+    );
+
+    // Create a Blob from the response
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+
+    // Create a link element, trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `acceptance_certificate_${hiredApplication.value.id}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Download failed:", error);
+    alert("Failed to download certificate.");
+  }
+};
+
 
 // Message Logic
 function sendMessage(companyId) {
@@ -537,6 +634,7 @@ async function sendActualMessage() {
 }
 
 onMounted(() => {
+  fetchHiredApplication();
   fetchJobs();
   fetchNotifications();
   fetchDashboardCounts();
