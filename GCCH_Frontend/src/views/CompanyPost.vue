@@ -171,24 +171,41 @@
 
                   <div v-else>
                     <div class="button-group">
-                      <button
-                        @click="openConfirmModal(application.id, 'accepted')"
-                      >
-                        ✅ Accept
-                      </button>
-                      <button
-                        @click="openConfirmModal(application.id, 'rejected')"
-                      >
-                        ❌ Reject
-                      </button>
-                      <button @click="scheduleInterview(application.id)">
-                        📅 Schedule Interview
-                      </button>
-                      <button @click="scheduleAssessment(application.id)">
-                        📝 Schedule Assessment
-                      </button>
+                      <div class="button-group">
+                        <label>
+                          <input
+                            type="checkbox"
+                            @change="
+                              openConfirmModal(application.id, 'accepted')
+                            "
+                          />
+                          ✅ Accept
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            @change="
+                              openConfirmModal(application.id, 'rejected')
+                            "
+                          />
+                          ❌ Reject
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            @change="scheduleInterview(application.id)"
+                          />
+                          📅 Schedule Interview
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            @change="scheduleAssessment(application.id)"
+                          />
+                          📝 Schedule Assessment
+                        </label>
+                      </div>
                     </div>
-
                     <textarea
                       v-model="comment"
                       placeholder="Add a comment (optional)"
@@ -202,11 +219,7 @@
                     >
                       Cancel
                     </button>
-                    <button
-                      @click="
-                        submitApplicationDecision
-                      "
-                    >
+                    <button @click="submitApplicationDecision">
                       Submit Update
                     </button>
                   </div>
@@ -321,7 +334,6 @@ function scheduleAssessment(applicationId) {
   }
 }
 
-
 function closeConfirmModal() {
   showConfirmModal.value = false;
 }
@@ -425,7 +437,6 @@ async function submitApplicationDecision() {
   showStatusOptions.value = false;
 }
 
-
 async function assessApplication(
   applicationId,
   status,
@@ -452,10 +463,11 @@ async function assessApplication(
         );
         console.log("Job offer sent:", offerResponse.data);
       } catch (offerError) {
-        console.error("Error sending job offer:", offerError.response?.data || offerError);
-        alert(
-          offerError.response?.data?.error || "Failed to send job offer"
+        console.error(
+          "Error sending job offer:",
+          offerError.response?.data || offerError
         );
+        alert(offerError.response?.data?.error || "Failed to send job offer");
       }
     }
 
@@ -620,7 +632,7 @@ body,
 }
 
 .hamburger {
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: space-between;
   width: 25px;
@@ -726,6 +738,7 @@ body,
   display: flex;
   gap: 20px;
   overflow: auto;
+  margin-bottom: 0.5vh;
 }
 .left-content {
   flex: 3;
@@ -777,7 +790,10 @@ body,
   border-radius: 10px;
   border: 2px solid #e0e6ed;
   border-bottom: #045d56 4px solid;
-  width: 60vh;
+  width: 100vh;
+  max-height: 80vh;
+  margin-left: 8vh;
+  margin-bottom: 10vh;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -803,11 +819,13 @@ body,
 .selected-job-box button {
   margin-top: 2vh;
   margin-bottom: 2vh;
-  padding: 5px 14px;
+  padding: 5px 24px;
   font-size: 10px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  background-color: #045d56;
+  color: white;
   transition: background-color 0.2s ease;
 }
 
@@ -816,27 +834,47 @@ body,
 }
 .cancel-button {
   margin-left: 8px;
-  margin-right: 30vh;
+  margin-right: 5vh;
 }
 
 .button-group {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 1vh;
+  margin-left: 5vh;
+  margin-bottom: 1vh;
 }
 
-.selected-job-box button {
+
+.button-group label {
+  display: flex;
+  align-items: center;
   background-color: #045d56;
   color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
   font-size: 10px;
+  transition: background-color 0.2s ease;
 }
 
-.selected-job-box a {
-  color: #2980b9;
-  text-decoration: none;
+.button-group label:hover {
+  background-color: #033f3a;
 }
 
-.selected-job-box a:hover {
-  text-decoration: underline;
+.button-group input[type="checkbox"] {
+  margin-right: 6px;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: #e0f2f1; /* Modern color for check */
+}
+
+.button-group input[type="checkbox"]:focus {
+  outline: 2px solid #e0f2f1;
+  outline-offset: 2px;
 }
 
 .modal-overlay {
