@@ -38,9 +38,11 @@ class ApplicantController extends Controller
     public function listedJobs(){
         $user = Auth::user();
 
-        $jobCount = Application::whereHas('applicant', function ($query) use ($user) {
+        $jobCount = JobApplication::whereHas('applicant', function ($query) use ($user) {
             $query->where('user_id', $user->id);
-        })->count();
+        })
+        ->whereNotIN('status',['accepted','hired'])
+        ->count();
 
         return response()->json(['total_jobs_applied' => $jobCount]);
     }
@@ -48,7 +50,7 @@ class ApplicantController extends Controller
     public function acceptedCount(){
         $user = Auth::user();
 
-        $acceptedCount = Application::where('status', 'accepted')
+        $acceptedCount = JobApplication::where('status', 'accepted')
             ->whereHas('applicant', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->count();
@@ -66,7 +68,11 @@ class ApplicantController extends Controller
 
         $applicantCourse = $user->applicant->course;
 
-        $matchedCount = Job::where('matchedJob', 'LIKE', '%' . $applicantCourse . '%')->count();
+        $matchedCount = Job::where('recommended_course', 'LIKE', '%' . $applicantCourse . '%')
+            ->orWhere('recommended_course_2', 'LIKE', '%' . $applicantCourse . '%')
+            ->orWhere('recommended_course_3', 'LIKE', '%' . $applicantCourse . '%')
+            ->count();
+
 
         return response()->json(['matched_jobs_count' => $matchedCount]);
     }
@@ -167,12 +173,6 @@ class ApplicantController extends Controller
             ], 201);
 
         } catch (Exception $e) {
-            // Log::error('Error while submitting job application', [
-            //     'error' => $e->getMessage(),
-            //     'trace' => $e->getTraceAsString(),
-            //     'applicant_id' => isset($applicant) ? $applicant->id : null,
-            //     'job_id' => $request->input('job_id')
-            // ]);
             return response()->json(['error' => 'An error occurred while applying for the job'], 500);
         }
     }
@@ -235,4 +235,47 @@ class ApplicantController extends Controller
             return response()->json(['error' => $e->validator->errors()], 422);
         }
     }
+
+    public function respondToOffer(Request $request, JobApplication $application)
+    {
+        $user = Auth::user();
+
+        if ($application->applicant->user_id !== $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if ($application->offer_status !== 'offered') {
+            return response()->json(['error' => 'No job offer to respond to'], 400);
+        }
+
+        if ($application->finalized) {
+            return response()->json(['error' => 'You have already finalized a job offer'], 400);
+        }
+
+        $validated = $request->validate([
+            'offer_status' => 'required|in:accepted,rejected'
+        ]);
+
+        if ($validated['offer_status'] === 'accepted') {
+            // Finalize this and reject all other offers
+            $application->status = 'hired';
+            $application->offer_status = 'accepted';
+            $application->finalized = true;
+            $application->save();
+
+            JobApplication::where('applicant_id', $application->applicant_id)
+                ->where('id', '!=', $application->id)
+                ->update([
+                    'offer_status' => 'rejected',
+                    'finalized' => true,
+                ]);
+        } else {
+            $application->offer_status = 'rejected';
+            $application->status = 'rejected';
+            $application->save();
+        }
+
+        return response()->json(['message' => 'Offer response recorded successfully']);
+    }
+
 }

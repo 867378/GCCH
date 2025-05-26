@@ -109,7 +109,7 @@
                     alt="total clients Icon"
                     class="ikon"
                   />
-                  ACCEPTED APPLICANTS</strong
+                  HIRED APPLICANTS</strong
                 >
               </p>
               <p>{{ totalClients }}</p>
@@ -439,6 +439,7 @@ async function postJob() {
     alert(response.data.message);
 
     await fetchPostedJobs();
+    await fetchDashboardCounts();
 
     jobData.value = {
       job_title: "",

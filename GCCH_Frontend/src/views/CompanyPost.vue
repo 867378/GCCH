@@ -198,10 +198,10 @@
                     </button>
                     <button
                       @click="
-                        assessApplication(application.id, 'comment', comment)
+                        submitApplicationDecision
                       "
                     >
-                      Submit Comment
+                      Submit Update
                     </button>
                   </div>
                 </div>
@@ -291,12 +291,34 @@ const comment = ref("");
 const showConfirmModal = ref(false);
 const selectedApplicationId = ref(null);
 const decisionType = ref("");
+const scheduledAt = ref(null);
 
 function openConfirmModal(applicationId, type) {
   selectedApplicationId.value = applicationId;
-  decisionType.value = type;
-  showConfirmModal.value = true;
+  decisionType.value = type; // e.g. 'accepted', 'rejected'
+  showStatusOptions.value = true; // show status section if hidden
 }
+
+function scheduleInterview(applicationId) {
+  const date = prompt("Enter interview date (YYYY-MM-DD HH:MM:SS):");
+  if (date) {
+    selectedApplicationId.value = applicationId;
+    decisionType.value = "interview";
+    scheduledAt.value = date;
+    showStatusOptions.value = true;
+  }
+}
+
+function scheduleAssessment(applicationId) {
+  const date = prompt("Enter assessment date (YYYY-MM-DD HH:MM:SS):");
+  if (date) {
+    selectedApplicationId.value = applicationId;
+    decisionType.value = "assessment";
+    scheduledAt.value = date;
+    showStatusOptions.value = true;
+  }
+}
+
 
 function closeConfirmModal() {
   showConfirmModal.value = false;
@@ -348,7 +370,7 @@ async function fetchApplicants(jobId) {
     const response = await axios.get(`/job/${jobId}/applications`);
     jobApplicants.value = response.data.applications.filter(
       (applicant) =>
-        applicant.status !== "rejected" && applicant.status !== "accepted"
+        applicant.status !== "rejected" && applicant.status !== "hired"
     );
     console.log(response.data);
   } catch (error) {
@@ -375,6 +397,28 @@ async function fetchPostedJobs() {
   }
 }
 
+async function submitApplicationDecision() {
+  if (!selectedApplicationId.value || !decisionType.value) {
+    alert("Please choose an applicant and a decision (accept/reject/etc).");
+    return;
+  }
+
+  await assessApplication(
+    selectedApplicationId.value,
+    decisionType.value,
+    scheduledAt.value,
+    comment.value
+  );
+
+  // Reset
+  selectedApplicationId.value = null;
+  decisionType.value = null;
+  scheduledAt.value = null;
+  comment.value = "";
+  showStatusOptions.value = false;
+}
+
+
 async function assessApplication(
   applicationId,
   status,
@@ -394,6 +438,20 @@ async function assessApplication(
     );
     console.log("Assessment Successful:", response.data);
 
+    if (status === "accepted") {
+      try {
+        const offerResponse = await axios.post(
+          `/company/offer-job/${applicationId}`
+        );
+        console.log("Job offer sent:", offerResponse.data);
+      } catch (offerError) {
+        console.error("Error sending job offer:", offerError.response?.data || offerError);
+        alert(
+          offerError.response?.data?.error || "Failed to send job offer"
+        );
+      }
+    }
+
     await fetchApplicants(selectedJob.value.id);
     await fetchPostedJobs();
   } catch (error) {
@@ -410,20 +468,6 @@ onMounted(fetchPostedJobs);
 function selectJob(job) {
   selectedJob.value = job;
   fetchApplicants(job.id);
-}
-
-function scheduleInterview(applicationId) {
-  const date = prompt("Enter interview date (YYYY-MM-DD HH:MM:SS):");
-  if (date) {
-    assessApplication(applicationId, "interview", date);
-  }
-}
-
-function scheduleAssessment(applicationId) {
-  const date = prompt("Enter assessment date (YYYY-MM-DD HH:MM:SS):");
-  if (date) {
-    assessApplication(applicationId, "assessment", date);
-  }
 }
 </script>
 

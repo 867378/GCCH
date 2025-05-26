@@ -101,10 +101,10 @@
                     alt="total clients Icon"
                     class="ikon"
                   />
-                  JOB APPLIED COUNT</strong
+                  ONGOING JOB APPLICATIONS</strong
                 >
               </p>
-              <p>{{ totalClients }}</p>
+              <p>{{ ongoingApplicationsCount }}</p>
             </div>
             <div class="card">
               <p>
@@ -114,10 +114,10 @@
                     alt="total job listings Icon"
                     class="ikon"
                   />
-                  MATCHING JOB COUNT</strong
+                  MATCHING JOBS COUNT</strong
                 >
               </p>
-              <p>{{ totalJobs }}</p>
+              <p>{{ matchedJobCount }}</p>
             </div>
             <div class="card">
               <p>
@@ -127,14 +127,14 @@
                     alt="pending applications Icon"
                     class="ikon"
                   />
-                  APPLICATIONS COUNT</strong
+                  OFFERED JOBS</strong
                 >
               </p>
-              <p>{{ pendingApplications }}</p>
+              <p>{{ acceptedApplicationsCount }}</p>
             </div>
           </div>
           <div class="job-content">
-            <h3>RECOMMENDED JOBS</h3>
+            <h3>RECOMMENDED JOBS BASED ON COURSE</h3>
             <div
               class="job-box"
               v-for="matchedJob in recommendedJobs"
@@ -313,9 +313,9 @@ const newNotifications = ref(0);
 const showApplyPopup = ref(false);
 const isSidenavOpen = ref(true);
 // COUNTS
-const totalClients = ref(0);
-const totalJobs = ref(0);
-const pendingApplications = ref(0);
+const ongoingApplicationsCount = ref(0);
+const matchedJobCount = ref(0);
+const acceptedApplicationsCount = ref(0);
 
 //for Message Popup
 const showMessagePopup = ref(false);
@@ -360,6 +360,23 @@ function confirmSignOut() {
     .catch((error) => {
       console.error("Error signing out:", error);
     });
+}
+
+// Counts Logic
+async function fetchDashboardCounts(){
+  try{
+    const [totalApplied, matchingJobs, acceptedApplied] = await Promise.all([
+      axios.get('/applicant/ongoing-applications'),
+      axios.get('/applicant/matched-jobs'),
+      axios.get('/applicant/accepted-applications'),
+    ])
+
+    ongoingApplicationsCount.value = totalApplied.data.total_jobs_applied;
+    matchedJobCount.value = matchingJobs.data.matched_jobs_count;
+    acceptedApplicationsCount.value = acceptedApplied.data.accepted_jobs_count;
+  } catch (error) {
+    console.error("Error:", error)
+  }
 }
 
 // Job Listings Logic
@@ -522,6 +539,7 @@ async function sendActualMessage() {
 onMounted(() => {
   fetchJobs();
   fetchNotifications();
+  fetchDashboardCounts();
 });
 </script>
 
