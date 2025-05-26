@@ -228,8 +228,6 @@ class CompanyController extends Controller
                     return response()->json(['error' => 'Job is already closed. Cannot hire more applicants.'], 403);
                 }
 
-                $job->increment('filled_slots');
-
                 if ($job->filled_slots >= $job->total_slots) {
                     $job->status = 'closed';
                     $job->save();

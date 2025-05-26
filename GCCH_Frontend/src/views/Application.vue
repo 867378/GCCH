@@ -138,6 +138,7 @@
                     <strong>Updated At:</strong>
                     {{ formatDate(application.updated_at) }}
                   </p>
+                  <p><strong>Comment: </strong> {{ application.comment }}</p>
                   
                   <div class="button-group">
                     <button

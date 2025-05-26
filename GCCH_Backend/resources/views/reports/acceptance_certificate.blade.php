@@ -24,9 +24,14 @@
             line-height: 1.8;
         }
         .signature {
-            margin-top: 60px;
+            margin-top: 30px;
             text-align: right;
-            margin-right: 60px;
+            margin-right: 30px;
+        }
+        .signature2 {
+            margin-bottom: 30px;
+            text-align: left;
+            margin-left: 30px;
         }
     </style>
 </head>
@@ -39,13 +44,18 @@
             <strong>{{ $application->applicant->first_name }} {{ $application->applicant->last_name }}</strong><br><br>
             has been officially accepted for the position of<br><br>
             <strong>{{ $application->job->job_title }}</strong><br><br>
-            at <strong>{{ $application->job->company_name ?? 'the hiring company' }}</strong>.<br><br>
+            at <strong>{{ $application->job->company->company_name ?? 'the hiring company' }}</strong>.<br><br>
             <small>Date Accepted: {{ \Carbon\Carbon::parse($application->updated_at)->format('F j, Y') }}</small>
         </div>
 
         <div class="signature">
-            <strong>{{ $application->job->company_name ?? 'Hiring Company' }}</strong><br>
-            Company
+            <strong>{{ $application->job->company->company_name ?? 'Hiring Company' }}</strong><br>
+            Company Signature
+        </div>
+
+        <div class="signature2">
+            <strong>{{ $application->applicant->first_name }} {{ $application->applicant->last_name }}</strong><br>
+            Applicant Signature
         </div>
     </div>
 </body>
