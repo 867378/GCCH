@@ -16,6 +16,15 @@ use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {   
+    public function getRole(){
+        $user = auth()->user();
+
+        return response()->json([
+            'id' => $user->id,
+            'role' => $user->role,
+        ]);
+    }
+
     public function redirectToGoogle(Request $request)
     {
         return Socialite::driver('google')->stateless()->with(['prompt' => 'consent'])->redirect();
