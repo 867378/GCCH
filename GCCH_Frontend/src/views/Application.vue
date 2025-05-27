@@ -122,7 +122,8 @@
               </div>
             </div>
           </div>
-
+          </div>
+<div class="right-content">
           <div class="resume-box">
             <h3 class="resumeh3">Accepted Applications</h3>
             <div class="form-row">
@@ -611,20 +612,21 @@ body,
 }
 
 .left-content {
-  flex: 3;
+  flex: 1;
 }
 
 .resume-box {
   background: white;
   padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
+  margin-top: 3vh;
+  margin-bottom: 2vh;
+  margin-left: 3vh;
   border-radius: 3vh;
   border-bottom: #045d56 4px solid;
-  width: 95%;
-  height: 40vh;
-  margin-left: 3vh;
+  width: 100%;
+  max-height: 80vh;
   overflow: auto;
+  overflow-x: hidden;
 }
 .resumeh3 {
   text-align: left;
@@ -634,18 +636,18 @@ body,
 }
 .resume-list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(1, 1fr);
   gap: 10px;
   margin-top: 1vh;
   max-height: 100%;
-  width: 85%;
+  width: 150%;
 }
 
 .resume-item {
   padding: 12px 20px;
   border-radius: 10px;
   margin-left: 13vh;
-  width: 60%;
+  width: 50%;
   position: relative;
 }
 
@@ -656,7 +658,7 @@ body,
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   max-width: 60%;
   height: 100%;
-  margin-left: 25vh;
+  margin-left: 5vh;
   margin-bottom: 10px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   text-transform: capitalize;
@@ -697,7 +699,13 @@ body,
   width: 16px;
   height: 16px;
 }
-
+.right-content {
+  flex: 1;
+  border-radius: 10px;
+  padding: 20px;
+  height: fit-content;
+  margin-top: -2vh;
+}
 
 .icons-right {
   display: flex;
