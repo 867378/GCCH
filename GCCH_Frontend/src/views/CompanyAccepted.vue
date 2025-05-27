@@ -157,6 +157,8 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { createToast } from 'mosha-vue-toastify';
+import 'mosha-vue-toastify/dist/style.css';
 
 const router = useRouter();
 
@@ -197,48 +199,34 @@ function toggleSignOut() {
 function confirmSignOut() {
   axios
     .post("/logout")
-    .then((response) => {
-      console.log("Sign out successful:", response.data.message);
+    .then(() => {
+      createToast('Successfully signed out!', {
+        type: 'success',
+        position: 'top-right',
+        timeout: 2000,
+        showIcon: true
+      });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
+      createToast('Failed to sign out. Please try again.', {
+        type: 'danger',
+        position: 'top-right',
+        timeout: 3000,
+        showIcon: true
+      });
     });
-}
-
-async function fetchApplicants(jobId) {
-  try {
-    const response = await axios.get(`/job/${jobId}/applications`);
-    const acceptedApplicants = response.data.applications.filter(
-      (applicant) => applicant.status === "hired"
-    );
-
-    jobApplicants.value = acceptedApplicants;
-
-    // Fetch detailed applicant info
-    for (const app of acceptedApplicants) {
-      const applicantId = app.applicant.user_id;
-      if (applicantId) {
-        try {
-          const userResponse = await axios.get(`user/applicant/${applicantId}`);
-          applicantUsers.value[applicantId] = userResponse.data;
-          console.log('Gathered user data', userResponse.data);
-
-        } catch (err) {
-          console.error(`Failed to fetch user ${applicantId}`, err);
-        }
-      }
-    }
-
-  } catch (error) {
-    console.error("Failed to fetch applicants", error);
-    jobApplicants.value = [];
-  }
 }
 
 const downloadJobReport = async () => {
   if (!selectedJob.value) {
-    alert("No job selected.");
+    createToast('Please select a job first', {
+      type: 'warning',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
     return;
   }
 
@@ -255,8 +243,21 @@ const downloadJobReport = async () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    createToast('Report downloaded successfully!', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   } catch (error) {
     console.error("Error downloading job report:", error);
+    createToast('Failed to download report', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 };
 
@@ -268,13 +269,64 @@ async function fetchPostedJobs() {
     console.log(response.data);
 
     if (postedJobs.value.length > 0) {
-      selectedJob.value = postedJobs.value[0]; // or let user pick
+      selectedJob.value = postedJobs.value[0];
       await fetchApplicants(selectedJob.value.id);
     } else {
       jobApplicants.value = [];
+      createToast('No jobs found', {
+        type: 'info',
+        position: 'top-right',
+        timeout: 3000,
+        showIcon: true
+      });
     }
   } catch (error) {
     console.error("Error fetching posted jobs:", error);
+    createToast('Failed to fetch jobs', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  }
+}
+
+async function fetchApplicants(jobId) {
+  try {
+    const response = await axios.get(`/job/${jobId}/applications`);
+    const acceptedApplicants = response.data.applications.filter(
+      (applicant) => applicant.status === "hired"
+    );
+
+    jobApplicants.value = acceptedApplicants;
+
+    for (const app of acceptedApplicants) {
+      const applicantId = app.applicant.user_id;
+      if (applicantId) {
+        try {
+          const userResponse = await axios.get(`user/applicant/${applicantId}`);
+          applicantUsers.value[applicantId] = userResponse.data;
+        } catch (err) {
+          console.error(`Failed to fetch user ${applicantId}`, err);
+          createToast('Failed to fetch some applicant details', {
+            type: 'warning',
+            position: 'top-right',
+            timeout: 3000,
+            showIcon: true
+          });
+        }
+      }
+    }
+
+  } catch (error) {
+    console.error("Failed to fetch applicants", error);
+    createToast('Failed to fetch applicants', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+    jobApplicants.value = [];
   }
 }
 
@@ -855,14 +907,20 @@ textarea {
     font-size: 12px;
   }
 
-  .avatar {
-    width: 30px;
-    height: 30px;
+  .selected-job-box {
+    width: 95%;
+    max-height: 43vh;
+    margin-left: 2vh;
+    font-size: 14px;
+    padding: 20px;
+    border-radius: 3vh;
   }
+  .selected-job-box h3 {
+    font-size: 30px;
+  }
+
   .sign-out {
-    width: 60px;
-    height: 40px;
-    margin-left: 5.5vh;
+    margin-left: 7.5vh;
   }
 }
 

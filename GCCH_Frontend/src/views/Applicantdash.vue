@@ -52,7 +52,6 @@
             <span></span>
           </div>
           <img class="avatar" src="/public/user.png" alt="Avatar" />
-          <input type="text" placeholder="Search..." />
         </div>
         <div class="icons-right">
           <div class="icon" @click="toggleMail">
@@ -97,7 +96,7 @@
               <p>
                 <strong>
                   <img
-                    src="/public/people.png"
+                    src="/public/management.png"
                     alt="total clients Icon"
                     class="ikon"
                   />
@@ -110,7 +109,7 @@
               <p>
                 <strong>
                   <img
-                    src="/public/checklist.png"
+                    src="/public/counting.png"
                     alt="total job listings Icon"
                     class="ikon"
                   />
@@ -123,7 +122,7 @@
               <p>
                 <strong>
                   <img
-                    src="/public/buffer.png"
+                    src="/public/email.png"
                     alt="pending applications Icon"
                     class="ikon"
                   />
@@ -199,11 +198,11 @@
                     <p>Status: {{ matchedJob.status }}</p>
                   </div>
                 </div>
-                 <!--  -->
+                <!--  -->
                 <div class="job-info">
                   <div class="job-detail">
                     <img src="/public/location.png" class="ikon" />
-                    <p>Location: {{ matchedJob.job_location}}</p>
+                    <p>Location: {{ matchedJob.job_location }}</p>
                   </div>
                 </div>
                 <!-- Job Description -->
@@ -216,56 +215,61 @@
         <!-- Notifications -->
         <div class="right-content">
           <div v-if="hiredApplication" class="hired">
-          <div class="hired-status-box">
-            <div class="hired-header">
-              <img
-                src="/public/checked.png"
-                alt="success icon"
-                class="ikon"
-              />
-              <h3>YOU'RE HIRED!</h3>
-            </div>
-            <div class="hired-content">
-              <p>Company Name: {{ hiredJobDetails.company.company_name }}</p>
-              <p>Job Title: {{ hiredJobDetails.job_title }}</p>
-              <p>Job Type: {{ formatType(hiredJobDetails.job_type) }}</p>
-              <p>Started By: {{ formatDate(hiredJobDetails.created_at) }}</p>
-              <button @click="downloadCertificate" class="download-btn">Download Certificate</button>
+            <div class="hired-status-box">
+              <div class="hired-header">
+                <img
+                  src="/public/checked.png"
+                  alt="success icon"
+                  class="ikon"
+                />
+                <h3>YOU'RE HIRED!</h3>
+              </div>
+              <div class="hired-content">
+                <p>Company Name: {{ hiredJobDetails.company.company_name }}</p>
+                <p>Job Title: {{ hiredJobDetails.job_title }}</p>
+                <p>Job Type: {{ formatType(hiredJobDetails.job_type) }}</p>
+                <p>Started By: {{ formatDate(hiredJobDetails.created_at) }}</p>
+                <button @click="downloadCertificate" class="download-btn">
+                  Download Certificate
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div v-else class="hired">
-        <div class="hired-status-box">
-          <div class="hired-header">
-            <h3>NO JOB YET</h3>
+          <div v-else class="hired">
+            <div class="hired-status-box">
+              <div class="hired-header">
+                <h3>NO JOB YET</h3>
+              </div>
+              <div class="hired-content">
+                <p>
+                  You haven't been hired for any job at the moment. Keep
+                  applying!
+                </p>
+              </div>
+            </div>
           </div>
-          <div class="hired-content">
-            <p>You haven't been hired for any job at the moment. Keep applying!</p>
-          </div>
-        </div>
-      </div>
 
           <div class="upd-content">
-          <h3>CHECK THIS OUT</h3>
-          <div class="updates-list">
-            <div
-              v-for="(notif, index) in filteredNotifications"
-              :key="index"
-              @click="openChat(notif)"
-              style="cursor: pointer"
-              class="update-box"
-            >
-              <h2>{{ formatType(notif.type) }}</h2>
-              <p>
-                {{ notif.latestContent }}
-                <span v-if="notif.count > 1">
-                  ({{ notif.count }} new
-                  {{ pluralizeType(notif.type, notif.count) }})
-                </span>
-              </p>
+            <h3>CHECK THIS OUT</h3>
+            <div class="updates-list">
+              <div
+                v-for="(notif, index) in filteredNotifications"
+                :key="index"
+                @click="openChat(notif)"
+                style="cursor: pointer"
+                class="update-box"
+              >
+                <h2>{{ formatType(notif.type) }}</h2>
+                <p>
+                  {{ notif.latestContent }}
+                  <span v-if="notif.count > 1">
+                    ({{ notif.count }} new
+                    {{ pluralizeType(notif.type, notif.count) }})
+                  </span>
+                </p>
+              </div>
             </div>
-          </div>
           </div>
         </div>
       </div>
@@ -318,6 +322,8 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { createToast } from 'mosha-vue-toastify';
+import 'mosha-vue-toastify/dist/style.css';
 
 const router = useRouter();
 
@@ -381,36 +387,35 @@ function confirmSignOut() {
 }
 
 // Counts Logic
-async function fetchDashboardCounts(){
-  try{
+async function fetchDashboardCounts() {
+  try {
     const [totalApplied, matchingJobs, acceptedApplied] = await Promise.all([
-      axios.get('/applicant/ongoing-applications'),
-      axios.get('/applicant/matched-jobs'),
-      axios.get('/applicant/accepted-applications'),
-    ])
+      axios.get("/applicant/ongoing-applications"),
+      axios.get("/applicant/matched-jobs"),
+      axios.get("/applicant/accepted-applications"),
+    ]);
 
     ongoingApplicationsCount.value = totalApplied.data.total_jobs_applied;
     matchedJobCount.value = matchingJobs.data.matched_jobs_count;
     acceptedApplicationsCount.value = acceptedApplied.data.accepted_jobs_count;
   } catch (error) {
-    console.error("Error:", error)
+    console.error("Error:", error);
   }
 }
 
 // Job Listings Logic
-  async function fetchJobs() {
-    try {
-      const response = await axios.get("/applicant/jobdisplay");
+async function fetchJobs() {
+  try {
+    const response = await axios.get("/applicant/jobdisplay");
 
-      console.log(response.data);
+    console.log(response.data);
 
-      recommendedJobs.value = response.data.matchedjobs;
-
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-      alert("Failed to fetch jobs. Please try again later.");
-    }
+    recommendedJobs.value = response.data.matchedjobs;
+  } catch (error) {
+    console.error("Error fetching jobs:", error);
+    alert("Failed to fetch jobs. Please try again later.");
   }
+}
 
 // Job Application Logic
 function applyToJob(jobId) {
@@ -420,7 +425,12 @@ function applyToJob(jobId) {
 
 async function submitApplication() {
   if (!coverLetterFile.value) {
-    alert("Please include a cover letter.");
+    createToast('Please include a cover letter.', {
+      type: 'warning',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
     return;
   }
 
@@ -439,17 +449,30 @@ async function submitApplication() {
       },
     });
 
-    alert(response.data.message);
+    createToast(response.data.message, {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
     closeApplyPopup();
-    console.log("Application submitted successfully:", response.data);
   } catch (error) {
     if (error.response && error.response.status === 422) {
       const errors = error.response.data.error;
       let errorMessages = Object.values(errors).flat().join("\n");
-      alert("Validation Error:\n" + errorMessages);
+      createToast(errorMessages, {
+        type: 'danger',
+        position: 'top-right',
+        timeout: 5000,
+        showIcon: true
+      });
     } else {
-      console.error("Unexpected error:", error);
-      alert("An unexpected error occurred.");
+      createToast('An unexpected error occurred.', {
+        type: 'danger',
+        position: 'top-right',
+        timeout: 3000,
+        showIcon: true
+      });
     }
   }
 }
@@ -541,13 +564,12 @@ function formatType(type) {
 
 function formatDate(dateString) {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 }
-
 
 async function fetchHiredApplication() {
   try {
@@ -555,18 +577,16 @@ async function fetchHiredApplication() {
     console.log("Applications:", response.data.applications);
 
     // Find the hired application object or null
-    hiredApplication.value = response.data.applications.find(
-      (app) => app.status === "hired"
-    ) || null;
+    hiredApplication.value =
+      response.data.applications.find((app) => app.status === "hired") || null;
 
     // If hired application found, fetch job details
     if (hiredApplication.value) {
       await fetchJobs(hiredApplication.value.job_id);
 
       const allJobs = [...recommendedJobs.value];
-      hiredJobDetails.value = allJobs.find(
-        (job) => job.id === hiredApplication.value.job_id
-      ) || null;
+      hiredJobDetails.value =
+        allJobs.find((job) => job.id === hiredApplication.value.job_id) || null;
 
       console.log("Hired job details:", hiredJobDetails.value);
     }
@@ -577,7 +597,12 @@ async function fetchHiredApplication() {
 
 const downloadCertificate = async () => {
   if (!hiredApplication.value || !hiredApplication.value.id) {
-    alert("No hired application found.");
+    createToast('No hired application found.', {
+      type: 'warning',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
     return;
   }
 
@@ -585,16 +610,16 @@ const downloadCertificate = async () => {
     const response = await axios.get(
       `/certificate/download/${hiredApplication.value.id}`,
       {
-        responseType: 'blob', // Important to receive binary data
+        responseType: "blob", // Important to receive binary data
       }
     );
 
     // Create a Blob from the response
-    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const blob = new Blob([response.data], { type: "application/pdf" });
     const url = window.URL.createObjectURL(blob);
 
     // Create a link element, trigger download
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = `acceptance_certificate_${hiredApplication.value.id}.pdf`;
     document.body.appendChild(link);
@@ -605,10 +630,14 @@ const downloadCertificate = async () => {
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error("Download failed:", error);
-    alert("Failed to download certificate.");
+    createToast('Failed to download certificate.', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 };
-
 
 // Message Logic
 function sendMessage(companyId) {
@@ -626,10 +655,20 @@ async function sendActualMessage() {
     console.log("Message Sent:", response.data);
     showMessagePopup.value = false;
     messageContent.value = "";
-    alert("Message Sent!");
+    createToast('Message sent successfully!', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   } catch (error) {
     console.error("Error sending message:", error);
-    alert("Failed to send message. Please try again later.");
+    createToast('Failed to send message. Please try again.', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
@@ -1116,7 +1155,7 @@ label {
   height: fit-content;
   margin-top: -2vh;
 }
-.upd-content{
+.upd-content {
   flex: 1;
   background-color: white;
   border-radius: 10px;
@@ -1290,199 +1329,97 @@ label {
 }
 
 @media (max-width: 768px) {
-  .hamburger {
-    display: flex;
-    z-index: 1001;
-  }
-
   .content {
     flex-direction: column;
     height: calc(100vh - 60px);
-    padding: 20px;
-    margin-top: 10px;
-    overflow: auto;
+    padding: 15px;
+    margin-top: 60px;
+    overflow-y: auto;
   }
 
-  .sidebar {
-    font-size: 14px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 28vh;
-    z-index: 1000;
-    transition: transform 0.3s ease;
-  }
-
-  .sidebar.active {
-    transform: translateX(0);
-  }
-
-  .ikon {
-    height: 15px;
-    width: 15px;
-  }
-  .logo {
-    height: 8vh;
-    width: 13vh;
-    margin-left: 4vh;
-    margin-bottom: 10vh;
-  }
-  .avatar {
-    width: 30px;
-    height: 30px;
-  }
-  .popup {
-    width: 50%;
-  }
-  .topbar input[type="text"] {
-    width: 30vh;
-  }
-
-  .message-btn {
-    margin-left: 0;
-    font-size: 8px;
-  }
-  .apply-btn {
-    margin-left: 0;
-    font-size: 10px;
-  }
-  .job-detail {
-    font-size: 12px;
-    margin-right: 5vh;
-  }
-  .job-description {
-    font-size: 14px;
-    margin-left: 5vh;
-    margin-right: 5vh;
-  }
   .left-content {
+    width: 100%;
     padding: 15px;
-    height: 60vh;
+    height: auto;
+    min-height: fit-content;
   }
+
   .right-content {
+    width: 100%;
     padding: 15px;
-    height: 60vh;
+    height: auto;
+    margin-top: 15px;
   }
-  .update-box {
-    font-size: 10px;
-    padding: 10px;
+
+  .cards {
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
   }
-  .sign-out {
-    width: 60px;
-    height: 40px;
-    margin-left: 7.5vh;
+
+  .card {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .job-box {
+    width: 95%;
+    margin: 10px auto;
+    padding: 12px;
+  }
+
+  .job-description {
+    margin: 15px;
+    font-size: 14px;
+  }
+
+  .upd-content {
+    margin-top: 15px;
+  }
+
+  .hired-status-box {
+    margin-bottom: 15px;
+  }
+
+  .button-group {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .message-btn,
+  .apply-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    white-space: nowrap;
   }
 }
 
 @media (max-width: 480px) {
-  .hamburger {
-    display: flex;
-    z-index: 1001;
-  }
-
-  .logo {
-    margin-left: 5vh;
-    margin-top: 5vh;
-    margin-bottom: 5vh;
-  }
-  .cards {
-    display: grid;
-    grid-template-columns: (2, 1fr);
-    width: 90%;
-  }
-
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 35vh;
-    z-index: 1000;
-    transition: transform 0.3s ease;
-  }
-
-  .sidebar.active {
-    transform: translateX(0);
-  }
-
-  .popup {
-    width: 80%;
-  }
-  .topbar input[type="text"] {
-    width: 20vh;
-  }
-
-  .message-btn {
-    margin-left: 0;
-    font-size: 6px;
-  }
-  .apply-btn {
-    margin-left: 0;
-    font-size: 7px;
-  }
-  .company-name {
-    font-size: 14px;
-    margin-top: 2.5vh;
-    margin-left: -2vh;
-  }
-  .job-box {
-    margin-left: 2vh;
-    white-space: pre-line;
-  }
-  .job-detail {
-    font-size: 12px;
-    margin-right: 5vh;
-  }
-  .job-description {
-    font-size: 10px;
-    margin-left: 5vh;
-    margin-right: 5vh;
-  }
-  .job-media {
-    margin-left: 0vh;
-  }
-  .update-box {
-    font-size: 8px;
+  .content {
     padding: 10px;
   }
-  .sign-out {
-    width: 60px;
-    height: 40px;
-    margin-left: 7.5vh;
+
+  .left-content,
+  .right-content {
+    padding: 10px;
   }
-}
-@media (max-width: 385px) {
-  .ikon {
-    height: 20px;
-    width: 20px;
+
+  .job-box {
+    width: 100%;
+    margin: 8px 0;
+    padding: 10px;
   }
-  .sidebar {
+
+  .job-description {
+    margin: 10px;
     font-size: 12px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 35vh;
-    z-index: 1000;
-    transition: transform 0.3s ease;
   }
-  .logo {
-    height: 6vh;
-    width: 10vh;
-    margin-left: 3vh;
-    margin-bottom: 5vh;
-  }
-  .button-group {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-  }
-}
-@media (max-width: 320px) {
-  .company-name {
+
+  .message-btn,
+  .apply-btn {
     font-size: 10px;
-    margin-top: 2.5vh;
+    padding: 4px 8px;
   }
 }
 </style>

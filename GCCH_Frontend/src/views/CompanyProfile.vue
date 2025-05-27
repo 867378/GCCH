@@ -209,6 +209,8 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { createToast } from 'mosha-vue-toastify';
+import 'mosha-vue-toastify/dist/style.css';
 
 const router = useRouter();
 
@@ -245,12 +247,23 @@ function toggleSignOut() {
 function confirmSignOut() {
   axios
     .post("/logout")
-    .then((response) => {
-      console.log("Sign out successful:", response.data.message);
+    .then(() => {
+      createToast('Successfully signed out!', {
+        type: 'success',
+        position: 'top-right',
+        timeout: 2000,
+        showIcon: true
+      });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
+      createToast('Failed to sign out. Please try again.', {
+        type: 'danger',
+        position: 'top-right',
+        timeout: 3000,
+        showIcon: true
+      });
     });
 }
 
@@ -258,11 +271,22 @@ async function fetchUserData() {
   try {
     const userId = localStorage.getItem("user_id");
     const response = await axios.get(`user/company/${userId}`);
-
     company.value = response.data;
     console.log("Fetched User Data", response.data);
+    createToast('Profile loaded successfully', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   } catch (error) {
     console.error("Failed to fetch user data", error);
+    createToast('Failed to load profile data', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
@@ -310,6 +334,81 @@ function formatType(type) {
       return "Female";
     case "other":
       return "Other";
+  }
+}
+
+async function onImageChange(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!file.type.match('image.*')) {
+    createToast('Please select an image file', {
+      type: 'warning',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('profile_image', file);
+    
+    await axios.post('/upload/profile-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    createToast('Profile image updated successfully', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+    
+    await fetchUserData();
+  } catch (error) {
+    console.error('Failed to upload image:', error);
+    createToast('Failed to update profile image', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  }
+}
+
+async function updateProfile() {
+  try {
+    const response = await axios.put(`/company/profile/update`, {
+      company_name: fullName.value,
+      industry_type: type.value,
+      company_telephone: telephone.value,
+      email: email.value,
+      street_address: location.value,
+      city: city.value,
+      province: province.value,
+      country: country.value
+    });
+
+    createToast('Profile updated successfully', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+
+    await fetchUserData();
+  } catch (error) {
+    console.error('Failed to update profile:', error);
+    createToast(error.response?.data?.message || 'Failed to update profile', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 

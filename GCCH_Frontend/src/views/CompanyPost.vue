@@ -281,6 +281,8 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { createToast } from 'mosha-vue-toastify';
+import 'mosha-vue-toastify/dist/style.css';
 
 const router = useRouter();
 
@@ -314,23 +316,35 @@ function openConfirmModal(applicationId, type) {
   showStatusOptions.value = true; // show status section if hidden
 }
 
-function scheduleInterview(applicationId) {
+async function scheduleInterview(applicationId) {
   const date = prompt("Enter interview date (YYYY-MM-DD HH:MM:SS):");
   if (date) {
     selectedApplicationId.value = applicationId;
     decisionType.value = "interview";
     scheduledAt.value = date;
     showStatusOptions.value = true;
+    createToast('Interview scheduled successfully', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
-function scheduleAssessment(applicationId) {
+async function scheduleAssessment(applicationId) {
   const date = prompt("Enter assessment date (YYYY-MM-DD HH:MM:SS):");
   if (date) {
     selectedApplicationId.value = applicationId;
     decisionType.value = "assessment";
     scheduledAt.value = date;
     showStatusOptions.value = true;
+    createToast('Assessment scheduled successfully', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
@@ -372,14 +386,24 @@ function toggleSignOut() {
 }
 
 function confirmSignOut() {
-  axios
-    .post("/logout")
-    .then((response) => {
-      console.log("Sign out successful:", response.data.message);
+  axios.post("/logout")
+    .then(() => {
+      createToast('Successfully signed out!', {
+        type: 'success',
+        position: 'top-right',
+        timeout: 2000,
+        showIcon: true
+      });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
+      createToast('Failed to sign out. Please try again.', {
+        type: 'danger',
+        position: 'top-right',
+        timeout: 3000,
+        showIcon: true
+      });
     });
 }
 
@@ -418,7 +442,12 @@ async function fetchPostedJobs() {
 
 async function submitApplicationDecision() {
   if (!selectedApplicationId.value || !decisionType.value) {
-    alert("Please choose an applicant and a decision (accept/reject/etc).");
+    createToast('Please choose an applicant and a decision', {
+      type: 'warning',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
     return;
   }
 
@@ -429,7 +458,7 @@ async function submitApplicationDecision() {
     comment.value
   );
 
-  // Reset
+  // Reset form
   selectedApplicationId.value = null;
   decisionType.value = null;
   scheduledAt.value = null;
@@ -454,31 +483,44 @@ async function assessApplication(
       `/company/job-applications/${applicationId}/assess`,
       payload
     );
-    console.log("Assessment Successful:", response.data);
+
+    createToast('Application status updated successfully', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
 
     if (status === "accepted") {
       try {
-        const offerResponse = await axios.post(
-          `/company/offer-job/${applicationId}`
-        );
-        console.log("Job offer sent:", offerResponse.data);
+        const offerResponse = await axios.post(`/company/offer-job/${applicationId}`);
+        createToast('Job offer sent successfully', {
+          type: 'success',
+          position: 'top-right',
+          timeout: 3000,
+          showIcon: true
+        });
       } catch (offerError) {
-        console.error(
-          "Error sending job offer:",
-          offerError.response?.data || offerError
-        );
-        alert(offerError.response?.data?.error || "Failed to send job offer");
+        console.error("Error sending job offer:", offerError);
+        createToast(offerError.response?.data?.error || 'Failed to send job offer', {
+          type: 'danger',
+          position: 'top-right',
+          timeout: 3000,
+          showIcon: true
+        });
       }
     }
 
     await fetchApplicants(selectedJob.value.id);
     await fetchPostedJobs();
   } catch (error) {
-    console.error(
-      "Error updating application status:",
-      error.response?.data || error
-    );
-    alert(error.response?.data?.error || "Failed to update application");
+    console.error("Error updating application status:", error);
+    createToast(error.response?.data?.error || 'Failed to update application', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
@@ -1095,13 +1137,19 @@ textarea {
     font-size: 12px;
   }
 
-  .avatar {
-    width: 30px;
-    height: 30px;
+  .selected-job-box {
+    width: 95%;
+    max-height: 43vh;
+    margin-left: 2vh;
+    font-size: 14px;
+    padding: 20px;
+    border-radius: 3vh;
   }
+  .selected-job-box h3 {
+    font-size: 30px;
+  }
+
   .sign-out {
-    width: 60px;
-    height: 40px;
     margin-left: 7.5vh;
   }
 }

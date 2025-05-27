@@ -110,38 +110,94 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
+import { createToast } from 'mosha-vue-toastify';
+import 'mosha-vue-toastify/dist/style.css';
 
-function redirectToGoogle() {
-  window.location.href = "http://localhost:8000/auth/google/redirect";
+async function redirectToGoogle() {
+  try {
+    window.location.href = "http://localhost:8000/auth/google/redirect";
+  } catch (error) {
+    console.error("Google redirect error:", error);
+    createToast('Failed to connect with Google. Please try again.', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  }
 }
 
+// Add error handling for authentication
+function handleAuthError(error) {
+  let message = 'Authentication failed. Please try again.';
+  
+  if (error.response) {
+    switch (error.response.status) {
+      case 401:
+        message = 'Invalid credentials. Please check your email.';
+        break;
+      case 403:
+        message = 'Access denied. Please use a valid Gordon College email.';
+        break;
+      default:
+        message = error.response.data.message || message;
+    }
+  }
+
+  createToast(message, {
+    type: 'danger',
+    position: 'top-right',
+    timeout: 4000,
+    showIcon: true
+  });
+}
+
+// Update datetime functions with error handling
 const currentTime = ref("");
 const currentDate = ref("");
 let timeInterval;
 
 const updateDateTime = () => {
-  const now = new Date();
+  try {
+    const now = new Date();
 
-  // Format time
-  currentTime.value = new Intl.DateTimeFormat("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  }).format(now);
+    currentTime.value = new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    }).format(now);
 
-  // Format date
-  currentDate.value = new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(now);
+    currentDate.value = new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(now);
+  } catch (error) {
+    console.error("DateTime update error:", error);
+    createToast('Failed to update date/time display', {
+      type: 'warning',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  }
 };
 
 onMounted(() => {
-  updateDateTime();
-  timeInterval = setInterval(updateDateTime, 1000);
+  try {
+    updateDateTime();
+    timeInterval = setInterval(updateDateTime, 1000);
+  } catch (error) {
+    console.error("Mount error:", error);
+    createToast('Failed to initialize date/time display', {
+      type: 'warning',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  }
 });
 
 onBeforeUnmount(() => {

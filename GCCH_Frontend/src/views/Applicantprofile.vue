@@ -177,6 +177,8 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { createToast } from 'mosha-vue-toastify';
+import 'mosha-vue-toastify/dist/style.css';
 
 const router = useRouter();
 
@@ -214,11 +216,22 @@ function confirmSignOut() {
   axios
     .post("/logout")
     .then((response) => {
-      console.log("Sign out successful:", response.data.message);
+      createToast('Successfully signed out', {
+        type: 'success',
+        position: 'top-right',
+        timeout: 2000,
+        showIcon: true
+      });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
+      createToast('Failed to sign out', {
+        type: 'danger',
+        position: 'top-right',
+        timeout: 3000,
+        showIcon: true
+      });
     });
 }
 
@@ -226,11 +239,38 @@ async function fetchUserData() {
   try {
     const userId = localStorage.getItem("user_id");
     const response = await axios.get(`user/applicant/${userId}`);
-
     applicant.value = response.data;
     console.log("Fetched User Data", response.data);
   } catch (error) {
     console.error("Failed to fetch user data", error);
+    createToast('Failed to load profile data', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  }
+}
+
+// Add this function for profile updates
+async function updateProfile(data) {
+  try {
+    const response = await axios.put(`/user/applicant/update`, data);
+    createToast('Profile updated successfully', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+    await fetchUserData();
+  } catch (error) {
+    console.error("Failed to update profile", error);
+    createToast(error.response?.data?.message || 'Failed to update profile', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
@@ -265,6 +305,12 @@ async function fetchNotifications() {
     console.log("Fetched notifications:", rawNotifications);
   } catch (error) {
     console.error("Error fetching notifications:", error);
+    createToast('Failed to load notifications', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
@@ -884,6 +930,7 @@ body,
     margin-left: 7.5vh;
   }
 }
+
 @media (max-width: 385px) {
    .sidebar {
     font-size: 12px;

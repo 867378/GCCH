@@ -122,8 +122,8 @@
               </div>
             </div>
           </div>
-          </div>
-<div class="right-content">
+        </div>
+        <div class="right-content">
           <div class="resume-box">
             <h3 class="resumeh3">Accepted Applications</h3>
             <div class="form-row">
@@ -140,7 +140,7 @@
                     {{ formatDate(application.updated_at) }}
                   </p>
                   <p><strong>Comment: </strong> {{ application.comment }}</p>
-                  
+
                   <div class="button-group">
                     <button
                       v-if="!showDownloadButton.get(application.id)"
@@ -150,7 +150,10 @@
                       Accept Offer
                     </button>
                     <button
-                      v-if="application.offer_status === 'accepted' && application.finalized"
+                      v-if="
+                        application.offer_status === 'accepted' &&
+                        application.finalized
+                      "
                       class="dl-btn"
                       @click="downloadCertificate(application.id)"
                     >
@@ -164,12 +167,11 @@
                     <button
                       v-if="!showDownloadButton.get(application.id)"
                       class="acrj-btn"
-                      @click="respondToOffer(application.id,'rejected')"
+                      @click="respondToOffer(application.id, 'rejected')"
                     >
                       Reject Offer
                     </button>
                   </div>
-
                 </div>
               </div>
             </div>
@@ -184,6 +186,8 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { createToast } from 'mosha-vue-toastify';
+import 'mosha-vue-toastify/dist/style.css';
 
 const isSidenavOpen = ref(true);
 const showMail = ref(false);
@@ -202,6 +206,7 @@ const acceptedApplications = ref([]);
 const showDownloadButton = ref(new Map());
 
 const router = useRouter();
+
 
 //Methods for Nav Bars
 
@@ -228,11 +233,22 @@ function confirmSignOut() {
   axios
     .post("/logout")
     .then((response) => {
-      console.log("Sign out successful:", response.data.message);
+      createToast('Successfully signed out!', {
+        type: 'success',
+        position: 'top-right',
+        timeout: 2000,
+        showIcon: true
+      });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
+      createToast('Failed to sign out. Please try again.', {
+        type: 'danger',
+        position: 'top-right',
+        timeout: 3000,
+        showIcon: true
+      });
     });
 }
 
@@ -301,35 +317,85 @@ function formatType(type) {
 async function fetchJobApplications() {
   try {
     const response = await axios.get("/applicant/applications");
-    console.log("Success", response.data);
-
     applications.value = response.data.applications;
-
     acceptedApplications.value = applications.value.filter(
-      (app) => app.status === "accepted" 
+      (app) => app.status === "accepted"
     );
-
     ongoingApplications.value = applications.value.filter(
-      (app) => app.status !== "accepted" && app.status !=='hired' && app.offer_status !== 'none'
+      (app) =>
+        app.status !== "accepted" &&
+        app.status !== "hired" &&
+        app.offer_status !== "none"
     );
   } catch (error) {
-    console.error("Error Occured", error);
+    console.error("Error Occurred", error);
+    createToast('Failed to fetch applications', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
-async function respondToOffer(applicationId, response){
-  try{
+async function respondToOffer(applicationId, response) {
+  try {
     const res = await axios.post(
       `/applicant/job-application/respond-offer/${applicationId}`,
       {
-        offer_status: response, // 'accepted' or 'rejected'
+        offer_status: response,
       }
     );
-    alert(res.data.message);
+    
+    createToast(res.data.message, {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+    
     await fetchJobApplications();
-  } catch (error){
+  } catch (error) {
     console.error("Error responding to offer", error.response?.data || error);
-    alert(error.response?.data?.error || "Something went wrong");
+    createToast(error.response?.data?.error || "Something went wrong", {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  }
+}
+
+async function downloadCertificate(applicationId) {
+  try {
+    const response = await axios.get(`/certificate/download/${applicationId}`, {
+      responseType: "blob"
+    });
+    
+    const blob = new Blob([response.data], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "certificate.pdf");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    createToast('Certificate downloaded successfully!', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  } catch (error) {
+    console.error("Download failed:", error);
+    createToast('Failed to download certificate', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
@@ -688,7 +754,7 @@ body,
   width: auto;
   margin-left: 5vh;
   margin-top: 2vh;
-  border:#033f3a 1px solid;
+  border: #033f3a 1px solid;
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
@@ -830,10 +896,22 @@ body,
     max-height: 85vh;
     overflow-y: auto;
   }
-
+  .left-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: -14vh;
+  }
   .resume-list {
-    margin-left: -5vh;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .right-content {
+    flex: 1;
+    border-radius: 10px;
+    padding: 20px;
+    margin-right: 4vh;
+    height: fit-content;
   }
   .sign-out {
     margin-left: 7.5vh;
@@ -886,8 +964,16 @@ body,
     width: 30px;
     height: 30px;
   }
+  .left-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: -14vh;
+  }
+
   .resume-box {
-    width: 75%;
+    width: 80%;
     max-height: 85vh;
     overflow-y: auto;
   }
@@ -909,8 +995,13 @@ body,
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     max-width: 90%;
     height: 100%;
-    margin-left: 12vh;
+    margin-left: 3vh;
     margin-bottom: 20px;
+  }
+
+  .resume-list {
+    grid-template-columns: repeat(1, 1fr);
+    width: 100%;
   }
 
   .form-row {
@@ -919,6 +1010,13 @@ body,
     gap: 10px;
   }
 
+  .right-content {
+    flex: 1;
+    border-radius: 10px;
+    padding: 20px;
+    margin-left: -10vh;
+    height: fit-content;
+  }
   .sign-out {
     width: 60px;
     height: 40px;
@@ -937,6 +1035,7 @@ body,
   .content {
     display: grid;
     flex-direction: column;
+    overflow: auto;
   }
   .logo {
     margin-left: 5vh;
@@ -965,7 +1064,7 @@ body,
   }
   .resume-item.received {
     width: 80%;
-    margin-left: 10vh;
+    margin-left: 5vh;
     margin-bottom: 2vh;
   }
   .resume-list {
@@ -973,18 +1072,21 @@ body,
     width: 100%;
   }
   .resumeh3 {
-    font-size: 1.6rem;
+    font-size: 1.2rem;
     margin-bottom: 2vh;
     text-align: center;
+  }
+  .right-content {
+    flex: 1;
+    border-radius: 10px;
+    padding: 20px;
+    margin-left: -10vh;
+    height: fit-content;
   }
   .sign-out {
     width: 40px;
     height: 40px;
     margin-left: 5vh;
-  }
-
-  .sidebar.active {
-    transform: translateX(0);
   }
 }
 
@@ -1022,6 +1124,26 @@ body,
 
   .resume-list {
     grid-template-columns: repeat(1, 1fr);
+  }
+  .resumeh3 {
+    font-size: 1.2rem;
+    margin-bottom: 2vh;
+    text-align: center;
+  }
+
+  .left-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: -14vh;
+  }
+  .right-content {
+    flex: 1;
+    border-radius: 10px;
+    padding: 20px;
+    margin-left: -15vh;
+    height: fit-content;
   }
 
   .sign-out {

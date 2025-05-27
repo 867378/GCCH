@@ -265,6 +265,8 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { createToast } from 'mosha-vue-toastify';
+import 'mosha-vue-toastify/dist/style.css';
 
 const router = useRouter();
 
@@ -357,30 +359,45 @@ function toggleSignOut() {
 function confirmSignOut() {
   axios
     .post("/logout")
-
     .then((response) => {
-      console.log("Sign out successful:", response.data.message);
+      createToast('Successfully signed out!', {
+        type: 'success',
+        position: 'top-right',
+        timeout: 2000,
+        showIcon: true
+      });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
+      createToast('Failed to sign out. Please try again.', {
+        type: 'danger',
+        position: 'top-right',
+        timeout: 3000,
+        showIcon: true
+      });
     });
 }
-//Dashboard Logic
+
 async function fetchDashboardCounts() {
   try {
     const [clientsRes, jobsRes, pendingRes] = await Promise.all([
       axios.get('/company/total-clients'),
       axios.get('/company/total-jobs'),
       axios.get('/company/pending-applications'),
-    ])
+    ]);
 
-    totalClients.value = clientsRes.data.count
-    totalJobs.value = jobsRes.data.count
-    pendingApplications.value = pendingRes.data.total
-
+    totalClients.value = clientsRes.data.count;
+    totalJobs.value = jobsRes.data.count;
+    pendingApplications.value = pendingRes.data.total;
   } catch (error) {
-    console.error('Failed to fetch dashboard stats:', error)
+    console.error('Failed to fetch dashboard stats:', error);
+    createToast('Failed to load dashboard statistics', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
@@ -435,12 +452,18 @@ async function postJob() {
       recommended_course_3: jobData.value.recommended_course_3 || null,
       total_slots: jobData.value.total_slots,
     });
-    console.log("Job posted successfully:", response.data);
-    alert(response.data.message);
+
+    createToast(response.data.message, {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
 
     await fetchPostedJobs();
     await fetchDashboardCounts();
 
+    // Reset form
     jobData.value = {
       job_title: "",
       job_description: "",
@@ -456,10 +479,20 @@ async function postJob() {
     if (error.response && error.response.status === 422) {
       const errors = error.response.data.error;
       let errorMessages = Object.values(errors).flat().join('\n');
-      alert("Validation Error:\n" + errorMessages);
+      createToast(errorMessages, {
+        type: 'danger',
+        position: 'top-right',
+        timeout: 5000,
+        showIcon: true
+      });
     } else {
       console.error("Unexpected error:", error);
-      alert("An unexpected error occurred.");
+      createToast('An unexpected error occurred.', {
+        type: 'danger',
+        position: 'top-right',
+        timeout: 3000,
+        showIcon: true
+      });
     }
   }
 }
@@ -470,6 +503,12 @@ async function fetchPostedJobs() {
     postedJobs.value = response.data.jobs;
   } catch (error) {
     console.error("Error fetching posted jobs:", error);
+    createToast('Failed to load posted jobs', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 

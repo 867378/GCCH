@@ -139,10 +139,11 @@
 </template>
 
 <script setup>
-
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
+import { createToast } from 'mosha-vue-toastify';
+import 'mosha-vue-toastify/dist/style.css';
 
 const route = useRoute();
 const router = useRouter();
@@ -167,7 +168,12 @@ const form = ref({
 });
 
 if (!userId) {
-  alert("User ID not found. Please log in again.");
+  createToast('User ID not found. Please log in again.', {
+    type: 'warning',
+    position: 'top-right',
+    timeout: 3000,
+    showIcon: true
+  });
   router.push("/login");
 }
 
@@ -182,9 +188,20 @@ const continueAction = async () => {
     );
 
     currentStep.value = selectedRole.value;
+    createToast(`Role set to ${selectedRole.value}`, {
+      type: 'success',
+      position: 'top-right',
+      timeout: 2000,
+      showIcon: true
+    });
   } catch (error) {
     console.error("Error setting role:", error);
-    alert(error.response.data.message || "An error occurred");
+    createToast(error.response?.data?.message || 'Failed to set role', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 };
 const goBack = () => {
@@ -203,12 +220,21 @@ const submitApplicantForm = async () => {
       course: form.value.course,
     });
 
-    console.log(response.data);
-
+    createToast('Profile created successfully!', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 2000,
+      showIcon: true
+    });
     router.push("/applicantdash");
   } catch (error) {
     console.error("Error submitting form:", error);
-    alert(error.response.data.message || "An error occurred");
+    createToast(error.response?.data?.message || 'Failed to create profile', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 };
 
@@ -224,12 +250,21 @@ const submitCompanyForm = async () => {
       industry_type: form.value.industry_type,
     });
 
-    console.log(response.data);
-
+    createToast('Company profile created successfully!', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 2000,
+      showIcon: true
+    });
     router.push("/companydash");
   } catch (error) {
     console.error("Error submitting form:", error);
-    alert(error.response.data.message);
+    createToast(error.response?.data?.message || 'Failed to create company profile', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 };
 </script>

@@ -52,7 +52,6 @@
             <span></span>
           </div>
           <img class="avatar" src="/public/user.png" alt="Avatar" />
-          <input type="text" placeholder="Search..." />
         </div>
         <div class="icons-right">
           <div class="icon" @click="toggleMail">
@@ -187,6 +186,8 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { createToast } from 'mosha-vue-toastify';
+import 'mosha-vue-toastify/dist/style.css';
 
 const router = useRouter();
 
@@ -238,9 +239,23 @@ function confirmSignOut() {
   axios
     .post("/logout")
     .then(() => {
+      createToast('Successfully signed out', {
+        type: 'success',
+        position: 'top-right',
+        timeout: 2000,
+        showIcon: true
+      });
       router.push("/login");
     })
-    .catch(console.error);
+    .catch((error) => {
+      console.error("Error signing out:", error);
+      createToast('Failed to sign out', {
+        type: 'danger',
+        position: 'top-right',
+        timeout: 3000,
+        showIcon: true
+      });
+    });
 }
 
 async function openChat(obj) {
@@ -248,11 +263,26 @@ async function openChat(obj) {
 
   if (!senderId) {
     console.warn("No sender ID found in notification:", obj);
+    createToast('Invalid conversation selected', {
+      type: 'warning',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
     return;
   }
 
   selectedUserId.value = senderId;
-  await fetchConversation(senderId);
+  try {
+    await fetchConversation(senderId);
+  } catch (error) {
+    createToast('Failed to load conversation', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  }
 }
 
 async function markMessageAsRead(messageId) {
@@ -288,12 +318,22 @@ async function fetchConversation(senderId) {
 }
 
 async function sendReply() {
-  if (!newReply.value.trim()) return;
+  if (!newReply.value.trim()) {
+    createToast('Message cannot be empty', {
+      type: 'warning',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+    return;
+  }
+
   try {
     await axios.post("/message/send", {
       receiver_id: selectedUserId.value,
       message: newReply.value.trim(),
     });
+    
     conversation.value.push({
       sender_id: currentUserId.value,
       receiver_id: selectedUserId.value,
@@ -302,9 +342,22 @@ async function sendReply() {
       content: newReply.value.trim(),
       created_at: new Date().toISOString(),
     });
+    
     newReply.value = "";
+    createToast('Message sent successfully', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 2000,
+      showIcon: true
+    });
   } catch (error) {
     console.error("Error sending message:", error);
+    createToast('Failed to send message', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
@@ -365,6 +418,12 @@ async function fetchNotifications() {
     newNotifications.value = notifications.value.length;
   } catch (error) {
     console.error("Error fetching notifications:", error);
+    createToast('Failed to load notifications', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
