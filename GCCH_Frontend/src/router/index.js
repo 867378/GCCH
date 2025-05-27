@@ -88,4 +88,46 @@ const router = createRouter({
   ],
 });
 
+router.beforeEach(async (to, from, next) => {
+  const userId = localStorage.getItem('user_id');
+  const publicPages = ['Login', 'Signup', 'Redirecting'];
+  const authRequired = !publicPages.includes(to.name);
+
+  if (authRequired && !userId) {
+    return next({ name: 'Login' });
+  }
+
+  if (!authRequired) return next();
+
+  try {
+    let role = localStorage.getItem('userRole');
+
+    if (!role) {
+      // Fallback in case role wasn't cached yet
+      const { data } = await axios.get(`/api/user/${userId}`, {
+        withCredentials: true
+      });
+      role = data.role;
+      localStorage.setItem('userRole', role);
+    }
+
+    const companyOnlyRoutes = ['CompanyDash', 'CompanyPost', 'CompanyMessage', 'CompanyAccepted', 'CompanyProfile'];
+    const applicantOnlyRoutes = ['ApplicantDash', 'ApplicantMessage', 'ApplicantProfile', 'Application'];
+
+    if (companyOnlyRoutes.includes(to.name) && role !== 'company') {
+      return next(from.fullPath);
+    }
+
+    if (applicantOnlyRoutes.includes(to.name) && role !== 'applicant') {
+      return next(from.fullPath);
+    }
+
+    return next(); // Role is valid for this route
+  } catch (error) {
+    console.error('Failed to fetch user data:', error);
+    return next({ name: 'Login' });
+  }
+});
+
+
 export default router;

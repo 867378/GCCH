@@ -34,6 +34,7 @@ Route::prefix('user')->name('api.')->group(function () {
 //Protected routes
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
+    Route::get('/user/${id}', [UserController::class, 'getRole'])->name('getRole');
     Route::get('/user', function (Request $request) {return $request->user();});
 });
 

@@ -27,6 +27,8 @@ onMounted(async () => {
     if (!user.role) {
       router.push(`/signup/${user.id}`);
     } else {
+      localStorage.setItem('userRole', user.role);
+
       switch (user.role) {
         case 'applicant':
           router.push('/applicantdash');
