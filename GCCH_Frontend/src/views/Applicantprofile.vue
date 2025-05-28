@@ -226,6 +226,8 @@ function confirmSignOut() {
         showIcon: true,
         toastBackgroundColor: "#045d56",
       });
+      localStorage.clear();
+
       router.push("/login");
     })
     .catch((error) => {

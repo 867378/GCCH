@@ -24,16 +24,16 @@ Route::prefix('auth')->group(function () {
 });
 
 
-// Route::middleware(['auth:sanctum','company'])->group(function () {
+Route::middleware(['auth:sanctum','company'])->group(function () {
     Route::get('/preview/job-report/{job}', [ReportController::class, 'previewJobReport']);
     Route::get('/api/report/job/{id}/download', [ReportController::class, 'downloadReport']);
-// });
+});
 
 
-// Route::middleware(['auth:sanctum','applicant'])->group(function () {
+Route::middleware(['auth:sanctum','applicant'])->group(function () {
     Route::get('/preview/certificate/{applicationId}', [ReportController::class, 'previewCertificate']);
     Route::get('/api/certificate/download/{applicationId}', [ReportController::class, 'downloadCertificate']);
-// });
+});
 
 
 // Public route for deleting all data (if needed)

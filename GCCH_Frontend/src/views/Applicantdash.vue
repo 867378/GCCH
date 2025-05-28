@@ -75,9 +75,7 @@
           <div class="popup">
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
-              <li>3 new applicants this week</li>
-              <li>Company profile approved</li>
-              <li>New feature: Analytics tab</li>
+              
             </ul>
             <button @click="toggleNotif">Close</button>
           </div>
@@ -372,16 +370,27 @@ function toggleSignOut() {
 function confirmSignOut() {
   axios
     .post("/logout")
-    .then((response) => {
-      console.log("Sign out successful:", response.data.message);
+    .then(() => {
+      createToast('Successfully signed out', {
+        type: 'success',
+        position: 'top-right',
+        timeout: 2000,
+        showIcon: true
+      });
+      localStorage.clear();
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
+      createToast('Failed to sign out', {
+        type: 'danger',
+        position: 'top-right',
+        timeout: 3000,
+        showIcon: true
+      });
     });
 }
 
-// Counts Logic
 async function fetchDashboardCounts() {
   try {
     const [totalApplied, matchingJobs, acceptedApplied] = await Promise.all([
@@ -398,7 +407,6 @@ async function fetchDashboardCounts() {
   }
 }
 
-// Job Listings Logic
 async function fetchJobs() {
   try {
     const response = await axios.get("/applicant/jobdisplay");
@@ -412,7 +420,6 @@ async function fetchJobs() {
   }
 }
 
-// Job Application Logic
 function applyToJob(jobId) {
   selectedJobId.value = jobId;
   showApplyPopup.value = true;
@@ -574,11 +581,9 @@ async function fetchHiredApplication() {
     const response = await axios.get("/applicant/applications");
     console.log("Applications:", response.data.applications);
 
-    // Find the hired application object or null
     hiredApplication.value =
       response.data.applications.find((app) => app.status === "hired") || null;
 
-    // If hired application found, fetch job details
     if (hiredApplication.value) {
       await fetchJobs(hiredApplication.value.job_id);
 
@@ -608,22 +613,19 @@ const downloadCertificate = async () => {
     const response = await axios.get(
       `/certificate/download/${hiredApplication.value.id}`,
       {
-        responseType: "blob", // Important to receive binary data
+        responseType: "blob",
       }
     );
 
-    // Create a Blob from the response
     const blob = new Blob([response.data], { type: "application/pdf" });
     const url = window.URL.createObjectURL(blob);
 
-    // Create a link element, trigger download
     const link = document.createElement("a");
     link.href = url;
     link.download = `acceptance_certificate_${hiredApplication.value.id}.pdf`;
     document.body.appendChild(link);
     link.click();
 
-    // Clean up
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
   } catch (error) {
@@ -637,7 +639,6 @@ const downloadCertificate = async () => {
   }
 };
 
-// Message Logic
 function sendMessage(companyId) {
   selectedCompanyId.value = companyId;
   showMessagePopup.value = true;
