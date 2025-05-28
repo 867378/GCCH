@@ -58,14 +58,8 @@
             <span></span>
             <span></span>
           </div>
-
-          <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
-          <div class="icon" @click="toggleMail">
-            <img src="/public/mail.png" />
-            <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
-          </div>
           <div class="icon" @click="toggleNotif">
             <img src="/public/notification.png" />
             <span v-if="newNotifications > 0">{{ newNotifications }}</span>
@@ -265,8 +259,8 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { createToast } from 'mosha-vue-toastify';
-import 'mosha-vue-toastify/dist/style.css';
+import { createToast } from "mosha-vue-toastify";
+import "mosha-vue-toastify/dist/style.css";
 
 const router = useRouter();
 
@@ -360,21 +354,22 @@ function confirmSignOut() {
   axios
     .post("/logout")
     .then((response) => {
-      createToast('Successfully signed out!', {
-        type: 'success',
-        position: 'top-right',
+      createToast("Successfully signed out!", {
+        type: "success",
+        position: "top-right",
         timeout: 2000,
-        showIcon: true
+        showIcon: true,
+        toastBackgroundColor: "#045d56",
       });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
-      createToast('Failed to sign out. Please try again.', {
-        type: 'danger',
-        position: 'top-right',
+      createToast("Failed to sign out. Please try again.", {
+        type: "danger",
+        position: "top-right",
         timeout: 3000,
-        showIcon: true
+        showIcon: true,
       });
     });
 }
@@ -382,21 +377,22 @@ function confirmSignOut() {
 async function fetchDashboardCounts() {
   try {
     const [clientsRes, jobsRes, pendingRes] = await Promise.all([
-      axios.get('/company/total-clients'),
-      axios.get('/company/total-jobs'),
-      axios.get('/company/pending-applications'),
+      axios.get("/company/total-clients"),
+      axios.get("/company/total-jobs"),
+      axios.get("/company/pending-applications"),
     ]);
 
     totalClients.value = clientsRes.data.count;
     totalJobs.value = jobsRes.data.count;
     pendingApplications.value = pendingRes.data.total;
   } catch (error) {
-    console.error('Failed to fetch dashboard stats:', error);
-    createToast('Failed to load dashboard statistics', {
-      type: 'danger',
-      position: 'top-right',
+    console.error("Failed to fetch dashboard stats:", error);
+    createToast("Failed to load dashboard statistics", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
   }
 }
@@ -422,9 +418,9 @@ function formatType(type) {
     case "message":
       return "Inquiry";
     case "full_time":
-      return "Full-time"
+      return "Full-time";
     case "part_time":
-      return "Part-time"
+      return "Part-time";
     case "other":
       return "Other";
   }
@@ -454,10 +450,12 @@ async function postJob() {
     });
 
     createToast(response.data.message, {
-      type: 'success',
-      position: 'top-right',
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+            toastBackgroundColor: "#045d56",
+
     });
 
     await fetchPostedJobs();
@@ -478,20 +476,20 @@ async function postJob() {
   } catch (error) {
     if (error.response && error.response.status === 422) {
       const errors = error.response.data.error;
-      let errorMessages = Object.values(errors).flat().join('\n');
+      let errorMessages = Object.values(errors).flat().join("\n");
       createToast(errorMessages, {
-        type: 'danger',
-        position: 'top-right',
+        type: "danger",
+        position: "top-right",
         timeout: 5000,
-        showIcon: true
+        showIcon: true,
       });
     } else {
       console.error("Unexpected error:", error);
-      createToast('An unexpected error occurred.', {
-        type: 'danger',
-        position: 'top-right',
+      createToast("An unexpected error occurred.", {
+        type: "danger",
+        position: "top-right",
         timeout: 3000,
-        showIcon: true
+        showIcon: true,
       });
     }
   }
@@ -503,11 +501,11 @@ async function fetchPostedJobs() {
     postedJobs.value = response.data.jobs;
   } catch (error) {
     console.error("Error fetching posted jobs:", error);
-    createToast('Failed to load posted jobs', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to load posted jobs", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -1144,8 +1142,6 @@ body,
   .topbar {
     left: 0;
   }
-
-
 }
 
 @media (max-width: 768px) {
@@ -1256,7 +1252,7 @@ body,
     margin-left: 5vh;
     overflow: auto;
   }
- .posted-jobs-box {
+  .posted-jobs-box {
     width: 100%;
     margin: 10px 0;
     padding: 8px;
@@ -1338,7 +1334,7 @@ body,
   }
 }
 @media (max-width: 380px) {
-    .ikon {
+  .ikon {
     height: 20px;
     width: 20px;
   }

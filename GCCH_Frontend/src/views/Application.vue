@@ -51,13 +51,8 @@
             <span></span>
             <span></span>
           </div>
-          <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
-          <div class="icon" @click="toggleMail">
-            <img src="/public/mail.png" />
-            <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
-          </div>
           <div class="icon" @click="toggleNotif">
             <img src="/public/notification.png" />
             <span v-if="newNotifications > 0">{{ newNotifications }}</span>
@@ -186,8 +181,8 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { createToast } from 'mosha-vue-toastify';
-import 'mosha-vue-toastify/dist/style.css';
+import { createToast } from "mosha-vue-toastify";
+import "mosha-vue-toastify/dist/style.css";
 
 const isSidenavOpen = ref(true);
 const showMail = ref(false);
@@ -206,7 +201,6 @@ const acceptedApplications = ref([]);
 const showDownloadButton = ref(new Map());
 
 const router = useRouter();
-
 
 //Methods for Nav Bars
 
@@ -233,21 +227,22 @@ function confirmSignOut() {
   axios
     .post("/logout")
     .then((response) => {
-      createToast('Successfully signed out!', {
-        type: 'success',
-        position: 'top-right',
+      createToast("Successfully signed out!", {
+        type: "success",
+        position: "top-right",
         timeout: 2000,
-        showIcon: true
+        showIcon: true,
+        toastBackgroundColor: "#045d56",
       });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
-      createToast('Failed to sign out. Please try again.', {
-        type: 'danger',
-        position: 'top-right',
+      createToast("Failed to sign out. Please try again.", {
+        type: "danger",
+        position: "top-right",
         timeout: 3000,
-        showIcon: true
+        showIcon: true,
       });
     });
 }
@@ -329,11 +324,11 @@ async function fetchJobApplications() {
     );
   } catch (error) {
     console.error("Error Occurred", error);
-    createToast('Failed to fetch applications', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to fetch applications", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -346,22 +341,23 @@ async function respondToOffer(applicationId, response) {
         offer_status: response,
       }
     );
-    
+
     createToast(res.data.message, {
-      type: 'success',
-      position: 'top-right',
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
-    
+
     await fetchJobApplications();
   } catch (error) {
     console.error("Error responding to offer", error.response?.data || error);
     createToast(error.response?.data?.error || "Something went wrong", {
-      type: 'danger',
-      position: 'top-right',
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
   }
 }
@@ -369,9 +365,9 @@ async function respondToOffer(applicationId, response) {
 async function downloadCertificate(applicationId) {
   try {
     const response = await axios.get(`/certificate/download/${applicationId}`, {
-      responseType: "blob"
+      responseType: "blob",
     });
-    
+
     const blob = new Blob([response.data], { type: "application/pdf" });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -382,19 +378,20 @@ async function downloadCertificate(applicationId) {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
 
-    createToast('Certificate downloaded successfully!', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Certificate downloaded successfully!", {
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
   } catch (error) {
     console.error("Download failed:", error);
-    createToast('Failed to download certificate', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to download certificate", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }

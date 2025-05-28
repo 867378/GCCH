@@ -51,13 +51,8 @@
             <span></span>
             <span></span>
           </div>
-          <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
-          <div class="icon" @click="toggleMail">
-            <img src="/public/mail.png" />
-            <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
-          </div>
           <div class="icon" @click="toggleNotif">
             <img src="/public/notification.png" />
             <span v-if="newNotifications > 0">{{ newNotifications }}</span>
@@ -124,7 +119,14 @@
             <div v-if="conversation.length" class="chat-box">
               <h3>Conversation</h3>
               <div
-                style="max-height: 400px; overflow-y: auto; margin-bottom: 1rem"
+                ref="chatContainer"
+                class="chat-messages"
+                style="
+                  max-height: 400px;
+                  overflow-y: auto;
+                  margin-bottom: 1rem;
+                  scroll-behavior: smooth;
+                "
               >
                 <div
                   v-for="(msg, index) in conversation"
@@ -183,11 +185,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { createToast } from 'mosha-vue-toastify';
-import 'mosha-vue-toastify/dist/style.css';
+import { createToast } from "mosha-vue-toastify";
+import "mosha-vue-toastify/dist/style.css";
 
 const router = useRouter();
 
@@ -216,6 +218,7 @@ const uniqueConversations = computed(() => {
 });
 
 const notifications = ref([]);
+const chatContainer = ref(null);
 
 function toggleMail() {
   showMail.value = !showMail.value;
@@ -239,21 +242,22 @@ function confirmSignOut() {
   axios
     .post("/logout")
     .then(() => {
-      createToast('Successfully signed out', {
-        type: 'success',
-        position: 'top-right',
+      createToast("Successfully signed out", {
+        type: "success",
+        position: "top-right",
         timeout: 2000,
-        showIcon: true
+        showIcon: true,
+        toastBackgroundColor: "#045d56",
       });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
-      createToast('Failed to sign out', {
-        type: 'danger',
-        position: 'top-right',
+      createToast("Failed to sign out", {
+        type: "danger",
+        position: "top-right",
         timeout: 3000,
-        showIcon: true
+        showIcon: true,
       });
     });
 }
@@ -263,11 +267,11 @@ async function openChat(obj) {
 
   if (!senderId) {
     console.warn("No sender ID found in notification:", obj);
-    createToast('Invalid conversation selected', {
-      type: 'warning',
-      position: 'top-right',
+    createToast("Invalid conversation selected", {
+      type: "warning",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
     return;
   }
@@ -276,11 +280,11 @@ async function openChat(obj) {
   try {
     await fetchConversation(senderId);
   } catch (error) {
-    createToast('Failed to load conversation', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to load conversation", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -294,16 +298,23 @@ async function markMessageAsRead(messageId) {
   }
 }
 
+const scrollToBottom = () => {
+  if (chatContainer.value) {
+    nextTick(() => {
+      chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+    });
+  }
+};
+
 async function fetchConversation(senderId) {
   try {
     const response = await axios.get(`/message/conversation/${senderId}`);
     const data = Array.isArray(response.data) ? response.data : [];
 
-    // Format the conversation with "You" or "Them"
     conversation.value = data.map((msg) => ({
       ...msg,
       from: msg.sender_id == currentUserId.value ? "You" : "Them",
-      content: msg.message, // alias 'message' as 'content' for display if needed
+      content: msg.message,
     }));
 
     for (const msg of data) {
@@ -311,6 +322,8 @@ async function fetchConversation(senderId) {
         await markMessageAsRead(msg.id);
       }
     }
+
+    scrollToBottom();
   } catch (error) {
     console.error("Error fetching conversation:", error);
     conversation.value = [];
@@ -319,11 +332,13 @@ async function fetchConversation(senderId) {
 
 async function sendReply() {
   if (!newReply.value.trim()) {
-    createToast('Message cannot be empty', {
-      type: 'warning',
-      position: 'top-right',
+    createToast("Message cannot be empty", {
+      type: "warning",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+            toastBackgroundColor: "#045d56",
+
     });
     return;
   }
@@ -333,7 +348,7 @@ async function sendReply() {
       receiver_id: selectedUserId.value,
       message: newReply.value.trim(),
     });
-    
+
     conversation.value.push({
       sender_id: currentUserId.value,
       receiver_id: selectedUserId.value,
@@ -342,40 +357,27 @@ async function sendReply() {
       content: newReply.value.trim(),
       created_at: new Date().toISOString(),
     });
-    
+
     newReply.value = "";
-    createToast('Message sent successfully', {
-      type: 'success',
-      position: 'top-right',
+    scrollToBottom();
+    createToast("Message sent successfully", {
+      type: "success",
+      position: "top-right",
       timeout: 2000,
-      showIcon: true
+      showIcon: true,
+            toastBackgroundColor: "#045d56",
+
     });
   } catch (error) {
     console.error("Error sending message:", error);
-    createToast('Failed to send message', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to send message", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
-
-// function closeChat() {
-//   showMessagePopup.value = false;
-//   selectedUserId.value = null;
-//   messages.value = [];
-// }
-
-// function handleKeyUp(event) {
-//   const textarea = event.target;
-//   textarea.style.height = "auto";
-//   textarea.style.height = `${textarea.scrollHeight}px`;
-//   if (event.key === "Enter" && !event.shiftKey) {
-//     event.preventDefault();
-//     sendReply();
-//   }
-// }
 
 //notification logic
 const filteredNotifications = computed(() =>
@@ -418,11 +420,11 @@ async function fetchNotifications() {
     newNotifications.value = notifications.value.length;
   } catch (error) {
     console.error("Error fetching notifications:", error);
-    createToast('Failed to load notifications', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to load notifications", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -972,6 +974,29 @@ body,
   transition: height 0.2s ease;
   margin-top: 1vh;
   overflow-y: auto;
+}
+
+.chat-messages {
+  scroll-behavior: smooth;
+  padding-right: 10px;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #045d56;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #033f3a;
 }
 
 @media (max-width: 1024px) {

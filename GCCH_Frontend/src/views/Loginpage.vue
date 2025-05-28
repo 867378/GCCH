@@ -110,34 +110,34 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
-import { createToast } from 'mosha-vue-toastify';
-import 'mosha-vue-toastify/dist/style.css';
+import { createToast } from "mosha-vue-toastify";
+import "mosha-vue-toastify/dist/style.css";
 
 async function redirectToGoogle() {
   try {
     window.location.href = "http://localhost:8000/auth/google/redirect";
   } catch (error) {
     console.error("Google redirect error:", error);
-    createToast('Failed to connect with Google. Please try again.', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to connect with Google. Please try again.", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
 
 // Add error handling for authentication
 function handleAuthError(error) {
-  let message = 'Authentication failed. Please try again.';
-  
+  let message = "Authentication failed. Please try again.";
+
   if (error.response) {
     switch (error.response.status) {
       case 401:
-        message = 'Invalid credentials. Please check your email.';
+        message = "Invalid credentials. Please check your email.";
         break;
       case 403:
-        message = 'Access denied. Please use a valid Gordon College email.';
+        message = "Access denied. Please use a valid Gordon College email.";
         break;
       default:
         message = error.response.data.message || message;
@@ -145,10 +145,11 @@ function handleAuthError(error) {
   }
 
   createToast(message, {
-    type: 'danger',
-    position: 'top-right',
+    type: "danger",
+    position: "top-right",
     timeout: 4000,
-    showIcon: true
+    showIcon: true,
+    toastBackgroundColor: "#045d56",
   });
 }
 
@@ -176,11 +177,11 @@ const updateDateTime = () => {
     }).format(now);
   } catch (error) {
     console.error("DateTime update error:", error);
-    createToast('Failed to update date/time display', {
-      type: 'warning',
-      position: 'top-right',
+    createToast("Failed to update date/time display", {
+      type: "warning",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 };
@@ -191,11 +192,11 @@ onMounted(() => {
     timeInterval = setInterval(updateDateTime, 1000);
   } catch (error) {
     console.error("Mount error:", error);
-    createToast('Failed to initialize date/time display', {
-      type: 'warning',
-      position: 'top-right',
+    createToast("Failed to initialize date/time display", {
+      type: "warning",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 });
@@ -221,17 +222,18 @@ html {
 }
 
 .welcome-text {
-  font-size: 4rem;
+  font-size: 5rem;
   font-weight: bold;
   color: #fff;
   margin-top: 8vh;
 }
 
 .welcome-text p {
-  font-size: 1.5rem;
+  font-size: 1.9rem;
   color: #fff;
   margin-top: 1vh;
 }
+
 section {
   display: flex;
   flex-direction: column;
@@ -417,7 +419,7 @@ section {
 
 .login-container {
   position: absolute;
-  top: 60%;
+  top: 65%;
   left: 50%;
   transform: translate(-50%, -50%);
   background: #fff8f0;
@@ -520,7 +522,6 @@ section {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }
-
 
 .about-section {
   flex-grow: 1;
@@ -647,9 +648,9 @@ section {
   text-align: center;
 }
 .datetime-container {
-  background: linear-gradient(135deg, #1cb9a7, #374151);
-  background-size: 400% 400%; 
-  animation: gradientShift 10s ease infinite;
+  background: linear-gradient(135deg, #40c9a2, #045d56);
+  background-size: 400% 400%;
+  animation: gradientShift 6s ease infinite;
   padding: 6px 20px;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(4, 93, 86, 0.1);
@@ -667,7 +668,6 @@ section {
     background-position: 0% 50%;
   }
 }
-
 
 .datetime-wrapper {
   display: flex;
@@ -688,7 +688,6 @@ section {
   font-size: 0.65rem;
   font-weight: 500;
 }
-
 
 @media (max-width: 1024px) {
   /* login part */
@@ -916,7 +915,7 @@ section {
     line-height: 1.6;
     text-align: justify;
   }
-    .datetime-container {
+  .datetime-container {
     padding: 8px 15px;
   }
 
@@ -1018,7 +1017,7 @@ section {
     line-height: 1.6;
     text-align: justify;
   }
-    .datetime-container {
+  .datetime-container {
     padding: 6px 12px;
     margin-right: 10px;
   }
@@ -1031,7 +1030,7 @@ section {
     font-size: 0.7rem;
   }
 
-  .nav-links{
+  .nav-links {
     display: none;
   }
 
@@ -1062,5 +1061,4 @@ section {
     font-size: 12px;
   }
 }
-
 </style>

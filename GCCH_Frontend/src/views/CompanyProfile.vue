@@ -58,14 +58,8 @@
             <span></span>
             <span></span>
           </div>
-
-          <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
-          <div class="icon" @click="toggleMail">
-            <img src="/public/mail.png" />
-            <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
-          </div>
           <div class="icon" @click="toggleNotif">
             <img src="/public/notification.png" />
             <span v-if="newNotifications > 0">{{ newNotifications }}</span>
@@ -122,7 +116,7 @@
                     type="text"
                     :readonly="!isEditing"
                     v-model="fullName"
-                    :placeholder = "company.company.company_name"
+                    :placeholder="company.company.company_name"
                   />
                 </div>
                 <div class="form-group">
@@ -209,8 +203,8 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { createToast } from 'mosha-vue-toastify';
-import 'mosha-vue-toastify/dist/style.css';
+import { createToast } from "mosha-vue-toastify";
+import "mosha-vue-toastify/dist/style.css";
 
 const router = useRouter();
 
@@ -248,21 +242,22 @@ function confirmSignOut() {
   axios
     .post("/logout")
     .then(() => {
-      createToast('Successfully signed out!', {
-        type: 'success',
-        position: 'top-right',
+      createToast("Successfully signed out!", {
+        type: "success",
+        position: "top-right",
         timeout: 2000,
-        showIcon: true
+        showIcon: true,
+        toastBackgroundColor: "#045d56",
       });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
-      createToast('Failed to sign out. Please try again.', {
-        type: 'danger',
-        position: 'top-right',
+      createToast("Failed to sign out. Please try again.", {
+        type: "danger",
+        position: "top-right",
         timeout: 3000,
-        showIcon: true
+        showIcon: true,
       });
     });
 }
@@ -273,19 +268,20 @@ async function fetchUserData() {
     const response = await axios.get(`user/company/${userId}`);
     company.value = response.data;
     console.log("Fetched User Data", response.data);
-    createToast('Profile loaded successfully', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Profile loaded successfully", {
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
   } catch (error) {
     console.error("Failed to fetch user data", error);
-    createToast('Failed to load profile data', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to load profile data", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -341,41 +337,43 @@ async function onImageChange(event) {
   const file = event.target.files[0];
   if (!file) return;
 
-  if (!file.type.match('image.*')) {
-    createToast('Please select an image file', {
-      type: 'warning',
-      position: 'top-right',
+  if (!file.type.match("image.*")) {
+    createToast("Please select an image file", {
+      type: "warning",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
     return;
   }
 
   try {
     const formData = new FormData();
-    formData.append('profile_image', file);
-    
-    await axios.post('/upload/profile-image', formData, {
+    formData.append("profile_image", file);
+
+    await axios.post("/upload/profile-image", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        "Content-Type": "multipart/form-data",
+      },
     });
 
-    createToast('Profile image updated successfully', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Profile image updated successfully", {
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
-    
+
     await fetchUserData();
   } catch (error) {
-    console.error('Failed to upload image:', error);
-    createToast('Failed to update profile image', {
-      type: 'danger',
-      position: 'top-right',
+    console.error("Failed to upload image:", error);
+    createToast("Failed to update profile image", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -390,24 +388,25 @@ async function updateProfile() {
       street_address: location.value,
       city: city.value,
       province: province.value,
-      country: country.value
+      country: country.value,
     });
 
-    createToast('Profile updated successfully', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Profile updated successfully", {
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
 
     await fetchUserData();
   } catch (error) {
-    console.error('Failed to update profile:', error);
-    createToast(error.response?.data?.message || 'Failed to update profile', {
-      type: 'danger',
-      position: 'top-right',
+    console.error("Failed to update profile:", error);
+    createToast(error.response?.data?.message || "Failed to update profile", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -737,7 +736,7 @@ body,
   color: #374151;
 }
 
-.form-group input::placeholder{
+.form-group input::placeholder {
   color: #000000;
   text-align: center;
   text-transform: capitalize;
@@ -936,7 +935,7 @@ body,
   }
 }
 @media (max-width: 385px) {
-   .sidebar {
+  .sidebar {
     font-size: 12px;
     position: fixed;
     top: 0;
@@ -1005,6 +1004,5 @@ body,
     width: 20vh;
     margin-left: 6vh;
   }
-  
 }
 </style>

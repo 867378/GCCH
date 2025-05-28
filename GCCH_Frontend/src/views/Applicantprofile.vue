@@ -51,13 +51,8 @@
             <span></span>
             <span></span>
           </div>
-          <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
-          <div class="icon" @click="toggleMail">
-            <img src="/public/mail.png" />
-            <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
-          </div>
           <div class="icon" @click="toggleNotif">
             <img src="/public/notification.png" />
             <span v-if="newNotifications > 0">{{ newNotifications }}</span>
@@ -111,12 +106,14 @@
                   {{ applicant.applicant.last_name }}
                 </p> -->
 
-                 <input
-                    type="text"
-                    :readonly="!isEditing"
-                    v-model="fullName"
-                    :placeholder="`${applicant.applicant?.first_name || ''} ${applicant.applicant?.middle_name || ''} ${applicant.applicant?.last_name || ''}`"
-                  />
+                <input
+                  type="text"
+                  :readonly="!isEditing"
+                  v-model="fullName"
+                  :placeholder="`${applicant.applicant?.first_name || ''} ${
+                    applicant.applicant?.middle_name || ''
+                  } ${applicant.applicant?.last_name || ''}`"
+                />
               </div>
 
               <div class="form-row">
@@ -126,11 +123,17 @@
                     type="text"
                     :readonly="!isEditing"
                     v-model="dateOfBirth"
-                    :placeholder="applicant.applicant?.date_of_birth ? new Date(applicant.applicant.date_of_birth).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit'
-                    }) : ''"
+                    :placeholder="
+                      applicant.applicant?.date_of_birth
+                        ? new Date(
+                            applicant.applicant.date_of_birth
+                          ).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                          })
+                        : ''
+                    "
                   />
                 </div>
                 <div class="form-group">
@@ -177,8 +180,8 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { createToast } from 'mosha-vue-toastify';
-import 'mosha-vue-toastify/dist/style.css';
+import { createToast } from "mosha-vue-toastify";
+import "mosha-vue-toastify/dist/style.css";
 
 const router = useRouter();
 
@@ -216,21 +219,22 @@ function confirmSignOut() {
   axios
     .post("/logout")
     .then((response) => {
-      createToast('Successfully signed out', {
-        type: 'success',
-        position: 'top-right',
+      createToast("Successfully signed out", {
+        type: "success",
+        position: "top-right",
         timeout: 2000,
-        showIcon: true
+        showIcon: true,
+        toastBackgroundColor: "#045d56",
       });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
-      createToast('Failed to sign out', {
-        type: 'danger',
-        position: 'top-right',
+      createToast("Failed to sign out", {
+        type: "danger",
+        position: "top-right",
         timeout: 3000,
-        showIcon: true
+        showIcon: true,
       });
     });
 }
@@ -243,11 +247,11 @@ async function fetchUserData() {
     console.log("Fetched User Data", response.data);
   } catch (error) {
     console.error("Failed to fetch user data", error);
-    createToast('Failed to load profile data', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to load profile data", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -256,20 +260,21 @@ async function fetchUserData() {
 async function updateProfile(data) {
   try {
     const response = await axios.put(`/user/applicant/update`, data);
-    createToast('Profile updated successfully', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Profile updated successfully", {
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
     await fetchUserData();
   } catch (error) {
     console.error("Failed to update profile", error);
-    createToast(error.response?.data?.message || 'Failed to update profile', {
-      type: 'danger',
-      position: 'top-right',
+    createToast(error.response?.data?.message || "Failed to update profile", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -305,11 +310,11 @@ async function fetchNotifications() {
     console.log("Fetched notifications:", rawNotifications);
   } catch (error) {
     console.error("Error fetching notifications:", error);
-    createToast('Failed to load notifications', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to load notifications", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -694,7 +699,7 @@ body,
   color: #374151;
 }
 
-.form-group input::placeholder{
+.form-group input::placeholder {
   color: #000000;
   text-align: center;
   text-transform: capitalize;
@@ -796,7 +801,6 @@ body,
     margin-left: 27vh;
     width: 100%;
     height: 100%;
-  
   }
   .profile-avatar {
     margin-left: 35vh;
@@ -932,7 +936,7 @@ body,
 }
 
 @media (max-width: 385px) {
-   .sidebar {
+  .sidebar {
     font-size: 12px;
     position: fixed;
     top: 0;
@@ -1001,6 +1005,5 @@ body,
     width: 20vh;
     margin-left: 6vh;
   }
-  
 }
 </style>

@@ -58,13 +58,8 @@
             <span></span>
             <span></span>
           </div>
-          <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
-          <div class="icon" @click="toggleMail">
-            <img src="/public/mail.png" />
-            <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
-          </div>
           <div class="icon" @click="toggleNotif">
             <img src="/public/notification.png" />
             <span v-if="newNotifications > 0">{{ newNotifications }}</span>
@@ -167,7 +162,6 @@
                       ⏳ Waiting for the applicant's response to the job offer
                     </span>
                   </div>
-
 
                   <div v-else>
                     <div class="button-group">
@@ -281,8 +275,8 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { createToast } from 'mosha-vue-toastify';
-import 'mosha-vue-toastify/dist/style.css';
+import { createToast } from "mosha-vue-toastify";
+import "mosha-vue-toastify/dist/style.css";
 
 const router = useRouter();
 
@@ -323,11 +317,12 @@ async function scheduleInterview(applicationId) {
     decisionType.value = "interview";
     scheduledAt.value = date;
     showStatusOptions.value = true;
-    createToast('Interview scheduled successfully', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Interview scheduled successfully", {
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
   }
 }
@@ -339,11 +334,12 @@ async function scheduleAssessment(applicationId) {
     decisionType.value = "assessment";
     scheduledAt.value = date;
     showStatusOptions.value = true;
-    createToast('Assessment scheduled successfully', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Assessment scheduled successfully", {
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
   }
 }
@@ -363,7 +359,9 @@ function confirmDecision() {
 }
 
 function getApplicationStatus(applicationId) {
-  const application = jobApplicants.value.find(app => app.id === applicationId);
+  const application = jobApplicants.value.find(
+    (app) => app.id === applicationId
+  );
   return application ? application.status : null;
 }
 
@@ -386,23 +384,25 @@ function toggleSignOut() {
 }
 
 function confirmSignOut() {
-  axios.post("/logout")
+  axios
+    .post("/logout")
     .then(() => {
-      createToast('Successfully signed out!', {
-        type: 'success',
-        position: 'top-right',
+      createToast("Successfully signed out!", {
+        type: "success",
+        position: "top-right",
         timeout: 2000,
-        showIcon: true
+        showIcon: true,
+        toastBackgroundColor: "#045d56",
       });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
-      createToast('Failed to sign out. Please try again.', {
-        type: 'danger',
-        position: 'top-right',
+      createToast("Failed to sign out. Please try again.", {
+        type: "danger",
+        position: "top-right",
         timeout: 3000,
-        showIcon: true
+        showIcon: true,
       });
     });
 }
@@ -442,11 +442,12 @@ async function fetchPostedJobs() {
 
 async function submitApplicationDecision() {
   if (!selectedApplicationId.value || !decisionType.value) {
-    createToast('Please choose an applicant and a decision', {
-      type: 'warning',
-      position: 'top-right',
+    createToast("Please choose an applicant and a decision", {
+      type: "warning",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
     return;
   }
@@ -484,30 +485,37 @@ async function assessApplication(
       payload
     );
 
-    createToast('Application status updated successfully', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Application status updated successfully", {
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
 
     if (status === "accepted") {
       try {
-        const offerResponse = await axios.post(`/company/offer-job/${applicationId}`);
-        createToast('Job offer sent successfully', {
-          type: 'success',
-          position: 'top-right',
+        const offerResponse = await axios.post(
+          `/company/offer-job/${applicationId}`
+        );
+        createToast("Job offer sent successfully", {
+          type: "success",
+          position: "top-right",
           timeout: 3000,
-          showIcon: true
+          showIcon: true,
+          toastBackgroundColor: "#045d56",
         });
       } catch (offerError) {
         console.error("Error sending job offer:", offerError);
-        createToast(offerError.response?.data?.error || 'Failed to send job offer', {
-          type: 'danger',
-          position: 'top-right',
-          timeout: 3000,
-          showIcon: true
-        });
+        createToast(
+          offerError.response?.data?.error || "Failed to send job offer",
+          {
+            type: "danger",
+            position: "top-right",
+            timeout: 3000,
+            showIcon: true,
+          }
+        );
       }
     }
 
@@ -515,11 +523,11 @@ async function assessApplication(
     await fetchPostedJobs();
   } catch (error) {
     console.error("Error updating application status:", error);
-    createToast(error.response?.data?.error || 'Failed to update application', {
-      type: 'danger',
-      position: 'top-right',
+    createToast(error.response?.data?.error || "Failed to update application", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -887,7 +895,6 @@ body,
   margin-left: 5vh;
   margin-bottom: 1vh;
 }
-
 
 .button-group label {
   display: flex;

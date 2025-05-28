@@ -51,13 +51,8 @@
             <span></span>
             <span></span>
           </div>
-          <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
-          <div class="icon" @click="toggleMail">
-            <img src="/public/mail.png" />
-            <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
-          </div>
           <div class="icon" @click="toggleNotif">
             <img src="/public/notification.png" />
             <span v-if="newNotifications > 0">{{ newNotifications }}</span>
@@ -322,8 +317,8 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { createToast } from 'mosha-vue-toastify';
-import 'mosha-vue-toastify/dist/style.css';
+import { createToast } from "mosha-vue-toastify";
+import "mosha-vue-toastify/dist/style.css";
 
 const router = useRouter();
 
@@ -425,11 +420,12 @@ function applyToJob(jobId) {
 
 async function submitApplication() {
   if (!coverLetterFile.value) {
-    createToast('Please include a cover letter.', {
-      type: 'warning',
-      position: 'top-right',
+    createToast("Please include a cover letter.", {
+      type: "warning",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
     return;
   }
@@ -450,10 +446,11 @@ async function submitApplication() {
     });
 
     createToast(response.data.message, {
-      type: 'success',
-      position: 'top-right',
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
     closeApplyPopup();
   } catch (error) {
@@ -461,17 +458,18 @@ async function submitApplication() {
       const errors = error.response.data.error;
       let errorMessages = Object.values(errors).flat().join("\n");
       createToast(errorMessages, {
-        type: 'danger',
-        position: 'top-right',
+        type: "danger",
+        position: "top-right",
         timeout: 5000,
-        showIcon: true
+        showIcon: true,
+        toastBackgroundColor: "#045d56",
       });
     } else {
-      createToast('An unexpected error occurred.', {
-        type: 'danger',
-        position: 'top-right',
+      createToast("An unexpected error occurred.", {
+        type: "danger",
+        position: "top-right",
         timeout: 3000,
-        showIcon: true
+        showIcon: true,
       });
     }
   }
@@ -597,11 +595,11 @@ async function fetchHiredApplication() {
 
 const downloadCertificate = async () => {
   if (!hiredApplication.value || !hiredApplication.value.id) {
-    createToast('No hired application found.', {
-      type: 'warning',
-      position: 'top-right',
+    createToast("No hired application found.", {
+      type: "warning",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
     return;
   }
@@ -630,11 +628,11 @@ const downloadCertificate = async () => {
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error("Download failed:", error);
-    createToast('Failed to download certificate.', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to download certificate.", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 };
@@ -655,19 +653,20 @@ async function sendActualMessage() {
     console.log("Message Sent:", response.data);
     showMessagePopup.value = false;
     messageContent.value = "";
-    createToast('Message sent successfully!', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Message sent successfully!", {
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
   } catch (error) {
     console.error("Error sending message:", error);
-    createToast('Failed to send message. Please try again.', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to send message. Please try again.", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }

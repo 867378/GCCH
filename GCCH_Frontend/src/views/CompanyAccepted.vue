@@ -58,13 +58,8 @@
             <span></span>
             <span></span>
           </div>
-          <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
-          <div class="icon" @click="toggleMail">
-            <img src="/public/mail.png" />
-            <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
-          </div>
           <div class="icon" @click="toggleNotif">
             <img src="/public/notification.png" />
             <span v-if="newNotifications > 0">{{ newNotifications }}</span>
@@ -204,7 +199,9 @@ function confirmSignOut() {
         type: 'success',
         position: 'top-right',
         timeout: 2000,
-        showIcon: true
+        showIcon: true,
+              toastBackgroundColor: "#045d56",
+
       });
       router.push("/login");
     })
@@ -225,7 +222,9 @@ const downloadJobReport = async () => {
       type: 'warning',
       position: 'top-right',
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+            toastBackgroundColor: "#045d56",
+
     });
     return;
   }
@@ -248,7 +247,9 @@ const downloadJobReport = async () => {
       type: 'success',
       position: 'top-right',
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+            toastBackgroundColor: "#045d56",
+
     });
   } catch (error) {
     console.error("Error downloading job report:", error);
@@ -277,7 +278,9 @@ async function fetchPostedJobs() {
         type: 'info',
         position: 'top-right',
         timeout: 3000,
-        showIcon: true
+        showIcon: true,
+              toastBackgroundColor: "#045d56",
+
       });
     }
   } catch (error) {

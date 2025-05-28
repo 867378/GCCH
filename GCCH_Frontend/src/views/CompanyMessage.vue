@@ -58,14 +58,8 @@
             <span></span>
             <span></span>
           </div>
-
-          <img class="avatar" src="/public/user.png" alt="Avatar" />
         </div>
         <div class="icons-right">
-          <div class="icon" @click="toggleMail">
-            <img src="/public/mail.png" />
-            <span v-if="unreadMessages > 0">{{ unreadMessages }}</span>
-          </div>
           <div class="icon" @click="toggleNotif">
             <img src="/public/notification.png" />
             <span v-if="newNotifications > 0">{{ newNotifications }}</span>
@@ -132,6 +126,8 @@
             <div v-if="conversation.length" class="chat-box">
               <h3>Conversation</h3>
               <div
+                ref="chatContainer"
+                class="chat-messages"
                 style="max-height: 400px; overflow-y: auto; margin-bottom: 1rem"
               >
                 <div
@@ -191,11 +187,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { createToast } from 'mosha-vue-toastify';
-import 'mosha-vue-toastify/dist/style.css';
+import { createToast } from "mosha-vue-toastify";
+import "mosha-vue-toastify/dist/style.css";
 
 const router = useRouter();
 
@@ -224,6 +220,7 @@ const uniqueConversations = computed(() => {
 });
 
 const notifications = ref([]);
+const chatContainer = ref(null);
 
 function toggleMail() {
   showMail.value = !showMail.value;
@@ -247,21 +244,22 @@ function confirmSignOut() {
   axios
     .post("/logout")
     .then(() => {
-      createToast('Successfully signed out!', {
-        type: 'success',
-        position: 'top-right',
+      createToast("Successfully signed out!", {
+        type: "success",
+        position: "top-right",
         timeout: 2000,
-        showIcon: true
+        showIcon: true,
+        toastBackgroundColor: "#045d56",
       });
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
-      createToast('Failed to sign out. Please try again.', {
-        type: 'danger',
-        position: 'top-right',
+      createToast("Failed to sign out. Please try again.", {
+        type: "danger",
+        position: "top-right",
         timeout: 3000,
-        showIcon: true
+        showIcon: true,
       });
     });
 }
@@ -271,11 +269,11 @@ async function openChat(obj) {
 
   if (!senderId) {
     console.warn("No sender ID found in notification:", obj);
-    createToast('Invalid conversation selected', {
-      type: 'warning',
-      position: 'top-right',
+    createToast("Invalid conversation selected", {
+      type: "warning",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
     return;
   }
@@ -284,11 +282,11 @@ async function openChat(obj) {
   try {
     await fetchConversation(senderId);
   } catch (error) {
-    createToast('Failed to load conversation', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to load conversation", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -319,19 +317,30 @@ async function fetchConversation(senderId) {
         await markMessageAsRead(msg.id);
       }
     }
+
+    scrollToBottom();
   } catch (error) {
     console.error("Error fetching conversation:", error);
     conversation.value = [];
   }
 }
 
+const scrollToBottom = () => {
+  if (chatContainer.value) {
+    nextTick(() => {
+      chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+    });
+  }
+};
+
 async function sendReply() {
   if (!newReply.value.trim()) {
-    createToast('Please enter a message', {
-      type: 'warning',
-      position: 'top-right',
+    createToast("Please enter a message", {
+      type: "warning",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
     return;
   }
@@ -341,7 +350,7 @@ async function sendReply() {
       receiver_id: selectedUserId.value,
       message: newReply.value.trim(),
     });
-    
+
     conversation.value.push({
       sender_id: currentUserId.value,
       receiver_id: selectedUserId.value,
@@ -350,21 +359,23 @@ async function sendReply() {
       content: newReply.value.trim(),
       created_at: new Date().toISOString(),
     });
-    
+
     newReply.value = "";
-    createToast('Message sent successfully', {
-      type: 'success',
-      position: 'top-right',
+    scrollToBottom();
+    createToast("Message sent successfully", {
+      type: "success",
+      position: "top-right",
       timeout: 2000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
   } catch (error) {
     console.error("Error sending message:", error);
-    createToast('Failed to send message', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to send message", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -426,11 +437,11 @@ async function fetchMessageNotifications() {
     newNotifications.value = notifications.value.length;
   } catch (error) {
     console.error("Error fetching notifications:", error);
-    createToast('Failed to load notifications', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to load notifications", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -937,6 +948,29 @@ body,
   overflow-y: auto;
 }
 
+.chat-messages {
+  scroll-behavior: smooth;
+  padding-right: 10px;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #045d56;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #033f3a;
+}
+
 @media (max-width: 1024px) {
   .hamburger {
     display: flex;
@@ -1081,7 +1115,7 @@ body,
 }
 
 @media (max-width: 480px) {
-    .hamburger {
+  .hamburger {
     display: flex;
     z-index: 1001;
   }
@@ -1168,7 +1202,7 @@ body,
     font-size: 12px;
   }
 
-    .right-content {
+  .right-content {
     width: 90%;
     margin-left: 3vh;
     overflow: auto;
@@ -1196,7 +1230,7 @@ body,
     margin-left: 3vh;
     margin-bottom: 5vh;
   }
-    .ikon {
+  .ikon {
     height: 20px;
     width: 20px;
   }

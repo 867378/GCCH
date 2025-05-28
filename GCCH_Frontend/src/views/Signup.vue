@@ -142,8 +142,8 @@
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
-import { createToast } from 'mosha-vue-toastify';
-import 'mosha-vue-toastify/dist/style.css';
+import { createToast } from "mosha-vue-toastify";
+import "mosha-vue-toastify/dist/style.css";
 
 const route = useRoute();
 const router = useRouter();
@@ -168,11 +168,12 @@ const form = ref({
 });
 
 if (!userId) {
-  createToast('User ID not found. Please log in again.', {
-    type: 'warning',
-    position: 'top-right',
+  createToast("User ID not found. Please log in again.", {
+    type: "warning",
+    position: "top-right",
     timeout: 3000,
-    showIcon: true
+    showIcon: true,
+    toastBackgroundColor: "#045d56",
   });
   router.push("/login");
 }
@@ -189,18 +190,19 @@ const continueAction = async () => {
 
     currentStep.value = selectedRole.value;
     createToast(`Role set to ${selectedRole.value}`, {
-      type: 'success',
-      position: 'top-right',
+      type: "success",
+      position: "top-right",
       timeout: 2000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
   } catch (error) {
     console.error("Error setting role:", error);
-    createToast(error.response?.data?.message || 'Failed to set role', {
-      type: 'danger',
-      position: 'top-right',
+    createToast(error.response?.data?.message || "Failed to set role", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 };
@@ -220,20 +222,21 @@ const submitApplicantForm = async () => {
       course: form.value.course,
     });
 
-    createToast('Profile created successfully!', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Profile created successfully!", {
+      type: "success",
+      position: "top-right",
       timeout: 2000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
     router.push("/applicantdash");
   } catch (error) {
     console.error("Error submitting form:", error);
-    createToast(error.response?.data?.message || 'Failed to create profile', {
-      type: 'danger',
-      position: 'top-right',
+    createToast(error.response?.data?.message || "Failed to create profile", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 };
@@ -250,21 +253,25 @@ const submitCompanyForm = async () => {
       industry_type: form.value.industry_type,
     });
 
-    createToast('Company profile created successfully!', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Company profile created successfully!", {
+      type: "success",
+      position: "top-right",
       timeout: 2000,
-      showIcon: true
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
     router.push("/companydash");
   } catch (error) {
     console.error("Error submitting form:", error);
-    createToast(error.response?.data?.message || 'Failed to create company profile', {
-      type: 'danger',
-      position: 'top-right',
-      timeout: 3000,
-      showIcon: true
-    });
+    createToast(
+      error.response?.data?.message || "Failed to create company profile",
+      {
+        type: "danger",
+        position: "top-right",
+        timeout: 3000,
+        showIcon: true,
+      }
+    );
   }
 };
 </script>
@@ -324,7 +331,7 @@ const submitCompanyForm = async () => {
   margin-bottom: 1rem;
 }
 
-.bday{
+.bday {
   display: block;
   text-align: left;
   padding-left: 0.5rem;
@@ -436,7 +443,7 @@ label[for="birthday"] {
   color: #045d56;
   font-size: 0.8rem;
   text-align: left;
-  display: block; 
+  display: block;
   margin-top: 0.5rem;
   margin-bottom: 0.25rem;
   padding-left: 0.25rem;
@@ -475,42 +482,41 @@ margin-top: 0.5rem;
   object-fit: contain;
 }
 
-  @media (max-width: 1024px) {
-    .main-wrapper {
-      display: flex;
-      width: 90%;
-      max-width: 90%;
-      min-height: 70vh;
-      overflow: hidden;
-      margin: 2rem auto;
-    }
-  
-    .photo-panel {
-      width: 45%;
-      padding: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  
-    .photo-panel img {
-      max-width: 80%;
-      height: auto;
-      object-fit: contain;
-    }
-  
-    .kontinue-btn {
-      width: 30%;
-      margin-top: 1rem;
-    }
-  
-    .content-box {
-      max-width: 450px;
-      margin-top: 2vh;
-      padding: 2rem;
-    }
+@media (max-width: 1024px) {
+  .main-wrapper {
+    display: flex;
+    width: 90%;
+    max-width: 90%;
+    min-height: 70vh;
+    overflow: hidden;
+    margin: 2rem auto;
   }
 
+  .photo-panel {
+    width: 45%;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .photo-panel img {
+    max-width: 80%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .kontinue-btn {
+    width: 30%;
+    margin-top: 1rem;
+  }
+
+  .content-box {
+    max-width: 450px;
+    margin-top: 2vh;
+    padding: 2rem;
+  }
+}
 
 @media (max-width: 768px) {
   .main-wrapper {
