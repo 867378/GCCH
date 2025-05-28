@@ -59,18 +59,6 @@
           </div>
         </div>
 
-        <div v-if="showMail" class="popup-overlay" @click.self="toggleMail">
-          <div class="popup">
-            <h3>📬 Messages</h3>
-            <ul class="popup-list">
-              <li>John: Interested in your post.</li>
-              <li>Jane: Sent a resume for the job.</li>
-              <li>Mark: Asking about job requirements.</li>
-            </ul>
-            <button @click="toggleMail">Close</button>
-          </div>
-        </div>
-
         <div v-if="showNotif" class="popup-overlay" @click.self="toggleNotif">
           <div class="popup">
             <h3>🔔 Notifications</h3>
