@@ -206,6 +206,7 @@ function confirmSignOut() {
         timeout: 2000,
         showIcon: true
       });
+      localStorage.clear();
       router.push("/login");
     })
     .catch((error) => {

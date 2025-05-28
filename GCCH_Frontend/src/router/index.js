@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import axios from "axios"; 
 import Loginpage from "@/views/Loginpage.vue";
 import Signup from "@/views/Signup.vue";
 import CompanyDashboard from "@/views/CompanyDashboard.vue";
@@ -93,6 +94,23 @@ router.beforeEach(async (to, from, next) => {
   const publicPages = ['Login', 'Signup', 'Redirecting'];
   const authRequired = !publicPages.includes(to.name);
 
+  let role = localStorage.getItem('user_role');
+
+  if (userId && publicPages.includes(to.name)) {
+    if (!role) {
+      try {
+        const { data } = await axios.get(`/user/${userId}`);
+        role = data.role;
+        localStorage.setItem('user_role', role);
+      } catch (error) {
+        console.error('Failed to fetch user role');
+        return next({ name: 'Login' });
+      }
+    }
+    const fallback = localStorage.getItem('last_valid_route') || (role === 'company' ? 'CompanyDash' : 'ApplicantDash');
+    return next({ name: fallback });
+  }
+
   if (authRequired && !userId) {
     return next({ name: 'Login' });
   }
@@ -100,34 +118,39 @@ router.beforeEach(async (to, from, next) => {
   if (!authRequired) return next();
 
   try {
-    let role = localStorage.getItem('userRole');
-
     if (!role) {
-      // Fallback in case role wasn't cached yet
-      const { data } = await axios.get(`/api/user/${userId}`, {
-        withCredentials: true
-      });
+      const { data } = await axios.get(`/user/${userId}`);
       role = data.role;
-      localStorage.setItem('userRole', role);
+      localStorage.setItem('user_role', role);
     }
 
     const companyOnlyRoutes = ['CompanyDash', 'CompanyPost', 'CompanyMessage', 'CompanyAccepted', 'CompanyProfile'];
     const applicantOnlyRoutes = ['ApplicantDash', 'ApplicantMessage', 'ApplicantProfile', 'Application'];
 
+    const fallback = from.name || localStorage.getItem('last_valid_route') || 'Login';
+
     if (companyOnlyRoutes.includes(to.name) && role !== 'company') {
-      return next(from.fullPath);
+      return next({ name: fallback });
     }
 
     if (applicantOnlyRoutes.includes(to.name) && role !== 'applicant') {
-      return next(from.fullPath);
+      return next({ name: fallback });
     }
 
-    return next(); // Role is valid for this route
+    return next();
   } catch (error) {
     console.error('Failed to fetch user data:', error);
     return next({ name: 'Login' });
   }
 });
+
+router.afterEach((to) => {
+  const publicPages = ['Login', 'Signup', 'Redirecting'];
+  if (!publicPages.includes(to.name)) {
+    localStorage.setItem('last_valid_route', to.name);
+  }
+});
+
 
 
 export default router;
