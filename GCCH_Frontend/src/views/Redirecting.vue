@@ -25,9 +25,11 @@ onMounted(async () => {
 
 
     if (!user.role) {
+      localStorage.setItem('onboarding_in_progress', 'true');
       router.push(`/signup/${user.id}`);
     } else {
       localStorage.setItem('user_role', user.role);
+      localStorage.removeItem('onboarding_in_progress'); // ✅ done onboarding
 
       switch (user.role) {
         case 'applicant':

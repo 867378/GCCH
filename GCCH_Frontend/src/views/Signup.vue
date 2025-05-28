@@ -186,6 +186,8 @@ const continueAction = async () => {
       },
       { withCredentials: true }
     );
+    
+    localStorage.setItem('onboarding_in_progress', 'true');
 
     currentStep.value = selectedRole.value;
     createToast(`Role set to ${selectedRole.value}`, {
@@ -210,7 +212,7 @@ const goBack = () => {
 
 const submitApplicantForm = async () => {
   try {
-    const response = await axios.post(`user/applicant/profile/${userId}`, {
+    await axios.post(`user/applicant/profile/${userId}`, {
       first_name: form.value.firstName,
       middle_name: form.value.middleName,
       last_name: form.value.lastName,
@@ -226,6 +228,8 @@ const submitApplicantForm = async () => {
       timeout: 2000,
       showIcon: true
     });
+    localStorage.setItem('user_role', 'applicant');
+    localStorage.removeItem('onboarding_in_progress');
     router.push("/applicantdash");
   } catch (error) {
     console.error("Error submitting form:", error);
@@ -240,7 +244,7 @@ const submitApplicantForm = async () => {
 
 const submitCompanyForm = async () => {
   try {
-    const response = await axios.post(`user/company/profile/${userId}`, {
+    await axios.post(`user/company/profile/${userId}`, {
       company_name: form.value.companyName,
       company_telephone: form.value.telephone,
       street_address: form.value.address,
@@ -256,6 +260,8 @@ const submitCompanyForm = async () => {
       timeout: 2000,
       showIcon: true
     });
+    localStorage.setItem('user_role', 'company');
+    localStorage.removeItem('onboarding_in_progress'); // ✅ Clear flag
     router.push("/companydash");
   } catch (error) {
     console.error("Error submitting form:", error);

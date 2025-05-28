@@ -158,6 +158,12 @@
                 <div>
                   <div v-if="!showStatusOptions">
                     <button
+                      class="message-btn"
+                      @click="sendMessage(application.id)"
+                    >
+                      Send Message
+                    </button>
+                    <button
                       v-if="application.status !== 'accepted'"
                       @click="showStatusOptions = true"
                     >
@@ -247,6 +253,27 @@
           </div>
         </div>
 
+        <div
+          v-if="showMessagePopup"
+          class="popup-overlay"
+          @click.self="showMessagePopup = false"
+        >
+          <div class="popup">
+            <h3>✉️ Message</h3>
+            <textarea
+              v-model="messageContent"
+              placeholder="Type your message here..."
+              rows="5"
+              style="width: 100%; padding: 8px; resize: none"
+            ></textarea>
+            <br /><br />
+            <button @click="sendActualMessage">Send</button>
+            <button @click="showMessagePopup = false" class="cancel-btn">
+              Cancel
+            </button>
+          </div>
+        </div>
+
         <!-- JOB DISPLAY -->
         <div class="right-content">
           <h3>POSTED JOBS</h3>
@@ -264,7 +291,7 @@
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
               <p><strong>Status:</strong> {{ job.status }}</p>
               <p>
-                <strong>Slots:</strong>{{ job.filled_slots }}/{{
+                <strong>Slots: </strong> {{ job.filled_slots }}/{{
                   job.total_slots
                 }}
               </p>
@@ -309,6 +336,43 @@ const showConfirmModal = ref(false);
 const selectedApplicationId = ref(null);
 const decisionType = ref("");
 const scheduledAt = ref(null);
+
+//message variables
+const selectedApplicantId = ref(null);
+const showMessagePopup = ref(false);
+const messageContent = ref("");
+
+function sendMessage(applicationId) {
+  selectedApplicantId.value = applicationId;
+  showMessagePopup.value = true;
+}
+
+async function sendActualMessage() {
+  try {
+    const response = await axios.post("/message/send", {
+      receiver_id: selectedApplicantId.value,
+      message: messageContent.value,
+    });
+
+    console.log("Message Sent:", response.data);
+    showMessagePopup.value = false;
+    messageContent.value = "";
+    createToast('Message sent successfully!', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  } catch (error) {
+    console.error("Error sending message:", error);
+    createToast('Failed to send message. Please try again.', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  }
+}
 
 function openConfirmModal(applicationId, type) {
   selectedApplicationId.value = applicationId;

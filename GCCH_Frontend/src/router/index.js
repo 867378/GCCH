@@ -91,58 +91,57 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const userId = localStorage.getItem('user_id');
+  const role = localStorage.getItem('user_role');
+  const onboarding = localStorage.getItem('onboarding_in_progress') === 'true';
+
   const publicPages = ['Login', 'Signup', 'Redirecting'];
   const authRequired = !publicPages.includes(to.name);
 
-  let role = localStorage.getItem('user_role');
-
   if (userId && publicPages.includes(to.name)) {
-    if (!role) {
-      try {
-        const { data } = await axios.get(`/user/${userId}`);
-        role = data.role;
-        localStorage.setItem('user_role', role);
-      } catch (error) {
-        console.error('Failed to fetch user role');
-        return next({ name: 'Login' });
-      }
+    if (onboarding && (to.name === 'Signup' || to.name === 'Redirecting')) {
+      return next();
     }
-    const fallback = localStorage.getItem('last_valid_route') || (role === 'company' ? 'CompanyDash' : 'ApplicantDash');
+
+    const fallback = role === 'company' || 'applicant' ? 'CompanyDash' : 'ApplicantDash';
     return next({ name: fallback });
+  }
+
+  if (!authRequired && !userId) {
+    return next();
   }
 
   if (authRequired && !userId) {
     return next({ name: 'Login' });
   }
 
-  if (!authRequired) return next();
-
-  try {
-    if (!role) {
+  if (!role && !onboarding && !publicPages.includes(to.name)) {
+    try {
       const { data } = await axios.get(`/user/${userId}`);
-      role = data.role;
-      localStorage.setItem('user_role', role);
+      localStorage.setItem('user_role', data.role);
+    } catch (error) {
+      console.error('Failed to fetch user role:', error);
+      return next({ name: 'Login' });
     }
-
-    const companyOnlyRoutes = ['CompanyDash', 'CompanyPost', 'CompanyMessage', 'CompanyAccepted', 'CompanyProfile'];
-    const applicantOnlyRoutes = ['ApplicantDash', 'ApplicantMessage', 'ApplicantProfile', 'Application'];
-
-    const fallback = from.name || localStorage.getItem('last_valid_route') || 'Login';
-
-    if (companyOnlyRoutes.includes(to.name) && role !== 'company') {
-      return next({ name: fallback });
-    }
-
-    if (applicantOnlyRoutes.includes(to.name) && role !== 'applicant') {
-      return next({ name: fallback });
-    }
-
-    return next();
-  } catch (error) {
-    console.error('Failed to fetch user data:', error);
-    return next({ name: 'Login' });
   }
+
+  const updatedRole = localStorage.getItem('user_role');
+
+  const companyOnlyRoutes = ['CompanyDash', 'CompanyPost', 'CompanyMessage', 'CompanyAccepted', 'CompanyProfile'];
+  const applicantOnlyRoutes = ['ApplicantDash', 'ApplicantMessage', 'ApplicantProfile', 'Application'];
+
+  const fallback = from.name || localStorage.getItem('last_valid_route') || 'Login';
+
+  if (companyOnlyRoutes.includes(to.name) && updatedRole !== 'company') {
+    return next({ name: fallback });
+  }
+
+  if (applicantOnlyRoutes.includes(to.name) && updatedRole !== 'applicant') {
+    return next({ name: fallback });
+  }
+
+  return next();
 });
+
 
 router.afterEach((to) => {
   const publicPages = ['Login', 'Signup', 'Redirecting'];
@@ -150,7 +149,5 @@ router.afterEach((to) => {
     localStorage.setItem('last_valid_route', to.name);
   }
 });
-
-
 
 export default router;
