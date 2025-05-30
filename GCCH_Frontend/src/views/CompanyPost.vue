@@ -144,7 +144,7 @@
                   <div v-if="!showStatusOptions">
                     <button
                       class="message-btn"
-                      @click="sendMessage(application.id)"
+                      @click="sendMessage(application.applicant.id)"
                     >
                       Send Message
                     </button>
@@ -306,7 +306,6 @@ const isSidenavOpen = ref(true);
 
 const selectedJob = ref(null);
 const jobApplicants = ref([]);
-const messages = ref([]);
 
 const notifications = ref([]);
 const postedJobs = ref([]);

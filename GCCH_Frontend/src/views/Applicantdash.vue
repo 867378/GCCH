@@ -62,9 +62,7 @@
         <div v-if="showNotif" class="popup-overlay" @click.self="toggleNotif">
           <div class="popup">
             <h3>🔔 Notifications</h3>
-            <ul class="popup-list">
-              
-            </ul>
+            <ul class="popup-list"></ul>
             <button @click="toggleNotif">Close</button>
           </div>
         </div>
@@ -72,7 +70,7 @@
 
       <div class="content">
         <div class="left-content">
-          <div class="cards">
+          <!-- <div class="cards">
             <div class="card">
               <p>
                 <strong>
@@ -112,14 +110,13 @@
               </p>
               <p>{{ acceptedApplicationsCount }}</p>
             </div>
-          </div>
+          </div> -->
           <div class="job-content">
             <h3>RECOMMENDED JOBS BASED ON COURSE</h3>
+            <!-- Replace your v-for with paginatedJobs -->
             <div
               class="job-box"
-              v-for="matchedJob in recommendedJobs.filter(
-                (job) => job.status === 'open'
-              )"
+              v-for="matchedJob in paginatedJobs"
               :key="matchedJob.id"
             >
               <div class="job-card">
@@ -134,7 +131,7 @@
                   <div class="button-group">
                     <button
                       class="message-btn"
-                      @click="sendMessage(matchedJob.company_id)"
+                      @click="sendMessage(matchedJob.company.user_id)"
                     >
                       Send Message
                     </button>
@@ -189,6 +186,37 @@
                 <!-- Job Description -->
                 <p class="job-description">{{ matchedJob.job_description }}</p>
               </div>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="pagination">
+              <button
+                class="pagination-btn"
+                @click="previousPage"
+                :disabled="currentPage === 1"
+              >
+                Previous
+              </button>
+
+              <div class="page-numbers">
+                <button
+                  v-for="page in totalPages"
+                  :key="page"
+                  @click="goToPage(page)"
+                  class="page-number"
+                  :class="{ active: currentPage === page }"
+                >
+                  {{ page }}
+                </button>
+              </div>
+
+              <button
+                class="pagination-btn"
+                @click="nextPage"
+                :disabled="currentPage === totalPages"
+              >
+                Next
+              </button>
             </div>
           </div>
         </div>
@@ -250,6 +278,48 @@
                   </span>
                 </p>
               </div>
+            </div>
+          </div>
+
+           <div class="cards">
+            <div class="card">
+              <p>
+                <strong>
+                  <img
+                    src="/public/management.png"
+                    alt="total clients Icon"
+                    class="ikon"
+                  />
+                  ONGOING JOB APPLICATIONS</strong
+                >
+              </p>
+              <p>{{ ongoingApplicationsCount }}</p>
+            </div>
+            <div class="card">
+              <p>
+                <strong>
+                  <img
+                    src="/public/counting.png"
+                    alt="total job listings Icon"
+                    class="ikon"
+                  />
+                  MATCHING JOBS COUNT</strong
+                >
+              </p>
+              <p>{{ matchedJobCount }}</p>
+            </div>
+            <div class="card">
+              <p>
+                <strong>
+                  <img
+                    src="/public/email.png"
+                    alt="pending applications Icon"
+                    class="ikon"
+                  />
+                  OFFERED JOBS</strong
+                >
+              </p>
+              <p>{{ acceptedApplicationsCount }}</p>
             </div>
           </div>
         </div>
@@ -339,6 +409,28 @@ const hiredJobDetails = ref(null);
 //For Notifications
 const notifications = ref([]);
 
+// Pagination state
+const currentPage = ref(1);
+const jobsPerPage = ref(2); // Number of jobs to show per page
+
+// Computed properties
+const totalPages = computed(() => {
+  return Math.ceil(
+    recommendedJobs.value.filter((job) => job.status === "open").length /
+      jobsPerPage.value
+  );
+});
+
+// Computed property for paginated jobs
+const paginatedJobs = computed(() => {
+  const filteredJobs = recommendedJobs.value.filter(
+    (job) => job.status === "open"
+  );
+  const start = (currentPage.value - 1) * jobsPerPage.value;
+  const end = start + jobsPerPage.value;
+  return filteredJobs.slice(start, end);
+});
+
 // NavBar Logic
 function toggleMail() {
   showMail.value = !showMail.value;
@@ -359,22 +451,22 @@ function confirmSignOut() {
   axios
     .post("/logout")
     .then(() => {
-      createToast('Successfully signed out', {
-        type: 'success',
-        position: 'top-right',
+      createToast("Successfully signed out", {
+        type: "success",
+        position: "top-right",
         timeout: 2000,
-        showIcon: true
+        showIcon: true,
       });
       localStorage.clear();
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
-      createToast('Failed to sign out', {
-        type: 'danger',
-        position: 'top-right',
+      createToast("Failed to sign out", {
+        type: "danger",
+        position: "top-right",
         timeout: 3000,
-        showIcon: true
+        showIcon: true,
       });
     });
 }
@@ -658,6 +750,23 @@ async function sendActualMessage() {
       showIcon: true,
     });
   }
+}
+
+// Pagination methods
+function nextPage() {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+}
+
+function previousPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+}
+
+function goToPage(page) {
+  currentPage.value = page;
 }
 
 onMounted(() => {
@@ -989,7 +1098,8 @@ body,
 }
 
 .cards {
-  display: flex;
+  margin-top: 2vh;
+  display: block;
   gap: 15px;
 }
 .card {
@@ -1267,147 +1377,77 @@ label {
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
 }
 
-@media (max-width: 1024px) {
-  .hamburger {
-    display: flex;
-    z-index: 1001;
-  }
-
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 35vh;
-    z-index: 1000;
-    transition: transform 0.3s ease;
-  }
-
-  .sidebar.active {
-    transform: translateX(0);
-  }
-
-  .logo {
-    margin-top: 4vh;
-    margin-left: 4vh;
-    margin-bottom: 8vh;
-  }
-
-  .content {
-    padding: 15px;
-    gap: 15px;
-  }
-  .update-box {
-    font-size: 12px;
-    padding: 15px;
-  }
-  .left-content {
-    flex: 3;
-    padding: 20px;
-    overflow-y: auto;
-  }
-
-  .main {
-    margin-left: 0;
-  }
-
-  .topbar {
-    left: 0;
-  }
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 20px 0;
 }
 
+.pagination-btn {
+  background-color: #045d56;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #033f3a;
+  transform: translateY(-2px);
+}
+
+.pagination-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.page-number {
+  width: 35px;
+  height: 35px;
+  border: none;
+  border-radius: 50%;
+  background-color: #f1f1f1;
+  color: #045d56;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.page-number:hover {
+  background-color: #e0e0e0;
+}
+
+.page-number.active {
+  background-color: #045d56;
+  color: white;
+}
+
+/* Add responsive styles */
 @media (max-width: 768px) {
-  .content {
-    flex-direction: column;
-    height: calc(100vh - 60px);
-    padding: 15px;
-    margin-top: 60px;
-    overflow-y: auto;
-  }
-
-  .left-content {
-    width: 100%;
-    padding: 15px;
-    height: auto;
-    min-height: fit-content;
-  }
-
-  .right-content {
-    width: 100%;
-    padding: 15px;
-    height: auto;
-    margin-top: 15px;
-  }
-
-  .cards {
-    flex-direction: column;
+  .pagination {
+    flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 15px;
   }
-
-  .card {
+  
+  .page-numbers {
+    order: 2;
     width: 100%;
-    padding: 12px;
+    justify-content: center;
   }
-
-  .job-box {
-    width: 95%;
-    margin: 10px auto;
-    padding: 12px;
-  }
-
-  .job-description {
-    margin: 15px;
-    font-size: 14px;
-  }
-
-  .upd-content {
-    margin-top: 15px;
-  }
-
-  .hired-status-box {
-    margin-bottom: 15px;
-  }
-
-  .button-group {
-    flex-direction: row;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-
-  .message-btn,
-  .apply-btn {
-    padding: 6px 10px;
-    font-size: 12px;
-    white-space: nowrap;
-  }
-}
-
-@media (max-width: 480px) {
-  .content {
-    padding: 10px;
-  }
-
-  .left-content,
-  .right-content {
-    padding: 10px;
-  }
-
-  .job-box {
-    width: 100%;
-    margin: 8px 0;
-    padding: 10px;
-  }
-
-  .job-description {
-    margin: 10px;
-    font-size: 12px;
-  }
-
-  .message-btn,
-  .apply-btn {
-    font-size: 10px;
-    padding: 4px 8px;
+  
+  .pagination-btn {
+    order: 1;
+    flex: 1;
   }
 }
 </style>

@@ -114,7 +114,7 @@
               <div
                 ref="chatContainer"
                 class="chat-messages"
-                style="max-height: 400px; overflow-y: auto; margin-bottom: 1rem"
+                style="height: 400px; overflow-y: auto; margin-bottom: 1rem"
               >
                 <div
                   v-for="(msg, index) in conversation"

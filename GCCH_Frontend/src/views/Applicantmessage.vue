@@ -108,7 +108,7 @@
                 ref="chatContainer"
                 class="chat-messages"
                 style="
-                  max-height: 400px;
+                  height: 400px;
                   overflow-y: auto;
                   margin-bottom: 1rem;
                   scroll-behavior: smooth;

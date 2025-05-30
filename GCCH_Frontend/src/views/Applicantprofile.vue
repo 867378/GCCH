@@ -76,13 +76,27 @@
         <div class="profile-wrapper">
           <div class="profile-card">
             <div class="form-group">
-              <label class="profile-avatar-label">
-                <img
-                  src="/public/user.png"
-                  alt="Profile"
-                  class="profile-avatar"
-                />
-              </label>
+              <label 
+  class="profile-avatar-label" 
+  @click="isEditing ? $refs.fileInput.click() : null"
+  :style="{ cursor: isEditing ? 'pointer' : 'default' }"
+>
+  <img
+    :src="avatarPreview || '/public/user.png'"
+    alt="Profile"
+    class="profile-avatar"
+  />
+  <input
+    type="file"
+    ref="fileInput"
+    :disabled="!isEditing"
+    @change="handleImageUpload"
+    accept="image/*"
+    style="display: none"
+  />
+  <div class="avatar-overlay" v-if="isEditing">
+  </div>
+</label>
             </div>
 
             <div class="profile-form" v-if="applicant.applicant">
@@ -155,7 +169,25 @@
                   />
                 </div>
               </div>
-              <div class="btn-group"></div>
+              <div class="btn-group">
+                <button
+                  v-if="!isEditing"
+                  @click="enableEditing"
+                  class="edit-btn"
+                >
+                  Edit
+                </button>
+                <button v-if="isEditing" @click="saveChanges" class="save-btn">
+                  Save
+                </button>
+                <button
+                  v-if="isEditing"
+                  @click="cancelEditing"
+                  class="cancel-btn"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -187,6 +219,16 @@ const notifications = ref([]);
 //User Data
 const applicant = ref({});
 
+const isEditing = ref(false);
+const fullName = ref("");
+const dateOfBirth = ref("");
+const sex = ref("");
+const phoneNumber = ref("");
+const email = ref("");
+const originalData = ref({});
+const avatarPreview = ref(null);
+const fileInput = ref(null);
+
 // NavBar Logic
 function toggleMail() {
   showMail.value = !showMail.value;
@@ -215,7 +257,6 @@ function confirmSignOut() {
         toastBackgroundColor: "#045d56",
       });
       localStorage.clear();
-
       router.push("/login");
     })
     .catch((error) => {
@@ -227,6 +268,57 @@ function confirmSignOut() {
         showIcon: true,
       });
     });
+}
+
+function enableEditing() {
+  isEditing.value = true;
+  const {
+    first_name,
+    middle_name,
+    last_name,
+    date_of_birth,
+    sex: s,
+    phone_number,
+    email: e,
+  } = applicant.value.applicant;
+  fullName.value = `${first_name} ${middle_name} ${last_name}`.trim();
+  dateOfBirth.value = date_of_birth;
+  sex.value = s;
+  phoneNumber.value = phone_number;
+  email.value = applicant.value.email;
+  originalData.value = {
+    fullName: fullName.value,
+    dateOfBirth: dateOfBirth.value,
+    sex: sex.value,
+    phoneNumber: phoneNumber.value,
+    email: email.value,
+  };
+}
+
+function cancelEditing() {
+  isEditing.value = false;
+  ({
+    fullName: fullName.value,
+    dateOfBirth: dateOfBirth.value,
+    sex: sex.value,
+    phoneNumber: phoneNumber.value,
+    email: email.value,
+  } = originalData.value);
+}
+
+async function saveChanges() {
+  const [first, middle = "", last = ""] = fullName.value.split(" ");
+  const data = {
+    first_name: first,
+    middle_name: middle,
+    last_name: last,
+    date_of_birth: dateOfBirth.value,
+    sex: sex.value,
+    phone_number: phoneNumber.value,
+    email: email.value,
+  };
+  await updateProfile(data);
+  isEditing.value = false;
 }
 
 async function fetchUserData() {
@@ -319,6 +411,71 @@ function formatType(type) {
       return "Female";
     case "other":
       return "Other";
+  }
+}
+
+async function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Check file type
+  if (!file.type.startsWith("image/")) {
+    createToast("Please upload an image file", {
+      type: "error",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+    return;
+  }
+
+  // Check file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    createToast("Image size should be less than 5MB", {
+      type: "error",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+    return;
+  }
+
+  try {
+    // Create preview
+    avatarPreview.value = URL.createObjectURL(file);
+
+    // Prepare form data
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    // Upload to server
+    const response = await axios.post(
+      "/user/applicant/upload-avatar",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    createToast("Profile picture updated successfully", {
+      type: "success",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
+    });
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    createToast("Failed to upload profile picture", {
+      type: "error",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+    // Reset preview on error
+    avatarPreview.value = null;
   }
 }
 

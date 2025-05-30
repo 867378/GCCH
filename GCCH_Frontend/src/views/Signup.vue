@@ -37,15 +37,23 @@
               v-model="form.middleName"
             />
             <input placeholder="Last Name" v-model="form.lastName" required />
-            <span class="bday">BIRTHDAY</span>
 
-            <input type="date" v-model="form.birthday" required />
             <select v-model="form.sex" required>
               <option value="" disabled selected>Select Sex</option>
               <option value="male">Male</option>
               <option value="female">Female</option>
               <option value="prefer_to_not_say">Prefer Not to Say</option>
             </select>
+
+            <span class="bday">BIRTHDAY</span>
+            <input
+              type="date"
+              v-model="form.birthday"
+              :max="maxDate"
+              required
+              @change="validateAge"
+            />
+
             <input
               placeholder="Phone Number"
               v-model="form.phone"
@@ -81,11 +89,66 @@
               <option value="Other">Other</option>
             </select>
 
+            <select
+              v-model="form.expertise"
+              required
+              :class="{ placeholder: !form.expertise }"
+            >
+              <option value="" disabled>Select Expertise</option>
+              <option
+                v-for="field in filteredExpertise"
+                :key="field"
+                :value="field"
+              >
+                {{ field }}
+              </option>
+            </select>
+
             <div class="button-group">
               <button type="button" class="back-btn" @click="goBack">
                 Back
               </button>
-              <button type="submit" class="kontinue-btn">Continue</button>
+              <button type="next" class="kontinue-btn">Next</button>
+            </div>
+          </form>
+        </div>
+
+        <div v-else-if="currentStep === 'photo'" class="form-view">
+          <h2 class="title">Upload Profile Photo</h2>
+          <form @submit.prevent="submitPhotoForm">
+            <div class="photo-upload-section">
+              <input
+                placeholder="Street Address"
+                v-model="form.address"
+                required
+              />
+              <input placeholder="City" v-model="form.city" required />
+              <input placeholder="Province" v-model="form.province" required />
+              <input placeholder="Country" v-model="form.country" required />
+              <input
+                type="file"
+                id="photo-upload"
+                @change="handlePhotoUpload"
+                accept="image/*"
+                required
+              />
+              <div v-if="previewUrl" class="photo-preview">
+                <button
+                  type="button"
+                  class="delete-photo-btn"
+                  @click="removePhoto"
+                >
+                  ×
+                </button>
+                <img :src="previewUrl" alt="Preview" />
+              </div>
+            </div>
+
+            <div class="button-group">
+              <button type="button" class="back-btn" @click="goToApplicantForm">
+                Back
+              </button>
+              <button type="submit" class="kontinue-btn">Submit</button>
             </div>
           </form>
         </div>
@@ -100,7 +163,7 @@
               required
             />
             <input
-              placeholder="Company Telephone"
+              placeholder="Company Phone"
               v-model="form.telephone"
               inputmode="tel"
               maxlength="11"
@@ -133,6 +196,38 @@
             </div>
           </form>
         </div>
+
+        <div v-else-if="currentStep === 'photo'" class="form-view">
+          <h2 class="title">Upload Profile Photo</h2>
+          <form @submit.prevent="submitPhotoForm">
+            <div class="photo-upload-section">
+              <input
+                type="file"
+                id="photo-upload"
+                @change="handlePhotoUpload"
+                accept="image/*"
+                required
+              />
+              <div v-if="previewUrl" class="photo-preview">
+                <button
+                  type="button"
+                  class="delete-photo-btn"
+                  @click="removePhoto"
+                >
+                  ×
+                </button>
+                <img :src="previewUrl" alt="Preview" />
+              </div>
+            </div>
+
+            <div class="button-group">
+              <button type="button" class="back-btn" @click="goToApplicantForm">
+                Back
+              </button>
+              <button type="submit" class="kontinue-btn">Submit</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -144,6 +239,7 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
+import { computed } from "vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -165,7 +261,91 @@ const form = ref({
   province: "",
   country: "",
   industry_type: "",
+  expertise: "",
+  photo: null,
 });
+const previewUrl = ref(null);
+
+const maxDate = computed(() => {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - 18);
+  return date.toISOString().split("T")[0];
+});
+
+const validateAge = () => {
+  const birthDate = new Date(form.value.birthday);
+  const today = new Date();
+  const age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+
+  if (age < 18) {
+    createToast("You must be at least 18 years old to register", {
+      type: "error",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+    form.value.birthday = "";
+  }
+};
+
+const filteredExpertise = computed(() => {
+  return expertiseMap[form.value.course] || [];
+});
+
+const expertiseMap = {
+  BSIT: [
+    "Web Development",
+    "Networking",
+    "Cybersecurity",
+    "System Administration",
+  ],
+  BSCS: ["Data Science", "AI", "Software Engineering", "Algorithms"],
+  BSEMC: ["Multimedia Arts", "Animation", "Game Development"],
+  BSN: ["Clinical Nursing", "Community Health", "Medical-Surgical Nursing"],
+  BSM: ["Strategic Management", "Operations Management", "Entrepreneurship"],
+  BSA: ["Financial Accounting", "Auditing", "Taxation"],
+  "BSBA-FM": ["Corporate Finance", "Investment Analysis", "Banking"],
+  "BSBA-HRM": [
+    "Human Resources",
+    "Talent Management",
+    "Organizational Development",
+  ],
+  "BSBA-MM": ["Marketing Strategy", "Advertising", "Sales Management"],
+  BSCA: ["Customs Brokerage", "Trade Compliance", "Logistics"],
+  BSHM: ["Hotel Management", "Food & Beverage Service", "Customer Relations"],
+  BSTM: ["Tourism Planning", "Event Management", "Travel Services"],
+  BAComm: ["Journalism", "Public Relations", "Media Production"],
+  BECEd: ["Early Childhood Development", "Preschool Education"],
+  BCAEd: ["Arts Education", "Cultural Studies", "Creative Expression"],
+  BPEd: ["Sports Science", "Physical Fitness", "Coaching"],
+  BEED: ["Elementary Teaching", "Child Psychology", "Classroom Management"],
+  "BSEd-Eng": ["English Education", "Literature", "Language Teaching"],
+  "BSEd-Math": ["Mathematics Education", "Algebra", "Calculus"],
+  "BSEd-Fil": [
+    "Filipino Language",
+    "Philippine Literature",
+    "Language Teaching",
+  ],
+  "BSEd-SS": ["Social Studies", "Philippine History", "Civics & Culture"],
+  "BSEd-Sci": ["General Science", "Biology", "Chemistry", "Physics"],
+  Other: ["Other"],
+};
+
+const removePhoto = () => {
+  form.value.photo = null;
+  previewUrl.value = null;
+  // Reset the file input
+  const fileInput = document.getElementById("photo-upload");
+  if (fileInput) fileInput.value = "";
+};
 
 if (!userId) {
   createToast("User ID not found. Please log in again.", {
@@ -178,7 +358,7 @@ if (!userId) {
   router.push("/login");
 }
 
-const continueAction = async () => {
+async function continueAction() {
   try {
     await axios.post(
       `user/set-role/${userId}`,
@@ -187,8 +367,8 @@ const continueAction = async () => {
       },
       { withCredentials: true }
     );
-    
-    localStorage.setItem('onboarding_in_progress', 'true');
+
+    localStorage.setItem("onboarding_in_progress", "true");
 
     currentStep.value = selectedRole.value;
     createToast(`Role set to ${selectedRole.value}`, {
@@ -207,7 +387,7 @@ const continueAction = async () => {
       showIcon: true,
     });
   }
-};
+}
 const goBack = () => {
   currentStep.value = "select";
 };
@@ -222,18 +402,11 @@ const submitApplicantForm = async () => {
       sex: form.value.sex,
       phone_number: form.value.phone,
       course: form.value.course,
+      expertise: form.value.expertise,
     });
 
-    createToast("Profile created successfully!", {
-      type: "success",
-      position: "top-right",
-      timeout: 2000,
-      showIcon: true,
-      toastBackgroundColor: "#045d56",
-    });
-    localStorage.setItem('user_role', 'applicant');
-    localStorage.removeItem('onboarding_in_progress');
-    router.push("/applicantdash");
+    // Instead of routing to dashboard, go to photo step
+    currentStep.value = "photo";
   } catch (error) {
     console.error("Error submitting form:", error);
     createToast(error.response?.data?.message || "Failed to create profile", {
@@ -257,16 +430,8 @@ const submitCompanyForm = async () => {
       industry_type: form.value.industry_type,
     });
 
-    createToast("Company profile created successfully!", {
-      type: "success",
-      position: "top-right",
-      timeout: 2000,
-      showIcon: true,
-      toastBackgroundColor: "#045d56",
-    });
-    localStorage.setItem('user_role', 'company');
-    localStorage.removeItem('onboarding_in_progress'); // ✅ Clear flag
-    router.push("/companydash");
+    // Transition to photo step
+    currentStep.value = "photo";
   } catch (error) {
     console.error("Error submitting form:", error);
     createToast(
@@ -278,6 +443,58 @@ const submitCompanyForm = async () => {
         showIcon: true,
       }
     );
+  }
+};
+
+const handlePhotoUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    form.value.photo = file;
+    previewUrl.value = URL.createObjectURL(file);
+  }
+};
+
+const goToApplicantForm = () => {
+  currentStep.value = "applicant";
+};
+
+const submitPhotoForm = async () => {
+  try {
+    const formData = new FormData();
+    formData.append("photo", form.value.photo);
+
+    const endpoint =
+      selectedRole.value === "company"
+        ? `user/company/photo/${userId}`
+        : `user/applicant/photo/${userId}`;
+
+    await axios.post(endpoint, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    createToast("Profile photo uploaded successfully!", {
+      type: "success",
+      position: "top-right",
+      timeout: 2000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
+    });
+
+    localStorage.setItem("user_role", selectedRole.value);
+    localStorage.removeItem("onboarding_in_progress");
+    router.push(
+      selectedRole.value === "company" ? "/companydash" : "/applicantdash"
+    );
+  } catch (error) {
+    console.error("Error uploading photo:", error);
+    createToast(error.response?.data?.message || "Failed to upload photo", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
   }
 };
 </script>
@@ -486,6 +703,55 @@ margin-top: 0.5rem;
   height: 100%;
   border-radius: 1rem;
   object-fit: contain;
+}
+
+.photo-preview {
+  position: relative;
+  margin-top: 1rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 2px solid #045d56;
+  background-color: #f3f4f6;
+  width: 40%;
+  margin-left: 20vh;
+}
+
+.photo-preview img {
+  width: 100%;
+  display: block;
+}
+
+.delete-photo-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #045d56;
+  color: #045d56;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.delete-photo-btn:hover {
+  background-color: #045d56;
+  color: white;
+}
+
+input[type="file"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: white;
 }
 
 @media (max-width: 1024px) {
