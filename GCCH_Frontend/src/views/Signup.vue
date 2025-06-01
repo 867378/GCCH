@@ -197,7 +197,7 @@
           </form>
         </div>
 
-        <div v-else-if="currentStep === 'photo'" class="form-view">
+        <!-- <div v-else-if="currentStep === 'photo'" class="form-view">
           <h2 class="title">Upload Profile Photo</h2>
           <form @submit.prevent="submitPhotoForm">
             <div class="photo-upload-section">
@@ -227,7 +227,7 @@
               <button type="submit" class="kontinue-btn">Submit</button>
             </div>
           </form>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -306,36 +306,39 @@ const expertiseMap = {
     "Networking",
     "Cybersecurity",
     "System Administration",
+    "Other",
   ],
-  BSCS: ["Data Science", "AI", "Software Engineering", "Algorithms"],
-  BSEMC: ["Multimedia Arts", "Animation", "Game Development"],
-  BSN: ["Clinical Nursing", "Community Health", "Medical-Surgical Nursing"],
-  BSM: ["Strategic Management", "Operations Management", "Entrepreneurship"],
-  BSA: ["Financial Accounting", "Auditing", "Taxation"],
-  "BSBA-FM": ["Corporate Finance", "Investment Analysis", "Banking"],
+  BSCS: ["Data Science", "AI", "Software Engineering", "Algorithms","Other"],
+  BSEMC: ["Multimedia Arts", "Animation", "Game Development","Other"],
+  BSN: ["Clinical Nursing", "Community Health", "Medical-Surgical Nursing","Other"],
+  BSM: ["Strategic Management", "Operations Management", "Entrepreneurship","Other"],
+  BSA: ["Financial Accounting", "Auditing", "Taxation","Other"],
+  "BSBA-FM": ["Corporate Finance", "Investment Analysis", "Banking","Other"],
   "BSBA-HRM": [
     "Human Resources",
     "Talent Management",
     "Organizational Development",
+    "Other",
   ],
-  "BSBA-MM": ["Marketing Strategy", "Advertising", "Sales Management"],
-  BSCA: ["Customs Brokerage", "Trade Compliance", "Logistics"],
-  BSHM: ["Hotel Management", "Food & Beverage Service", "Customer Relations"],
-  BSTM: ["Tourism Planning", "Event Management", "Travel Services"],
-  BAComm: ["Journalism", "Public Relations", "Media Production"],
-  BECEd: ["Early Childhood Development", "Preschool Education"],
-  BCAEd: ["Arts Education", "Cultural Studies", "Creative Expression"],
-  BPEd: ["Sports Science", "Physical Fitness", "Coaching"],
-  BEED: ["Elementary Teaching", "Child Psychology", "Classroom Management"],
-  "BSEd-Eng": ["English Education", "Literature", "Language Teaching"],
-  "BSEd-Math": ["Mathematics Education", "Algebra", "Calculus"],
+  "BSBA-MM": ["Marketing Strategy", "Advertising", "Sales Management","Other"],
+  BSCA: ["Customs Brokerage", "Trade Compliance", "Logistics","Other"],
+  BSHM: ["Hotel Management", "Food & Beverage Service", "Customer Relations","Other"],
+  BSTM: ["Tourism Planning", "Event Management", "Travel Services","Other"],
+  BAComm: ["Journalism", "Public Relations", "Media Production","Other"],
+  BECEd: ["Early Childhood Development", "Preschool Education","Other"],
+  BCAEd: ["Arts Education", "Cultural Studies", "Creative Expression","Other"],
+  BPEd: ["Sports Science", "Physical Fitness", "Coaching","Other"],
+  BEED: ["Elementary Teaching", "Child Psychology", "Classroom Management","Other"],
+  "BSEd-Eng": ["English Education", "Literature", "Language Teaching","Other"],
+  "BSEd-Math": ["Mathematics Education", "Algebra", "Calculus","Other"],
   "BSEd-Fil": [
     "Filipino Language",
     "Philippine Literature",
     "Language Teaching",
+    "Other",
   ],
-  "BSEd-SS": ["Social Studies", "Philippine History", "Civics & Culture"],
-  "BSEd-Sci": ["General Science", "Biology", "Chemistry", "Physics"],
+  "BSEd-SS": ["Social Studies", "Philippine History", "Civics & Culture","Other"],
+  "BSEd-Sci": ["General Science", "Biology", "Chemistry", "Physics","Other"],
   Other: ["Other"],
 };
 
@@ -393,58 +396,59 @@ const goBack = () => {
 };
 
 const submitApplicantForm = async () => {
-  try {
-    await axios.post(`user/applicant/profile/${userId}`, {
-      first_name: form.value.firstName,
-      middle_name: form.value.middleName,
-      last_name: form.value.lastName,
-      date_of_birth: form.value.birthday,
-      sex: form.value.sex,
-      phone_number: form.value.phone,
-      course: form.value.course,
-      expertise: form.value.expertise,
-    });
+  // try {
+  //   await axios.post(`user/applicant/profile/${userId}`, {
+  //     first_name: form.value.firstName,
+  //     middle_name: form.value.middleName,
+  //     last_name: form.value.lastName,
+  //     date_of_birth: form.value.birthday,
+  //     sex: form.value.sex,
+  //     phone_number: form.value.phone,
+  //     course: form.value.course,
+  //     expertise: form.value.expertise,
 
-    // Instead of routing to dashboard, go to photo step
+  //   });
+
+  //   // Instead of routing to dashboard, go to photo step
     currentStep.value = "photo";
-  } catch (error) {
-    console.error("Error submitting form:", error);
-    createToast(error.response?.data?.message || "Failed to create profile", {
-      type: "danger",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-    });
-  }
+  // } catch (error) {
+  //   console.error("Error submitting form:", error);
+  //   createToast(error.response?.data?.message || "Failed to create profile", {
+  //     type: "danger",
+  //     position: "top-right",
+  //     timeout: 3000,
+  //     showIcon: true,
+  //   });
+  // }
 };
 
 const submitCompanyForm = async () => {
-  try {
-    await axios.post(`user/company/profile/${userId}`, {
-      company_name: form.value.companyName,
-      company_telephone: form.value.telephone,
-      street_address: form.value.address,
-      city: form.value.city,
-      province: form.value.province,
-      country: form.value.country,
-      industry_type: form.value.industry_type,
-    });
+  // try {
+  //   await axios.post(`user/company/profile/${userId}`, {
+  //     company_name: form.value.companyName,
+  //     company_telephone: form.value.telephone,
+  //     street_address: form.value.address,
+  //     city: form.value.city,
+  //     province: form.value.province,
+  //     country: form.value.country,
+  //     industry_type: form.value.industry_type,
+  //   });
     
 
-    // Transition to photo step
+  //   // Transition to photo step
     currentStep.value = "photo";
-  } catch (error) {
-    console.error("Error submitting form:", error);
-    createToast(
-      error.response?.data?.message || "Failed to create company profile",
-      {
-        type: "danger",
-        position: "top-right",
-        timeout: 3000,
-        showIcon: true,
-      }
-    );
-  }
+  // } catch (error) {
+  //   console.error("Error submitting form:", error);
+  //   createToast(
+  //     error.response?.data?.message || "Failed to create company profile",
+  //     {
+  //       type: "danger",
+  //       position: "top-right",
+  //       timeout: 3000,
+  //       showIcon: true,
+  //     }
+  //   );
+  // }
 };
 
 const handlePhotoUpload = (event) => {
@@ -462,20 +466,45 @@ const goToApplicantForm = () => {
 const submitPhotoForm = async () => {
   try {
     const formData = new FormData();
-    formData.append("photo", form.value.photo);
 
-    const endpoint =
-      selectedRole.value === "company"
-        ? `user/company/photo/${userId}`
-        : `user/applicant/photo/${userId}`;
+    if (selectedRole.value === "applicant") {
+      formData.append("first_name", form.value.firstName);
+      formData.append("middle_name", form.value.middleName);
+      formData.append("last_name", form.value.lastName);
+      formData.append("date_of_birth", form.value.birthday);
+      formData.append("sex", form.value.sex);
+      formData.append("phone_number", form.value.phone);
+      formData.append("course", form.value.course);
+      formData.append("expertise", form.value.expertise);
+      formData.append("street_address", form.value.address);
+      formData.append("city", form.value.city);
+      formData.append("province", form.value.province);
+      formData.append("country", form.value.country);
+    } else if (selectedRole.value === "company") {
+      formData.append("company_name", form.value.companyName);
+      formData.append("company_telephone", form.value.telephone);
+      formData.append("street_address", form.value.address);
+      formData.append("city", form.value.city);
+      formData.append("province", form.value.province);
+      formData.append("country", form.value.country);
+      formData.append("industry_type", form.value.industry_type);
+    }
+
+    if (form.value.photo) {
+      formData.append("profile_picture", form.value.photo);
+    }
+
+    // POST to a single unified endpoint (you may want to create this backend route)
+    const endpoint = `user/${selectedRole.value}/profile/${userId}`;
 
     await axios.post(endpoint, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      withCredentials: true,
     });
 
-    createToast("Profile photo uploaded successfully!", {
+    createToast("Profile completed successfully!", {
       type: "success",
       position: "top-right",
       timeout: 2000,
@@ -489,8 +518,8 @@ const submitPhotoForm = async () => {
       selectedRole.value === "company" ? "/companydash" : "/applicantdash"
     );
   } catch (error) {
-    console.error("Error uploading photo:", error);
-    createToast(error.response?.data?.message || "Failed to upload photo", {
+    console.error("Error submitting profile:", error);
+    createToast(error.response?.data?.message || "Failed to submit profile", {
       type: "danger",
       position: "top-right",
       timeout: 3000,
@@ -498,6 +527,7 @@ const submitPhotoForm = async () => {
     });
   }
 };
+
 </script>
 
 <style scoped>

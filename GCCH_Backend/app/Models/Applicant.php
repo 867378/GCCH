@@ -15,6 +15,12 @@ class Applicant extends Model
         'sex',
         'phone_number',
         'course',
+        'profile_picture',
+        'expertise',
+        'street_address',
+        'city',
+        'province',
+        'country',
     ];
 
     public function user()
@@ -22,8 +28,14 @@ class Applicant extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function profilePicture()
+    {
+        return $this->belongsTo(ProfilePicture::class, 'profile_picture');
+    }
+
     public function jobApplications()
     {
         return $this->hasMany(JobApplication::class);
     }
+
 }
