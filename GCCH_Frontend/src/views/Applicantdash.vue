@@ -281,7 +281,7 @@
             </div>
           </div>
 
-           <div class="cards">
+          <div class="cards">
             <div class="card">
               <p>
                 <strong>
@@ -334,15 +334,166 @@
     @click.self="closeApplyPopup"
   >
     <div class="apply-popup">
-      <h3>📄 Upload Your Resume</h3>
-      <span>Resume </span>
-      <input type="file" @change="handleFileUploadResume" accept=".pdf" />
-      <br /><br />
-      <span>Cover Letter </span>
-      <input type="file" @change="handleFileUploadCoverLetter" accept=".pdf" />
-      <br /><br />
-      <button @click="submitApplication">Apply</button>
-      <button @click="closeApplyPopup">Cancel</button>
+      <!-- Step 1: Contact Information -->
+      <div v-if="applicationStep === 1">
+        <h3>📝 Contact Information</h3>
+        <div class="form-group">
+          <label>Full Name</label>
+          <input
+            type="text"
+            v-model="contactInfo.name"
+            placeholder="Enter your full name"
+            class="form-input"
+          />
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input
+            type="tel"
+            v-model="contactInfo.phone"
+            placeholder="Enter your phone number"
+            class="form-input"
+          />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input
+            type="email"
+            v-model="contactInfo.email"
+            placeholder="Enter your email address"
+            class="form-input"
+          />
+        </div>
+        <div class="popup-buttons">
+          <button @click="closeApplyPopup" class="cancel-btn">Cancel</button>
+          <button @click="nextStep" class="next-btn">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Document Upload -->
+      <div v-if="applicationStep === 2">
+        <h3>📄 Upload Documents</h3>
+        <div class="form-group">
+          <label>Resume</label>
+          <input
+            type="file"
+            @change="handleFileUploadResume"
+            accept=".pdf"
+            class="file-input"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Cover Letter</label>
+          <input
+            type="file"
+            @change="handleFileUploadCoverLetter"
+            accept=".pdf"
+            class="file-input"
+            required
+          />
+        </div>
+        <div class="popup-buttons">
+          <button @click="previousStep" class="back-btn">Back</button>
+          <button @click="nextStep" class="next-btn">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Work Experience -->
+      <div v-if="applicationStep === 3" class="work-experience-section">
+        <h3>💼 Lastest Work Experience</h3>
+        <div class="form-group">
+          <label>Company Name</label>
+          <input
+            type="text"
+            v-model="workExperience.company"
+            placeholder="Enter company name"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group date-group">
+          <label>Employment </label>
+          <div class="date-inputs">
+            <div class="date-field">
+              <span>From</span>
+              <input
+                type="date"
+                v-model="workExperience.dateFrom"
+                class="form-input"
+              />
+            </div>
+            <div class="date-field">
+              <span>To</span>
+              <input
+                type="date"
+                v-model="workExperience.dateTo"
+                class="form-input"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>City</label>
+          <input
+            type="text"
+            v-model="workExperience.city"
+            placeholder="Enter city"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Industry</label>
+          <input
+            type="text"
+            v-model="workExperience.industry"
+            placeholder="Enter industry"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea
+            v-model="workExperience.description"
+            placeholder="Describe your role and responsibilities"
+            class="form-input description-input"
+            rows="4"
+          ></textarea>
+        </div>
+
+        <div class="popup-buttons">
+          <button @click="previousStep" class="back-btn">Back</button>
+          <button @click="submitApplication" class="submit-btn">Submit</button>
+        </div>
+      </div>
+
+      <!-- Add this before your form content in the apply-popup div -->
+      <div class="step-indicator">
+        <div
+          class="step"
+          :class="{ active: applicationStep === 1, completed: applicationStep > 1 }"
+        >
+          <div class="step-number">1</div>
+          <span class="step-text">Contact Info</span>
+        </div>
+        <div
+          class="step"
+          :class="{ active: applicationStep === 2, completed: applicationStep > 2 }"
+        >
+          <div class="step-number">2</div>
+          <span class="step-text">Documents</span>
+        </div>
+        <div
+          class="step"
+          :class="{ active: applicationStep === 3 }"
+        >
+          <div class="step-number">3</div>
+          <span class="step-text">Experience</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -505,21 +656,84 @@ function applyToJob(jobId) {
   showApplyPopup.value = true;
 }
 
-async function submitApplication() {
-  if (!coverLetterFile.value) {
-    createToast("Please include a cover letter.", {
-      type: "warning",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-      toastBackgroundColor: "#045d56",
-    });
-    return;
-  }
+const applicationStep = ref(1);
+const contactInfo = ref({
+  name: "",
+  phone: "",
+  email: "",
+});
 
+const workExperience = ref({
+  company: "",
+  dateFrom: "",
+  dateTo: "",
+  city: "",
+  industry: "",
+  description: "",
+});
+
+function nextStep() {
+  if (applicationStep.value === 1) {
+    if (
+      !contactInfo.value.name ||
+      !contactInfo.value.phone ||
+      !contactInfo.value.email
+    ) {
+      createToast("Please fill in all contact information", {
+        type: "warning",
+        position: "top-right",
+        timeout: 3000,
+        showIcon: true,
+      });
+      return;
+    }
+    applicationStep.value = 2;
+  } else if (applicationStep.value === 2) {
+    if (!resumeFile.value || !coverLetterFile.value) {
+      createToast("Please upload both resume and cover letter", {
+        type: "warning",
+        position: "top-right",
+        timeout: 3000,
+        showIcon: true,
+      });
+      return;
+    }
+    applicationStep.value = 3;
+  } else if (applicationStep.value === 3) {
+    if (
+      !workExperience.value.company ||
+      !workExperience.value.dateFrom ||
+      !workExperience.value.dateTo ||
+      !workExperience.value.city ||
+      !workExperience.value.industry
+    ) {
+      createToast("Please fill in all work experience details", {
+        type: "warning",
+        position: "top-right",
+        timeout: 3000,
+        showIcon: true,
+      });
+      return;
+    }
+    submitApplication();
+  }
+}
+
+function previousStep() {
+  applicationStep.value = 1;
+}
+
+// Modify your submitApplication function
+async function submitApplication() {
   const formData = new FormData();
   formData.append("job_id", selectedJobId.value);
   formData.append("cover_letter", coverLetterFile.value);
+  formData.append("name", contactInfo.value.name);
+  formData.append("phone", contactInfo.value.phone);
+  formData.append("email", contactInfo.value.email);
+
+  // Add work experience data
+  formData.append("work_experience", JSON.stringify(workExperience.value));
 
   if (resumeFile.value) {
     formData.append("resume", resumeFile.value);
@@ -572,9 +786,23 @@ function handleFileUploadCoverLetter(event) {
 
 function closeApplyPopup() {
   showApplyPopup.value = false;
+  applicationStep.value = 1;
+  contactInfo.value = {
+    name: "",
+    phone: "",
+    email: "",
+  };
+  workExperience.value = {
+    company: "",
+    dateFrom: "",
+    dateTo: "",
+    city: "",
+    industry: "",
+    description: "",
+  };
   resumeFile.value = null;
+  coverLetterFile.value = null;
   selectedJobId.value = null;
-  coverLetterFile.value = "";
 }
 
 // Notification Logic
@@ -1027,9 +1255,11 @@ body,
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   width: 90%;
+  max-height: 90%;
   max-width: 500px;
   z-index: 1000;
   animation: fadeIn 0.3s ease-in-out;
+  overflow: auto;
 }
 
 .apply-popup h3 {
@@ -1070,17 +1300,172 @@ body,
   color: #045d56;
 }
 
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.form-group {
+  margin-bottom: 20px;
 }
 
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: bold;
+  background: none;
+  padding: 0;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.file-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed #ddd;
+  border-radius: 8px;
+  margin-top: 5px;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.next-btn,
+.submit-btn {
+  background-color: #045d56;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.back-btn,
+.cancel-btn {
+  background-color: #666;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.next-btn:hover,
+.submit-btn:hover {
+  background-color: #033f3a;
+}
+
+.back-btn:hover,
+.cancel-btn:hover {
+  background-color: #555;
+}
+.date-group {
+  margin-bottom: 20px;
+}
+
+.date-inputs {
+  display: flex;
+  gap: 20px;
+}
+
+.date-field {
+  flex: 1;
+}
+
+.date-field span {
+  display: block;
+  margin-bottom: 5px;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.description-input {
+  resize: vertical;
+  min-height: 100px;
+  resize: none;
+}
+
+.work-experience-section {
+  animation: slideIn 0.3s ease-out;
+}
+
+.step-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  position: relative;
+  padding: 0 20px;
+}
+
+.step-indicator::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 50px;
+  right: 50px;
+  height: 2px;
+  background: #ddd;
+  z-index: 1;
+}
+
+.step {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #999;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+  background: #045d56;
+  border-color: #045d56;
+  color: white;
+}
+
+.step.completed .step-number {
+  background: #045d56;
+  border-color: #045d56;
+  color: white;
+}
+
+.step.completed .step-number::after {
+  content: '✓';
+}
+
+.step-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+.step.active .step-text {
+  color: #045d56;
+  font-weight: bold;
+}
+
+.step.completed .step-text {
+  color: #045d56;
+}
 .content {
   margin-top: 10px;
   padding: 20px;
@@ -1438,13 +1823,13 @@ label {
     flex-wrap: wrap;
     gap: 10px;
   }
-  
+
   .page-numbers {
     order: 2;
     width: 100%;
     justify-content: center;
   }
-  
+
   .pagination-btn {
     order: 1;
     flex: 1;

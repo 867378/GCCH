@@ -89,10 +89,16 @@
                     alt="total clients Icon"
                     class="ikon"
                   />
-                  HIRED APPLICANTS</strong
-                >
+                  HIRED APPLICANTS
+                </strong>
               </p>
               <p>{{ totalClients }}</p>
+              <div class="graph-container">
+                <div
+                  class="graph-bar hired"
+                  :style="{ height: `${(totalClients / maxValue) * 100}%` }"
+                ></div>
+              </div>
             </div>
             <div class="card">
               <p>
@@ -102,10 +108,16 @@
                     alt="total job listings Icon"
                     class="ikon"
                   />
-                  TOTAL JOB LISTINGS</strong
-                >
+                  TOTAL JOB LISTINGS
+                </strong>
               </p>
               <p>{{ totalJobs }}</p>
+              <div class="graph-container">
+                <div
+                  class="graph-bar jobs"
+                  :style="{ height: `${(totalJobs / maxValue) * 100}%` }"
+                ></div>
+              </div>
             </div>
             <div class="card">
               <p>
@@ -115,13 +127,21 @@
                     alt="pending applications Icon"
                     class="ikon"
                   />
-                  PENDING APPLICATION</strong
-                >
+                  PENDING APPLICATION
+                </strong>
               </p>
               <p>{{ pendingApplications }}</p>
+              <div class="graph-container">
+                <div
+                  class="graph-bar pending"
+                  :style="{
+                    height: `${(pendingApplications / maxValue) * 100}%`,
+                  }"
+                ></div>
+              </div>
             </div>
           </div>
-          <form @submit.prevent="postJob">
+          <!-- <form @submit.prevent="postJob">
             <div class="post-box">
               <h3>Job Description</h3>
               <button>Post Job</button>
@@ -196,7 +216,7 @@
                 />
               </div>
             </div>
-          </form>
+          </form> -->
         </div>
 
         <!-- JOB DISPLAY -->
@@ -242,7 +262,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
@@ -441,8 +461,7 @@ async function postJob() {
       position: "top-right",
       timeout: 3000,
       showIcon: true,
-            toastBackgroundColor: "#045d56",
-
+      toastBackgroundColor: "#045d56",
     });
 
     await fetchPostedJobs();
@@ -498,6 +517,15 @@ async function fetchPostedJobs() {
 }
 
 onMounted(fetchPostedJobs);
+
+const maxValue = computed(() => {
+  return Math.max(
+    totalClients.value,
+    totalJobs.value,
+    pendingApplications.value,
+    1
+  );
+});
 </script>
 
 <style scoped>
@@ -960,24 +988,118 @@ body,
   display: flex;
   gap: 15px;
 }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
 .card {
   background: white;
-  padding: 15px;
-  border-radius: 3vh;
-  text-align: center;
-  flex: 1;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
-  cursor: pointer;
-  margin-bottom: 1vh;
-  border-bottom: #045d56 solid 4px;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(4, 93, 86, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 40vh;
+  position: relative;
+  border: 1px solid rgba(4, 93, 86, 0.1);
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #045d56, #00bfa5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(4, 93, 86, 0.15);
 }
 
+.card:hover::before {
+  opacity: 1;
+}
+
+.card p {
+  margin: 0;
+  padding: 0;
+}
+
+.card p:first-child {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+.card p:first-child strong {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card p:nth-child(2) {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #045d56;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.graph-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 15px;
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.5)
+  );
+  border-top: 1px solid rgba(4, 93, 86, 0.1);
+}
+
+.graph-bar {
+  width: 100px;
+  min-height: 5px;
+  border-radius: 6px 6px 0 0;
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.graph-bar.hired {
+  background: linear-gradient(to top, #045d56, #00bfa5);
+  box-shadow: 0 0 15px rgba(4, 93, 86, 0.3);
+}
+
+.graph-bar.jobs {
+  background: linear-gradient(to top, #00695c, #00897b);
+  box-shadow: 0 0 15px rgba(0, 105, 92, 0.3);
+}
+
+.graph-bar.pending {
+  background: linear-gradient(to top, #004d40, #00695c);
+  box-shadow: 0 0 15px rgba(0, 77, 64, 0.3);
+}
+
+.card:hover .ikon {
+  transform: scale(1.1);
+}
 .right-content {
   flex: 1;
   background: white;
