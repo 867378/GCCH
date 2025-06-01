@@ -6,7 +6,7 @@
         <li>
           <router-link to="/companydash" class="sidenav-text">
             <img src="/public/home.png" class="ikon" />
-            HOME
+            DASHBOARD
           </router-link>
         </li>
         <li>

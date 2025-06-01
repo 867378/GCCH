@@ -131,13 +131,18 @@
                 </strong>
               </p>
               <p>{{ pendingApplications }}</p>
-              <div class="graph-container">
-                <div
-                  class="graph-bar pending"
-                  :style="{
-                    height: `${(pendingApplications / maxValue) * 100}%`,
-                  }"
-                ></div>
+              <div class="pie-chart-container">
+                <div class="pie-chart" :style="pieChartStyle"></div>
+                <div class="pie-legend">
+                  <div class="legend-item">
+                    <span class="legend-color pending"></span>
+                    <span>Pending ({{ pendingPercentage }}%)</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-color total"></span>
+                    <span>Total ({{ 100 - pendingPercentage }}%)</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -525,6 +530,20 @@ const maxValue = computed(() => {
     pendingApplications.value,
     1
   );
+});
+
+const pendingPercentage = computed(() => {
+  const total = totalClients.value + pendingApplications.value;
+  return total === 0 ? 0 : Math.round((pendingApplications.value / total) * 100);
+});
+
+const pieChartStyle = computed(() => {
+  return {
+    background: `conic-gradient(
+      #004d40 0% ${pendingPercentage.value}%, 
+      #e0e0e0 ${pendingPercentage.value}% 100%
+    )`
+  };
 });
 </script>
 
@@ -1050,11 +1069,8 @@ body,
 }
 
 .card p:nth-child(2) {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #045d56;
-  margin-bottom: 30px;
-  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 10px;
 }
 
 .graph-container {
@@ -1475,5 +1491,48 @@ body,
     padding: 6px 8px;
     margin-top: 10px;
   }
+}
+
+/* Add to your existing <style> section */
+.pie-chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.pie-chart {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.legend-color.pending {
+  background-color: #004d40;
+}
+
+.legend-color.total {
+  background-color: #e0e0e0;
 }
 </style>

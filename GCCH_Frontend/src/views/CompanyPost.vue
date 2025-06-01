@@ -6,7 +6,7 @@
         <li>
           <router-link to="/companydash" class="sidenav-text">
             <img src="/public/home.png" class="ikon" />
-            HOME
+            DASHBOARD
           </router-link>
         </li>
         <li style="font-weight: bold">
@@ -82,6 +82,84 @@
       <!-- POSTED JOBS DISPLAY -->
       <div class="content">
         <div class="left-content">
+          <form @submit.prevent="postJob">
+            <div class="post-box">
+              <h3>Job Description</h3>
+              <button>Post Job</button>
+              <input
+                v-model="jobData.job_title"
+                type="text"
+                placeholder="Enter Job Title"
+                class="job-title"
+              />
+
+              <textarea
+                v-model="jobData.job_description"
+                placeholder="Describe the job description of your company....."
+              ></textarea>
+
+              <div class="form-row">
+                <select
+                  v-model="jobData.job_type"
+                  class="job-form job-type"
+                  id="job_type"
+                >
+                  <option disabled selected value="">Job Type</option>
+                  <option value="full_time">Full-time</option>
+                  <option value="part_time">Part-time</option>
+                  <option value="internship">Internship</option>
+                  <option value="contract">Contract</option>
+                </select>
+
+                <div class="dropdown-checkbox">
+                  <button
+                    type="button"
+                    @click="toggleCourseDropdown"
+                    class="dropdown-btn"
+                  >
+                    Recommended Programs
+                    <span v-if="selectedCourses.length"
+                      >({{ selectedCourses.length }}/3)</span
+                    >
+                  </button>
+                  <div v-if="showCourseDropdown" class="dropdown-list">
+                    <label v-for="course in courseOptions" :key="course">
+                      <input
+                        type="checkbox"
+                        :value="course"
+                        :checked="selectedCourses.includes(course)"
+                        @change="handleCheckboxChange($event, course)"
+                      />
+                      {{ course }}
+                    </label>
+                  </div>
+                </div>
+
+                <input
+                  v-model="jobData.job_location"
+                  type="text"
+                  placeholder="Enter Job Location"
+                  class="job-input"
+                />
+
+                <input
+                  type="number"
+                  v-model="jobData.monthly_salary"
+                  placeholder="Enter Monthly Salary (in Php)"
+                  class="salary-input"
+                />
+
+                <input
+                  type="number"
+                  v-model="jobData.total_slots"
+                  placeholder="Hiring Slot"
+                  class="slot-input"
+                />
+              </div>
+            </div>
+          </form>
+
+          <!-- Add the new sections here -->
           <div v-if="selectedJob" class="selected-job-box">
             <h2>{{ selectedJob.job_title }}</h2>
             <p>{{ selectedJob.job_description }}</p>
@@ -98,6 +176,7 @@
               }}
             </p>
           </div>
+
           <div v-if="selectedJob" class="selected-job-box">
             <h3>Ongoing Applications</h3>
             <ul v-if="jobApplicants.length > 0">
@@ -135,9 +214,9 @@
                   </a>
                 </div>
                 <div v-if="application.resume">
-                  <a :href="application.resume.embed_url" target="_blank"
-                    >📄 View Resume</a
-                  >
+                  <a :href="application.resume.embed_url" target="_blank">
+                    📄 View Resume
+                  </a>
                 </div>
 
                 <div>
@@ -161,41 +240,36 @@
 
                   <div v-else>
                     <div class="button-group">
-                      <div class="button-group">
-                        <label>
-                          <input
-                            type="checkbox"
-                            @change="
-                              openConfirmModal(application.id, 'accepted')
-                            "
-                          />
-                          ✅ Accept
-                        </label>
-                        <label>
-                          <input
-                            type="checkbox"
-                            @change="
-                              openConfirmModal(application.id, 'rejected')
-                            "
-                          />
-                          ❌ Reject
-                        </label>
-                        <label>
-                          <input
-                            type="checkbox"
-                            @change="scheduleInterview(application.id)"
-                          />
-                          📅 Schedule Interview
-                        </label>
-                        <label>
-                          <input
-                            type="checkbox"
-                            @change="scheduleAssessment(application.id)"
-                          />
-                          📝 Schedule Assessment
-                        </label>
-                      </div>
+                      <label>
+                        <input
+                          type="checkbox"
+                          @change="openConfirmModal(application.id, 'accepted')"
+                        />
+                        ✅ Accept
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          @change="openConfirmModal(application.id, 'rejected')"
+                        />
+                        ❌ Reject
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          @change="scheduleInterview(application.id)"
+                        />
+                        📅 Schedule Interview
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          @change="scheduleAssessment(application.id)"
+                        />
+                        📝 Schedule Assessment
+                      </label>
                     </div>
+
                     <textarea
                       v-model="comment"
                       placeholder="Add a comment (optional)"
@@ -216,49 +290,15 @@
                 </div>
               </li>
             </ul>
-
             <p v-else>No applicants have applied yet.</p>
           </div>
+
           <div v-else>
             <p>Select a job to view details and applicants.</p>
           </div>
-
-          <!-- Confirmation Modal -->
-          <div v-if="showConfirmModal" class="modal-overlay">
-            <div class="modal-content">
-              <p>
-                Are you sure you want to update the status of this application
-              </p>
-              <div class="modal-buttons">
-                <button @click="confirmDecision">Yes</button>
-                <button @click="closeConfirmModal">Cancel</button>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div
-          v-if="showMessagePopup"
-          class="popup-overlay"
-          @click.self="showMessagePopup = false"
-        >
-          <div class="popup">
-            <h3>✉️ Message</h3>
-            <textarea
-              v-model="messageContent"
-              placeholder="Type your message here..."
-              rows="5"
-              style="width: 100%; padding: 8px; resize: none"
-            ></textarea>
-            <br /><br />
-            <button @click="sendActualMessage">Send</button>
-            <button @click="showMessagePopup = false" class="cancel-btn">
-              Cancel
-            </button>
-          </div>
-        </div>
-
-        <!-- JOB DISPLAY -->
+        <!-- Keep your existing right-content section -->
         <div class="right-content">
           <h3>POSTED JOBS</h3>
           <div class="posted-jobs">
@@ -340,19 +380,19 @@ async function sendActualMessage() {
     console.log("Message Sent:", response.data);
     showMessagePopup.value = false;
     messageContent.value = "";
-    createToast('Message sent successfully!', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Message sent successfully!", {
+      type: "success",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   } catch (error) {
     console.error("Error sending message:", error);
-    createToast('Failed to send message. Please try again.', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to send message. Please try again.", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -592,6 +632,128 @@ function selectJob(job) {
   selectedJob.value = job;
   fetchApplicants(job.id);
 }
+
+// Add these to your existing script setup
+const showCourseDropdown = ref(false);
+const selectedCourses = ref([]);
+
+const courseOptions = [
+  "BSIT",
+  "BSCS",
+  "BSEMC",
+  "BSN",
+  "BSM",
+  "BSA",
+  "BSBA-FM",
+  "BSBA-HRM",
+  "BSBA-MM",
+  "BSCA",
+  "BSHM",
+  "BSTM",
+  "BAComm",
+  "BECEd",
+  "BCAEd",
+  "BPEd",
+  "BEED",
+  "BSEd-Eng",
+  "BSEd-Math",
+  "BSEd-Fil",
+  "BSEd-SS",
+  "BSEd-Sci",
+  "Other",
+];
+
+const jobData = ref({
+  job_title: "",
+  job_description: "",
+  job_location: "",
+  monthly_salary: "",
+  job_type: "",
+  recommended_course: "",
+  recommended_course_2: "",
+  recommended_course_3: "",
+  total_slots: "",
+});
+
+function toggleCourseDropdown() {
+  showCourseDropdown.value = !showCourseDropdown.value;
+}
+
+const handleCheckboxChange = (event, course) => {
+  if (event.target.checked) {
+    if (selectedCourses.value.length < 3) {
+      selectedCourses.value.push(course);
+    } else {
+      selectedCourses.value.shift();
+      selectedCourses.value.push(course);
+    }
+  } else {
+    selectedCourses.value = selectedCourses.value.filter((c) => c !== course);
+  }
+};
+
+async function postJob() {
+  try {
+    jobData.value.recommended_course = selectedCourses.value[0] || null;
+    jobData.value.recommended_course_2 = selectedCourses.value[1] || null;
+    jobData.value.recommended_course_3 = selectedCourses.value[2] || null;
+
+    const response = await axios.post("/company/postjob", {
+      job_title: jobData.value.job_title,
+      job_description: jobData.value.job_description,
+      job_location: jobData.value.job_location,
+      monthly_salary: jobData.value.monthly_salary,
+      job_type: jobData.value.job_type,
+      recommended_course: jobData.value.recommended_course,
+      recommended_course_2: jobData.value.recommended_course_2 || null,
+      recommended_course_3: jobData.value.recommended_course_3 || null,
+      total_slots: jobData.value.total_slots,
+    });
+
+    createToast(response.data.message, {
+      type: "success",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
+    });
+
+    // Reset form
+    jobData.value = {
+      job_title: "",
+      job_description: "",
+      job_location: "",
+      monthly_salary: "",
+      job_type: "",
+      recommended_course: "",
+      recommended_course_2: "",
+      recommended_course_3: "",
+      total_slots: "",
+    };
+
+    selectedCourses.value = [];
+    await fetchPostedJobs();
+  } catch (error) {
+    if (error.response && error.response.status === 422) {
+      const errors = error.response.data.error;
+      let errorMessages = Object.values(errors).flat().join("\n");
+      createToast(errorMessages, {
+        type: "danger",
+        position: "top-right",
+        timeout: 5000,
+        showIcon: true,
+      });
+    } else {
+      console.error("Unexpected error:", error);
+      createToast("An unexpected error occurred.", {
+        type: "danger",
+        position: "top-right",
+        timeout: 3000,
+        showIcon: true,
+      });
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -605,16 +767,22 @@ body,
 .container {
   display: flex;
   background: #e6f0ea;
-  height: 100vh;
-  overflow: hidden;
+  height: auto;
+  overflow: AUTO;
 }
 .sidebar {
+  position: fixed; 
+  top: 0;
+  left: 0;
+  height: 100vh;
   width: 200px;
   background: #fafafa;
   padding: 20px 0;
   border-radius: 2vh;
   border-right: 3.5px solid #045d56;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow-y: auto; 
+  z-index: 1000; 
 }
 .logo {
   height: 8vh;
@@ -720,6 +888,7 @@ body,
   margin-right: 10px;
 }
 .main {
+  margin-left: 200px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -846,6 +1015,136 @@ body,
 }
 .left-content {
   flex: 3;
+}
+
+.post-box {
+  background: white;
+  padding: 20px;
+  margin-bottom: 10px;
+  border-radius: 5vh;
+  width: 130vh;
+  border-bottom: #045d56 solid 4px;
+  overflow: auto;
+}
+
+.post-box textarea {
+  width: 100%;
+  background-color: #f1f1f1;
+  padding: 10px 15px;
+  margin-top: 2vh;
+  border-radius: 13px;
+  height: 30vh;
+  border: none;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+}
+
+.post-box h3 {
+  text-align: left;
+  font-size: 30px;
+}
+
+.post-box button {
+  background: #00695c;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 10px;
+  margin-top: -30px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: color 0.3s ease-in-out;
+  float: right;
+}
+
+.post-box button:hover {
+  color: #045d56;
+  background: #f1f1f1;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 3fr);
+  gap: 1vh;
+  align-items: center;
+  margin-top: 3vh;
+}
+
+.job-form {
+  flex: 1;
+  position: relative;
+  width: 45vh;
+  padding: 10px 6px;
+  margin-left: 3vh;
+  border-radius: 2vh;
+  background-color: #045d56;
+  color: #e0f2f1;
+  font-size: 14px;
+  transition: background-color 0.3s ease-in-out;
+  z-index: 1;
+}
+
+.job-form:hover {
+  background-color: #e0f2f1;
+  color: #045d56;
+}
+
+.job-title {
+  width: 100%;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 12px;
+  background-color: #f1f1f1;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.3s ease-in-out;
+  box-shadow: inset 0 0 0 1px transparent;
+  outline: none;
+}
+
+.dropdown-checkbox {
+  position: relative;
+  display: flex;
+  margin-top: 4vh;
+}
+
+.dropdown-btn {
+  padding: 10px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  width: 75%;
+  text-align: left;
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  width: 80%;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.dropdown-list label {
+  display: block;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.job-input,
+.salary-input,
+.slot-input {
+  width: 44vh;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  margin-left: 2.5vh;
 }
 
 .selected-job-box {
