@@ -67,6 +67,7 @@ return [
             'refreshToken' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
             'folderId' => env('GOOGLE_DRIVE_FOLDER_ID'),
             'folderPath' => env('GOOGLE_DRIVE_FOLDER_PATH'),
+            'picturePath' => env('GOOGLE_DRIVE_PICTURE_PATH'),
             'folderDownload' => env('GOOGLE_DRIVE_DOWNLOADABLE_FILES')
         ],
 

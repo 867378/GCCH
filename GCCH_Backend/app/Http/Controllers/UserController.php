@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Company;
 use App\Models\Applicant;
+use App\Models\ProfilePicture;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
@@ -12,10 +13,18 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use App\Services\GoogleDriveService;
 
 
 class UserController extends Controller
 {   
+    protected $googleDriveService;
+
+    public function __construct(GoogleDriveService $googleDriveService)
+    {
+        $this->googleDriveService = $googleDriveService;
+    }
+
     public function getRole(){
         $user = auth()->user();
 
@@ -101,9 +110,24 @@ class UserController extends Controller
             'sex' => 'required|in:male,female,prefer_to_not_say',
             'phone_number' => ['required', 'string', 'max:15', 'regex:/^[\d\s]+$/'],
             'course' => 'required|in:BSIT,BSCS,BSEMC,BSN,BSM,BSA,BSBA-FM,BSBA-HRM,BSBA-MM,BSCA,BSHM,BSTM,BAComm,BECEd,BCAEd,BPEd,BEED,BSEd-Eng,BSEd-Math,BSEd-Fil,BSEd-SS,BSEd-Sci,Other',
+            'expertise' => 'required|string|max:255',
+            'street_address' => 'required|string|max:255',
+            'city' => 'required|string|max:30',
+            'province' => 'required|string|max:30',
+            'country' => 'required|string|max:30',
+            'profile_picture' => 'required|image|max:2048',
         ]);
 
         try{
+            $file = $request->file('profile_picture');
+            $customFileName = $request->first_name . '_' . $request->last_name . '_profile_picture';
+
+            $profilePicture = $this->uploadPicture($file, $customFileName, $user->id);
+
+            if (!$profilePicture) {
+                return response()->json(['error' => 'Failed to upload profile picture'], 500);
+            }
+
             Applicant::create([
                 'user_id' => $user->id,
                 'first_name' => $request->first_name,
@@ -113,6 +137,12 @@ class UserController extends Controller
                 'sex' => $request->sex,
                 'phone_number' => $request->phone_number,
                 'course' => $request->course,
+                'expertise' => $request->expertise,
+                'street_address' => $request->street_address,
+                'city' => $request->city,
+                'province' => $request->province,
+                'country' => $request->country,
+                'profile_picture' => $profilePicture->id,
             ]);
     
             return response()->json([
@@ -132,10 +162,20 @@ class UserController extends Controller
             'city' => 'required|string|max:30',
             'province' => 'required|string|max:30',
             'country' => 'required|string|max:30',
+            'profile_picture' => 'required|image|max:2048',
             'industry_type' => 'required|string|max:255',
         ]);
 
         try{
+            $file = $request->file('profile_picture');
+            $customFileName = $request->company_name . '_profile_picture';
+
+            $profilePicture = $this->uploadPicture($file, $customFileName, $user->id);
+
+            if (!$profilePicture) {
+                return response()->json(['error' => 'Failed to upload profile picture'], 500);
+            }
+
             Company::create([
                 'user_id' => $user->id,
                 'company_name' => $request->company_name,
@@ -145,6 +185,8 @@ class UserController extends Controller
                 'province' => $request->province,
                 'country' => $request->country,
                 'industry_type' => $request->industry_type,
+                'profile_picture' => $profilePicture->id,
+                
             ]);
     
             return response()->json([
@@ -156,6 +198,27 @@ class UserController extends Controller
             return response()->json(['error' => $e->validator->errors()], 422);
         }
     }
+
+    private function uploadPicture($file, $customFileName, $userId)
+    {
+        $uploadResult = $this->googleDriveService->uploadPicture($file, $customFileName);
+
+        if (!$uploadResult || !isset($uploadResult['file_id'])) {
+            return ['error' => 'Failed to upload profile picture'];
+        }
+
+        $this->googleDriveService->setPublicPermission($uploadResult['file_id']);
+
+        $profilePicture = ProfilePicture::create([
+            'user_id' => $userId,
+            'file_name' => $uploadResult['name'],
+            'drive_file_id' => $uploadResult['file_id'],
+            'mime_type' => $file->getMimeType(),
+        ]);
+
+        return $profilePicture;
+    }
+
 
     public function getUserById($id){
         $user = User::find($id);

@@ -76,27 +76,27 @@
         <div class="profile-wrapper">
           <div class="profile-card">
             <div class="form-group">
-              <label 
-  class="profile-avatar-label" 
-  @click="isEditing ? $refs.fileInput.click() : null"
-  :style="{ cursor: isEditing ? 'pointer' : 'default' }"
->
-  <img
-    :src="avatarPreview || '/public/user.png'"
-    alt="Profile"
-    class="profile-avatar"
-  />
-  <input
-    type="file"
-    ref="fileInput"
-    :disabled="!isEditing"
-    @change="handleImageUpload"
-    accept="image/*"
-    style="display: none"
-  />
-  <div class="avatar-overlay" v-if="isEditing">
-  </div>
-</label>
+              <label
+                class="profile-avatar-label"
+                @click="isEditing ? $refs.fileInput.click() : null"
+                :style="{ cursor: isEditing ? 'pointer' : 'default' }"
+              >
+                <img
+                  :src="avatarPreview || applicant.profile_picture_url"
+                  alt="Profile"
+                  class="profile-avatar"
+                />
+                <input
+                  type="file"
+                  ref="fileInput"
+                  :disabled="!isEditing"
+                  @change="handleImageUpload"
+                  accept="image/*"
+                  style="display: none"
+                />
+                <div class="avatar-overlay" v-if="isEditing"></div>
+              </label>
+              <h2>Profile</h2>
             </div>
 
             <div class="profile-form" v-if="applicant.applicant">
@@ -165,7 +165,7 @@
                     type="email"
                     :readonly="!isEditing"
                     v-model="email"
-                    :placeholder="applicant.email || ''"
+                    :placeholder="applicant.user.email || ''"
                   />
                 </div>
               </div>
@@ -297,6 +297,7 @@ function enableEditing() {
 
 function cancelEditing() {
   isEditing.value = false;
+  avatarPreview.value = null;
   ({
     fullName: fullName.value,
     dateOfBirth: dateOfBirth.value,
@@ -327,6 +328,13 @@ async function fetchUserData() {
     const response = await axios.get(`user/applicant/${userId}`);
     applicant.value = response.data;
     console.log("Fetched User Data", response.data);
+    createToast("Profile loaded successfully", {
+      type: "success",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
+    });
   } catch (error) {
     console.error("Failed to fetch user data", error);
     createToast("Failed to load profile data", {
@@ -466,6 +474,8 @@ async function handleImageUpload(event) {
       showIcon: true,
       toastBackgroundColor: "#045d56",
     });
+    avatarPreview.value = null; // Reset preview
+    await fetchUserData();      // Refresh data
   } catch (error) {
     console.error("Error uploading image:", error);
     createToast("Failed to upload profile picture", {

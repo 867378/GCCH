@@ -26,9 +26,24 @@ class CompanyController extends Controller
 
     public function fetchCompanyData($id)
     {
-        $user = User::with('company')->findOrFail($id);
-        return response()->json($user);
+        $user = User::with('company.profilePicture')->findOrFail($id);
+
+        $company = $user->company;
+
+        $profilePictureUrl = null;
+
+        if ($company && $company->profilePicture) {
+            $fileId = $company->profilePicture->drive_file_id;
+            $profilePictureUrl = $this->googleDriveService->getPublicImageUrl($fileId);
+        }
+
+        return response()->json([
+            'user' => $user,
+            'company' => $company,
+            'profile_picture_url' => $profilePictureUrl,
+        ]);
     }
+
 
     public function totalClients()
     {
