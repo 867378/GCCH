@@ -9,18 +9,28 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('profile_pictures', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('file_name');
-            $table->string('drive_file_id');
-            $table->string('mime_type')->nullable();
-            $table->timestamps();
-        });
-    }
+public function up(): void
+{
+    // Fix invalid data first
+    DB::table('companies')->where('profile_picture', '')->update(['profile_picture' => null]);
+    DB::table('applicants')->where('profile_picture', '')->update(['profile_picture' => null]);
 
+    Schema::table('companies', function (Blueprint $table) {
+        $table->unsignedBigInteger('profile_picture')->nullable()->change();
+        $table->foreign('profile_picture')
+            ->references('id')
+            ->on('profile_pictures')
+            ->onDelete('set null');
+    });
+
+    Schema::table('applicants', function (Blueprint $table) {
+        $table->unsignedBigInteger('profile_picture')->nullable()->change();
+        $table->foreign('profile_picture')
+            ->references('id')
+            ->on('profile_pictures')
+            ->onDelete('set null');
+    });
+}
     /**
      * Reverse the migrations.
      */
@@ -28,4 +38,5 @@ return new class extends Migration
     {
         Schema::dropIfExists('profile_pictures');
     }
+    
 };

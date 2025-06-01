@@ -197,7 +197,7 @@
           </form>
         </div>
 
-        <!-- <div v-else-if="currentStep === 'photo'" class="form-view">
+        <div v-else-if="currentStep === 'photos'" class="form-view">
           <h2 class="title">Upload Profile Photo</h2>
           <form @submit.prevent="submitPhotoForm">
             <div class="photo-upload-section">
@@ -227,7 +227,7 @@
               <button type="submit" class="kontinue-btn">Submit</button>
             </div>
           </form>
-        </div> -->
+        </div>
       </div>
     </div>
   </div>
