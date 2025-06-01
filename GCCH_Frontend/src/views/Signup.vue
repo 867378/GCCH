@@ -256,6 +256,7 @@ const submitCompanyForm = async () => {
       country: form.value.country,
       industry_type: form.value.industry_type,
     });
+    
 
     createToast("Company profile created successfully!", {
       type: "success",

@@ -113,6 +113,7 @@ router.beforeEach(async (to, from, next) => {
   if (authRequired && !userId) {
     return next({ name: 'Login' });
   }
+  
 
   if (!role && !onboarding && !publicPages.includes(to.name)) {
     try {

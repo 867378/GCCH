@@ -154,7 +154,7 @@
                   <div v-if="!showStatusOptions">
                     <button
                       class="message-btn"
-                      @click="sendMessage(application.id)"
+                      @click="sendMessage(application.applicant.id)"
                     >
                       Send Message
                     </button>
