@@ -189,10 +189,10 @@
             />
 
             <div class="button-group">
-              <button type="button" class="back-btn" @click="goBack">
+              <button type="button" class="back-btn" @click="goBackcompany">
                 Back
               </button>
-              <button type="submit" class="kontinue-btn">Continue</button>
+              <button @click="currentStep = 'photos'" class="kontinue-btn">Continue</button>
             </div>
           </form>
         </div>
@@ -221,7 +221,7 @@
             </div>
 
             <div class="button-group">
-              <button type="button" class="back-btn" @click="goToApplicantForm">
+              <button type="button" class="back-btn" @click="currentStep = 'company'">
                 Back
               </button>
               <button type="submit" class="kontinue-btn">Submit</button>
@@ -395,6 +395,9 @@ const goBack = () => {
   currentStep.value = "select";
 };
 
+const goBackcompany = () => {
+  currentStep.value = "select";
+};
 const submitApplicantForm = async () => {
   // try {
   //   await axios.post(`user/applicant/profile/${userId}`, {
@@ -462,7 +465,9 @@ const handlePhotoUpload = (event) => {
 const goToApplicantForm = () => {
   currentStep.value = "applicant";
 };
-
+const goToCompanyForm = () => {
+  currentStep.value = "company";
+};
 const submitPhotoForm = async () => {
   try {
     const formData = new FormData();
