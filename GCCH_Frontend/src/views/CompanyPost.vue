@@ -66,16 +66,6 @@
           </div>
         </div>
 
-        <div v-if="showMail" class="popup-overlay" @click.self="toggleMail">
-          <div class="popup">
-            <h3>📬 Messages</h3>
-            <ul class="popup-list">
-              <li v-for="(msg, index) in messages" :key="index">{{ msg }}</li>
-            </ul>
-            <button @click="toggleMail">Close</button>
-          </div>
-        </div>
-
         <div v-if="showNotif" class="popup-overlay" @click.self="toggleNotif">
           <div class="popup">
             <h3>🔔 Notifications</h3>
@@ -316,7 +306,6 @@ const isSidenavOpen = ref(true);
 
 const selectedJob = ref(null);
 const jobApplicants = ref([]);
-const messages = ref([]);
 
 const notifications = ref([]);
 const postedJobs = ref([]);

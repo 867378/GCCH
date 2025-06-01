@@ -6,7 +6,7 @@
         <li style="font-weight: bold">
           <router-link to="/companydash" class="sidenav-text">
             <img src="/public/home.png" class="ikon" />
-            HOME
+            DASHBOARD
           </router-link>
         </li>
         <li>
@@ -63,20 +63,6 @@
           <div class="icon" @click="toggleNotif">
             <img src="/public/notification.png" />
             <span v-if="newNotifications > 0">{{ newNotifications }}</span>
-          </div>
-        </div>
-
-        <div v-if="showMail" class="popup-overlay" @click.self="toggleMail">
-          <div class="popup">
-            <h3>📬 Messages</h3>
-            <ul class="popup-list">
-              <li v-for="(notif, index) in notifications" :key="index">
-                <strong>{{ formatType(notif.type) }}</strong
-                >: {{ notif.content }}
-                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
-              </li>
-            </ul>
-            <button @click="toggleMail">Close</button>
           </div>
         </div>
 
