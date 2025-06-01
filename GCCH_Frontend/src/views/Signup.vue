@@ -399,59 +399,11 @@ const goBackcompany = () => {
   currentStep.value = "select";
 };
 const submitApplicantForm = async () => {
-  // try {
-  //   await axios.post(`user/applicant/profile/${userId}`, {
-  //     first_name: form.value.firstName,
-  //     middle_name: form.value.middleName,
-  //     last_name: form.value.lastName,
-  //     date_of_birth: form.value.birthday,
-  //     sex: form.value.sex,
-  //     phone_number: form.value.phone,
-  //     course: form.value.course,
-  //     expertise: form.value.expertise,
-
-  //   });
-
-  //   // Instead of routing to dashboard, go to photo step
     currentStep.value = "photo";
-  // } catch (error) {
-  //   console.error("Error submitting form:", error);
-  //   createToast(error.response?.data?.message || "Failed to create profile", {
-  //     type: "danger",
-  //     position: "top-right",
-  //     timeout: 3000,
-  //     showIcon: true,
-  //   });
-  // }
 };
 
 const submitCompanyForm = async () => {
-  // try {
-  //   await axios.post(`user/company/profile/${userId}`, {
-  //     company_name: form.value.companyName,
-  //     company_telephone: form.value.telephone,
-  //     street_address: form.value.address,
-  //     city: form.value.city,
-  //     province: form.value.province,
-  //     country: form.value.country,
-  //     industry_type: form.value.industry_type,
-  //   });
-    
-
-  //   // Transition to photo step
     currentStep.value = "photo";
-  // } catch (error) {
-  //   console.error("Error submitting form:", error);
-  //   createToast(
-  //     error.response?.data?.message || "Failed to create company profile",
-  //     {
-  //       type: "danger",
-  //       position: "top-right",
-  //       timeout: 3000,
-  //       showIcon: true,
-  //     }
-  //   );
-  // }
 };
 
 const handlePhotoUpload = (event) => {
