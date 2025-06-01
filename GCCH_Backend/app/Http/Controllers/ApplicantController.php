@@ -31,8 +31,22 @@ class ApplicantController extends Controller
 
     public function fetchApplicantData($id)
     {
-        $user = User::with('applicant')->findOrFail($id);
-        return response()->json($user);
+        $user = User::with('applicant.profilePicture')->findOrFail($id);
+
+        $applicant = $user->applicant;
+
+        $profilePictureUrl = null;
+
+        if ($applicant && $applicant->profilePicture) {
+            $fileId = $applicant->profilePicture->drive_file_id;
+            $profilePictureUrl = $this->googleDriveService->getPublicImageUrl($fileId);
+        }
+
+        return response()->json([
+            'user' => $user,
+            'applicant' => $applicant,
+            'profile_picture_url' => $profilePictureUrl,
+        ]);
     }
 
     public function listedJobs(){
@@ -131,6 +145,10 @@ class ApplicantController extends Controller
                 $customFileName = $applicant->first_name . '_' . $applicant->last_name . '_cover_letter';
                 $fileMeta['cover_letter'] = $this->googleDriveService->uploadFile($file, $customFileName);
 
+                 if ($fileMeta['cover_letter'] && isset($fileMeta['cover_letter']['file_id'])) {
+                    $this->googleDriveService->setPublicPermission($fileMeta['cover_letter']['file_id']);
+                }
+
                 $coverLetter = new CoverLetter();
                 $coverLetter->applicant_id = $applicant->id;
                 $coverLetter->file_name = $fileMeta['cover_letter']['name'];
@@ -147,6 +165,10 @@ class ApplicantController extends Controller
                 $file = $request->file('resume');
                 $customFileName = $applicant->first_name . '_' . $applicant->last_name . '_resume';
                 $fileMeta['resume'] = $this->googleDriveService->uploadFile($file, $customFileName);
+
+                 if ($fileMeta['resume'] && isset($fileMeta['resume']['file_id'])) {
+                    $this->googleDriveService->setPublicPermission($fileMeta['resume']['file_id']);
+                }
 
                 $resume = new Resume();
                 $resume->applicant_id = $applicant->id;

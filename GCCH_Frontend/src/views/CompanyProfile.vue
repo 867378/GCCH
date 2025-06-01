@@ -84,7 +84,7 @@
             <div class="form-group">
               <label class="profile-avatar-label">
                 <img
-                  :src="profileImage || '/public/user.png'"
+                  :src="company.profile_picture_url"
                   alt="Profile"
                   class="profile-avatar"
                 />
@@ -136,7 +136,7 @@
                     type="email"
                     :readonly="!isEditing"
                     v-model="email"
-                    :placeholder="company.email"
+                    :placeholder="company.user.email"
                   />
                 </div>
               </div>

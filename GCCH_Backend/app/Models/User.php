@@ -37,6 +37,10 @@ class User extends Authenticatable
         //'remember_token',
     ];
 
+    public function profilePicture()
+    {
+        return $this->hasOne(ProfilePicture::class);
+    }
     public function applicant()
     {
         return $this->hasOne(Applicant::class);

@@ -48,6 +48,7 @@ Route::get('/delete-all-data', function () {
     DB::table('cover_letters')->truncate();
     DB::table('sessions')->truncate();
     DB::table('messages')->truncate();
+    DB::table('profile_pictures')->truncate();
     DB::table('notifications')->truncate();
     DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     return 'All data has been deleted successfully!';

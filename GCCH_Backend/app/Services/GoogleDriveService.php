@@ -8,7 +8,22 @@ use League\Flysystem\FileAttributes;
 use Illuminate\Support\Str;
 
 class GoogleDriveService
-{
+{   
+    protected function getClient()
+    {
+        $client = new \Google_Client();
+        $client->setClientId(config('services.google.client_id'));
+        $client->setClientSecret(config('services.google.client_secret'));
+        $client->setRedirectUri(config('services.google.redirect_uri'));
+        $client->addScope(\Google_Service_Drive::DRIVE);
+
+        // Set refresh token to get access tokens automatically
+        $client->refreshToken(config('services.google.refresh_token'));
+
+        return $client;
+    }
+
+
     public function uploadFile($file, $customFileName){
         $folderPath = config('filesystems.disks.google.folderPath', '/');
         $extension = $file->getClientOriginalExtension();
@@ -44,13 +59,56 @@ class GoogleDriveService
 
         return null;
     }
-    
-    /*
-    public function setPublicPermission($fileId){
 
-        $client = new \Google_Client();
-        $client->setAuthConfig(storage_path('app/google/credentials.json')); // Adjust path if needed
-        $client->addScope(\Google_Service_Drive::DRIVE);
+    public function getFileEmbedUrl($fileId){
+        return "https://drive.google.com/file/d/{$fileId}/preview";
+    }
+    
+    public function uploadPicture($file, $customFileName){
+        $folderPath = config('filesystems.disks.google.picturePath', '/');
+        $extension = $file->getClientOriginalExtension();
+        $uniqueSuffix = now()->timestamp . '_' . Str::random(8);
+        $fileName = $customFileName . '_' .$uniqueSuffix . '.' . $extension;
+
+        $path = Storage::disk('google')->putFileAs(
+            $folderPath,
+            $file,
+            $fileName   
+        );
+
+        \Log::info('Uploaded path:', ['path' => $path]);
+
+        if($path){
+            $contents = Storage::disk('google')->listContents($folderPath, false);
+
+            \Log::info('Drive folder contents:', ['contents' => $contents]);
+
+            foreach ($contents as $content) {
+                if($content instanceof FileAttributes && basename($content->path()) === $fileName) {
+
+                    $fileId = $content->extraMetaData()['id'] ?? null;
+                    
+                    return [
+                        'name' => basename($content->path()),
+                        'path' => $content->path(),
+                        'file_id' => $fileId,
+                    ];
+                }
+            }
+        }
+
+        return null;
+    }
+    
+    public function getPublicImageUrl($fileId)
+    {
+        return "https://drive.google.com/thumbnail?id={$fileId}";
+    }
+
+
+    public function setPublicPermission($fileId)
+    {
+        $client = $this->getClient();
 
         $service = new \Google_Service_Drive($client);
 
@@ -65,8 +123,6 @@ class GoogleDriveService
             \Log::error('Failed to set permission: ' . $e->getMessage());
         }
     }
-    */
-    
 
     public function listFiles(){
         return Storage::disk('google')->listContents('/', false);
@@ -78,10 +134,6 @@ class GoogleDriveService
 
     public function deleteFile($filePath){
         return Storage::disk('google')->delete($filePath);
-    }
-
-    public function getFileEmbedUrl($fileId){
-        return "https://drive.google.com/file/d/{$fileId}/preview";
     }
 
     public function getFileMetaData($fileId){

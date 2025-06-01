@@ -50,6 +50,7 @@ onMounted(async () => {
 });
 </script>
 
+
 <style scoped>
 .redirect-container {
   display: flex;
