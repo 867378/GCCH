@@ -23,6 +23,9 @@ class Job extends Model
         'total_slots',
         'filled_slots',
         'company_id', // foreign key from company that posted the job
+        'recommended_expertise',
+        'recommended_expertise_2',
+        'recommended_expertise_3',
     ];
 
     public function company()

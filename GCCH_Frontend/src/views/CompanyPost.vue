@@ -95,7 +95,7 @@
 
               <textarea
                 v-model="jobData.job_description"
-                placeholder="Describe the job description of your company....."
+                placeholder="Describe the job responsibilities, requirements, and any other relevant details."
               ></textarea>
 
               <div class="form-row">
@@ -131,6 +131,30 @@
                         @change="handleCheckboxChange($event, course)"
                       />
                       {{ course }}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="dropdown-checkbox">
+                  <button
+                    type="button"
+                    @click="toggleExpertiseDropdown"
+                    class="dropdown-btn"
+                  >
+                    Recommended Expertise
+                    <span v-if="selectedExpertise.length"
+                      >({{ selectedExpertise.length }}/3)</span
+                    >
+                  </button>
+                  <div v-if="showExpertiseDropdown" class="dropdown-list">
+                    <label v-for="expertise in filteredExpertise" :key="expertise">
+                      <input
+                        type="checkbox"
+                        :value="expertise"
+                        :checked="selectedExpertise.includes(expertise)"
+                        @change="handleExpertiseCheckboxChange($event, expertise)"
+                      />
+                      {{ expertise }}
                     </label>
                   </div>
                 </div>
@@ -329,7 +353,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
@@ -636,6 +660,24 @@ function selectJob(job) {
 // Add these to your existing script setup
 const showCourseDropdown = ref(false);
 const selectedCourses = ref([]);
+const selectedExpertise = ref([]);
+
+const filteredExpertise = computed(() => {
+  const expertiseSet = new Set();
+
+  selectedCourses.value.forEach((course) => {
+    const expertiseList = expertiseMap[course] || [];
+    expertiseList.forEach((expertise) => expertiseSet.add(expertise));
+  });
+
+  return Array.from(expertiseSet);
+});
+
+const showExpertiseDropdown = ref(false);
+
+function toggleExpertiseDropdown() {
+  showExpertiseDropdown.value = !showExpertiseDropdown.value;
+}
 
 const courseOptions = [
   "BSIT",
@@ -663,6 +705,48 @@ const courseOptions = [
   "Other",
 ];
 
+const expertiseMap = {
+  BSIT: [
+    "Web Development",
+    "Networking",
+    "Cybersecurity",
+    "System Administration",
+    "Other",
+  ],
+  BSCS: ["Data Science", "AI", "Software Engineering", "Algorithms","Other"],
+  BSEMC: ["Multimedia Arts", "Animation", "Game Development","Other"],
+  BSN: ["Clinical Nursing", "Community Health", "Medical-Surgical Nursing","Other"],
+  BSM: ["Strategic Management", "Operations Management", "Entrepreneurship","Other"],
+  BSA: ["Financial Accounting", "Auditing", "Taxation","Other"],
+  "BSBA-FM": ["Corporate Finance", "Investment Analysis", "Banking","Other"],
+  "BSBA-HRM": [
+    "Human Resources",
+    "Talent Management",
+    "Organizational Development",
+    "Other",
+  ],
+  "BSBA-MM": ["Marketing Strategy", "Advertising", "Sales Management","Other"],
+  BSCA: ["Customs Brokerage", "Trade Compliance", "Logistics","Other"],
+  BSHM: ["Hotel Management", "Food & Beverage Service", "Customer Relations","Other"],
+  BSTM: ["Tourism Planning", "Event Management", "Travel Services","Other"],
+  BAComm: ["Journalism", "Public Relations", "Media Production","Other"],
+  BECEd: ["Early Childhood Development", "Preschool Education","Other"],
+  BCAEd: ["Arts Education", "Cultural Studies", "Creative Expression","Other"],
+  BPEd: ["Sports Science", "Physical Fitness", "Coaching","Other"],
+  BEED: ["Elementary Teaching", "Child Psychology", "Classroom Management","Other"],
+  "BSEd-Eng": ["English Education", "Literature", "Language Teaching","Other"],
+  "BSEd-Math": ["Mathematics Education", "Algebra", "Calculus","Other"],
+  "BSEd-Fil": [
+    "Filipino Language",
+    "Philippine Literature",
+    "Language Teaching",
+    "Other",
+  ],
+  "BSEd-SS": ["Social Studies", "Philippine History", "Civics & Culture","Other"],
+  "BSEd-Sci": ["General Science", "Biology", "Chemistry", "Physics","Other"],
+  Other: ["Other"],
+};
+
 const jobData = ref({
   job_title: "",
   job_description: "",
@@ -672,12 +756,29 @@ const jobData = ref({
   recommended_course: "",
   recommended_course_2: "",
   recommended_course_3: "",
+  recommeded_expertise: "",
+  recommended_expertise_2: "",
+  recommended_expertise_3: "",
   total_slots: "",
 });
 
 function toggleCourseDropdown() {
   showCourseDropdown.value = !showCourseDropdown.value;
 }
+
+const handleExpertiseCheckboxChange = (event, expertise) => {
+  if (event.target.checked) {
+    if (selectedExpertise.value.length < 3) {
+      selectedExpertise.value.push(expertise);
+    } else {
+      selectedExpertise.value.shift();
+      selectedExpertise.value.push(expertise);
+    }
+  } else {
+    selectedExpertise.value = selectedExpertise.value.filter((e) => e !== expertise);
+  }
+};
+
 
 const handleCheckboxChange = (event, course) => {
   if (event.target.checked) {
@@ -697,6 +798,10 @@ async function postJob() {
     jobData.value.recommended_course = selectedCourses.value[0] || null;
     jobData.value.recommended_course_2 = selectedCourses.value[1] || null;
     jobData.value.recommended_course_3 = selectedCourses.value[2] || null;
+    jobData.value.recommended_expertise = selectedExpertise.value[0] || null;
+    jobData.value.recommended_expertise_2 = selectedExpertise.value[1] || null;
+    jobData.value.recommended_expertise_3 = selectedExpertise.value[2] || null;
+
 
     const response = await axios.post("/company/postjob", {
       job_title: jobData.value.job_title,
@@ -707,6 +812,9 @@ async function postJob() {
       recommended_course: jobData.value.recommended_course,
       recommended_course_2: jobData.value.recommended_course_2 || null,
       recommended_course_3: jobData.value.recommended_course_3 || null,
+      recommended_expertise: jobData.value.recommended_expertise,
+      recommended_expertise_2: jobData.value.recommended_expertise_2 || null,
+      recommended_expertise_3: jobData.value.recommended_expertise_3 || null,
       total_slots: jobData.value.total_slots,
     });
 
@@ -728,10 +836,14 @@ async function postJob() {
       recommended_course: "",
       recommended_course_2: "",
       recommended_course_3: "",
+      recommended_expertise: "",
+      recommended_expertise_2: "",
+      recommended_expertise_3: "",
       total_slots: "",
     };
 
     selectedCourses.value = [];
+    selectedExpertise.value = [];
     await fetchPostedJobs();
   } catch (error) {
     if (error.response && error.response.status === 422) {

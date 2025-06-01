@@ -255,6 +255,8 @@ class ApplicantController extends Controller
                     'job_id' => $application->job_id,
                     'job_title' => $application->job->job_title,
                     'status' => $application->status,
+                    'comment' => $application->comment,
+                    'schedule' => $application->scheduled_at,
                     'updated_at' => $application->created_at,
                 ];
             });

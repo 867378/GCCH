@@ -85,19 +85,20 @@
               <div class="resume-list">
                 <div
                   v-for="application in ongoingApplications"
-                  :key="index"
+                  :key="application.id"
                   class="resume-item received"
                 >
-                  <h4>Job Application for : {{ application.job_title }}</h4>
-                  <p><strong>Job Title:</strong> {{ application.job_title }}</p>
+                  <h4>Job Application for "{{ application.job_title }}"</h4>
+                  <br>
                   <p><strong>Status:</strong> {{ application.status }}</p>
+                  <!-- will be updated later -->
                   <p>
                     <strong>Schedule:</strong>
-                    {{ application.schedule || "To be announced" }}
+                    {{ application.schedule || "To be announced" }} 
                   </p>
                   <p>
                     <strong>Comments:</strong>
-                    {{ application.comments || "No comments yet." }}
+                    {{ application.comment || "No comments yet." }}
                   </p>
                   <p>
                     <strong>Updated At:</strong>
@@ -118,7 +119,7 @@
                   :key="index"
                   class="resume-item received"
                 >
-                  <h4>Job Application for : {{ application.job_title }}</h4>
+                  <h4>Job Application for {{ application.job_title }}</h4>
                   <p><strong>Status:</strong> {{ application.status }}</p>
                   <p>
                     <strong>Updated At:</strong>
@@ -313,6 +314,7 @@ async function fetchJobApplications() {
         app.status !== "hired" &&
         app.offer_status !== "none"
     );
+    console.log("Fetched applications:", ongoingApplications.value);
   } catch (error) {
     console.error("Error Occurred", error);
     createToast("Failed to fetch applications", {
