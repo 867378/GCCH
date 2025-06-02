@@ -102,6 +102,9 @@ class CompanyController extends Controller
                 'recommended_course' => 'required|string|max:255',
                 'recommended_course_2' => 'nullable|string|max:255',
                 'recommended_course_3' => 'nullable|string|max:255',
+                'recommended_expertise' => 'nullable|string|max:255',
+                'recommended_expertise_2' => 'nullable|string|max:255',
+                'recommended_expertise_3' => 'nullable|string|max:255',
                 'total_slots' => 'required|integer|min:1',
             ]);
 
@@ -117,6 +120,9 @@ class CompanyController extends Controller
             'recommended_course' => $validated['recommended_course'],
             'recommended_course_2' => $validated['recommended_course_2'],
             'recommended_course_3' => $validated['recommended_course_3'],
+            'recommended_expertise' => $validated['recommended_expertise'],
+            'recommended_expertise_2' => $validated['recommended_expertise_2'],
+            'recommended_expertise_3' => $validated['recommended_expertise_3'],
             'total_slots' => $validated['total_slots'],
             'filled_slots' => 0,
             'date_posted' => now(),

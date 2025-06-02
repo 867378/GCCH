@@ -340,6 +340,9 @@ const jobData = ref({
   recommended_course: "",
   recommended_course_2: "",
   recommended_course_3: "",
+  recommended_expertise: "",
+  recommended_expertise_2: "",
+  recommended_expertise_3: "",
   total_slots: "",
 });
 
