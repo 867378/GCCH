@@ -135,6 +135,12 @@
                   </div>
                 </div>
 
+                <input
+                  v-model="jobData.job_location"
+                  type="text"
+                  placeholder="Enter Job Location"
+                  class="job-input"
+                />
                 <div class="dropdown-checkbox">
                   <button
                     type="button"
@@ -147,25 +153,22 @@
                     >
                   </button>
                   <div v-if="showExpertiseDropdown" class="dropdown-list">
-                    <label v-for="expertise in filteredExpertise" :key="expertise">
+                    <label
+                      v-for="expertise in filteredExpertise"
+                      :key="expertise"
+                    >
                       <input
                         type="checkbox"
                         :value="expertise"
                         :checked="selectedExpertise.includes(expertise)"
-                        @change="handleExpertiseCheckboxChange($event, expertise)"
+                        @change="
+                          handleExpertiseCheckboxChange($event, expertise)
+                        "
                       />
                       {{ expertise }}
                     </label>
                   </div>
                 </div>
-
-                <input
-                  v-model="jobData.job_location"
-                  type="text"
-                  placeholder="Enter Job Location"
-                  class="job-input"
-                />
-
                 <input
                   type="number"
                   v-model="jobData.monthly_salary"
@@ -713,37 +716,62 @@ const expertiseMap = {
     "System Administration",
     "Other",
   ],
-  BSCS: ["Data Science", "AI", "Software Engineering", "Algorithms","Other"],
-  BSEMC: ["Multimedia Arts", "Animation", "Game Development","Other"],
-  BSN: ["Clinical Nursing", "Community Health", "Medical-Surgical Nursing","Other"],
-  BSM: ["Strategic Management", "Operations Management", "Entrepreneurship","Other"],
-  BSA: ["Financial Accounting", "Auditing", "Taxation","Other"],
-  "BSBA-FM": ["Corporate Finance", "Investment Analysis", "Banking","Other"],
+  BSCS: ["Data Science", "AI", "Software Engineering", "Algorithms", "Other"],
+  BSEMC: ["Multimedia Arts", "Animation", "Game Development", "Other"],
+  BSN: [
+    "Clinical Nursing",
+    "Community Health",
+    "Medical-Surgical Nursing",
+    "Other",
+  ],
+  BSM: [
+    "Strategic Management",
+    "Operations Management",
+    "Entrepreneurship",
+    "Other",
+  ],
+  BSA: ["Financial Accounting", "Auditing", "Taxation", "Other"],
+  "BSBA-FM": ["Corporate Finance", "Investment Analysis", "Banking", "Other"],
   "BSBA-HRM": [
     "Human Resources",
     "Talent Management",
     "Organizational Development",
     "Other",
   ],
-  "BSBA-MM": ["Marketing Strategy", "Advertising", "Sales Management","Other"],
-  BSCA: ["Customs Brokerage", "Trade Compliance", "Logistics","Other"],
-  BSHM: ["Hotel Management", "Food & Beverage Service", "Customer Relations","Other"],
-  BSTM: ["Tourism Planning", "Event Management", "Travel Services","Other"],
-  BAComm: ["Journalism", "Public Relations", "Media Production","Other"],
-  BECEd: ["Early Childhood Development", "Preschool Education","Other"],
-  BCAEd: ["Arts Education", "Cultural Studies", "Creative Expression","Other"],
-  BPEd: ["Sports Science", "Physical Fitness", "Coaching","Other"],
-  BEED: ["Elementary Teaching", "Child Psychology", "Classroom Management","Other"],
-  "BSEd-Eng": ["English Education", "Literature", "Language Teaching","Other"],
-  "BSEd-Math": ["Mathematics Education", "Algebra", "Calculus","Other"],
+  "BSBA-MM": ["Marketing Strategy", "Advertising", "Sales Management", "Other"],
+  BSCA: ["Customs Brokerage", "Trade Compliance", "Logistics", "Other"],
+  BSHM: [
+    "Hotel Management",
+    "Food & Beverage Service",
+    "Customer Relations",
+    "Other",
+  ],
+  BSTM: ["Tourism Planning", "Event Management", "Travel Services", "Other"],
+  BAComm: ["Journalism", "Public Relations", "Media Production", "Other"],
+  BECEd: ["Early Childhood Development", "Preschool Education", "Other"],
+  BCAEd: ["Arts Education", "Cultural Studies", "Creative Expression", "Other"],
+  BPEd: ["Sports Science", "Physical Fitness", "Coaching", "Other"],
+  BEED: [
+    "Elementary Teaching",
+    "Child Psychology",
+    "Classroom Management",
+    "Other",
+  ],
+  "BSEd-Eng": ["English Education", "Literature", "Language Teaching", "Other"],
+  "BSEd-Math": ["Mathematics Education", "Algebra", "Calculus", "Other"],
   "BSEd-Fil": [
     "Filipino Language",
     "Philippine Literature",
     "Language Teaching",
     "Other",
   ],
-  "BSEd-SS": ["Social Studies", "Philippine History", "Civics & Culture","Other"],
-  "BSEd-Sci": ["General Science", "Biology", "Chemistry", "Physics","Other"],
+  "BSEd-SS": [
+    "Social Studies",
+    "Philippine History",
+    "Civics & Culture",
+    "Other",
+  ],
+  "BSEd-Sci": ["General Science", "Biology", "Chemistry", "Physics", "Other"],
   Other: ["Other"],
 };
 
@@ -775,10 +803,11 @@ const handleExpertiseCheckboxChange = (event, expertise) => {
       selectedExpertise.value.push(expertise);
     }
   } else {
-    selectedExpertise.value = selectedExpertise.value.filter((e) => e !== expertise);
+    selectedExpertise.value = selectedExpertise.value.filter(
+      (e) => e !== expertise
+    );
   }
 };
-
 
 const handleCheckboxChange = (event, course) => {
   if (event.target.checked) {
@@ -801,7 +830,6 @@ async function postJob() {
     jobData.value.recommended_expertise = selectedExpertise.value[0] || null;
     jobData.value.recommended_expertise_2 = selectedExpertise.value[1] || null;
     jobData.value.recommended_expertise_3 = selectedExpertise.value[2] || null;
-
 
     const response = await axios.post("/company/postjob", {
       job_title: jobData.value.job_title,
@@ -883,7 +911,7 @@ body,
   overflow: AUTO;
 }
 .sidebar {
-  position: fixed; 
+  position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
@@ -893,8 +921,8 @@ body,
   border-radius: 2vh;
   border-right: 3.5px solid #045d56;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  overflow-y: auto; 
-  z-index: 1000; 
+  overflow-y: auto;
+  z-index: 1000;
 }
 .logo {
   height: 8vh;
@@ -1135,6 +1163,7 @@ body,
   margin-bottom: 10px;
   border-radius: 5vh;
   width: 130vh;
+  height: 75vh;
   border-bottom: #045d56 solid 4px;
   overflow: auto;
 }

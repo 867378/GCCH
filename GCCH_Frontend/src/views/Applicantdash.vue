@@ -51,8 +51,95 @@
             <span></span>
             <span></span>
           </div>
+          <div class="search-container">
+            <img src="/public/search.png" alt="Search" class="search-icon" />
+            <input
+              type="text"
+              placeholder="Search..."
+              class="search-input"
+              v-model="searchQuery"
+              @input="handleSearch"
+            />
+          </div>
         </div>
         <div class="icons-right">
+          <div class="icon" @click="toggleProgramsDropdown">
+            <img src="/public/learning.png" />
+            <p>Programs</p>
+            <!-- Add the dropdown menu or logic -->
+            <div class="programs-dropdown" v-if="showProgramsDropdown">
+              <div class="dropdown-header">
+                <h4>Select Program</h4>
+              </div>
+              <div class="dropdown-options">
+                <div
+                  v-for="program in programsList"
+                  :key="program.id"
+                  class="dropdown-item"
+                  :class="{ active: selectedProgram === program.id }"
+                  @click="filterByProgram(program)"
+                >
+                  {{ program.name }}
+                </div>
+                <div class="dropdown-item clear" @click="clearProgramFilter">
+                  Clear Filter
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="icon" @click="toggleExpertiseDropdown">
+            <img src="/public/expertise.png" />
+            <p>Expertise</p>
+            <!-- Add the dropdown menu or logic -->
+            <div class="expertise-dropdown" v-if="showExpertiseDropdown">
+              <div class="dropdown-header">
+                <h4>Select Expertise</h4>
+              </div>
+              <div class="dropdown-options">
+                <div
+                  v-for="skill in expertiseList"
+                  :key="skill.id"
+                  class="dropdown-item"
+                  :class="{ active: selectedExpertise === skill.id }"
+                  @click="filterByExpertise(skill)"
+                >
+                  {{ skill.name }}
+                </div>
+                <div class="dropdown-item clear" @click="clearExpertiseFilter">
+                  Clear Filter
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="icon" @click="toggleSalaryDropdown">
+            <img src="/public/money.png" />
+            <p>Salary</p>
+            <!-- Add the dropdown menu -->
+            <div class="salary-dropdown" v-if="showSalaryDropdown">
+              <div class="dropdown-header">
+                <h4>Salary Range</h4>
+              </div>
+              <div class="dropdown-options">
+                <div
+                  v-for="range in salaryRanges"
+                  :key="range.id"
+                  class="dropdown-item"
+                  :class="{ active: selectedSalaryRange === range.id }"
+                  @click="filterBySalary(range)"
+                >
+                  ₱{{ range.min.toLocaleString() }} - ₱{{
+                    range.max.toLocaleString()
+                  }}
+                </div>
+                <div class="dropdown-item clear" @click="clearSalaryFilter">
+                  Clear Filter
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="icon" @click="toggleNotif">
             <img src="/public/notification.png" />
             <span v-if="newNotifications > 0">{{ newNotifications }}</span>
@@ -70,50 +157,14 @@
 
       <div class="content">
         <div class="left-content">
-          <!-- <div class="cards">
-            <div class="card">
-              <p>
-                <strong>
-                  <img
-                    src="/public/management.png"
-                    alt="total clients Icon"
-                    class="ikon"
-                  />
-                  ONGOING JOB APPLICATIONS</strong
-                >
-              </p>
-              <p>{{ ongoingApplicationsCount }}</p>
-            </div>
-            <div class="card">
-              <p>
-                <strong>
-                  <img
-                    src="/public/counting.png"
-                    alt="total job listings Icon"
-                    class="ikon"
-                  />
-                  MATCHING JOBS COUNT</strong
-                >
-              </p>
-              <p>{{ matchedJobCount }}</p>
-            </div>
-            <div class="card">
-              <p>
-                <strong>
-                  <img
-                    src="/public/email.png"
-                    alt="pending applications Icon"
-                    class="ikon"
-                  />
-                  OFFERED JOBS</strong
-                >
-              </p>
-              <p>{{ acceptedApplicationsCount }}</p>
-            </div>
-          </div> -->
           <div class="job-content">
             <h3>RECOMMENDED JOBS BASED ON COURSE</h3>
-            <!-- Replace your v-for with paginatedJobs -->
+
+            <div v-if="paginatedJobs.length === 0" class="no-jobs-message">
+              <img src="/public/job-loss.png" alt="No Jobs" class="ikon" />
+              <p>No job listings available yet</p>
+            </div>
+
             <div
               class="job-box"
               v-for="matchedJob in paginatedJobs"
@@ -259,28 +310,6 @@
             </div>
           </div>
 
-          <div class="upd-content">
-            <h3>CHECK THIS OUT</h3>
-            <div class="updates-list">
-              <div
-                v-for="(notif, index) in filteredNotifications"
-                :key="index"
-                @click="openChat(notif)"
-                style="cursor: pointer"
-                class="update-box"
-              >
-                <h2>{{ formatType(notif.type) }}</h2>
-                <p>
-                  {{ notif.latestContent }}
-                  <span v-if="notif.count > 1">
-                    ({{ notif.count }} new
-                    {{ pluralizeType(notif.type, notif.count) }})
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-
           <div class="cards">
             <div class="card">
               <p>
@@ -321,6 +350,11 @@
               </p>
               <p>{{ acceptedApplicationsCount }}</p>
             </div>
+          </div>
+
+          <!-- Add this after your cards div -->
+          <div class="chart-container">
+            <canvas id="statsChart"></canvas>
           </div>
         </div>
       </div>
@@ -474,22 +508,25 @@
       <div class="step-indicator">
         <div
           class="step"
-          :class="{ active: applicationStep === 1, completed: applicationStep > 1 }"
+          :class="{
+            active: applicationStep === 1,
+            completed: applicationStep > 1,
+          }"
         >
           <div class="step-number">1</div>
           <span class="step-text">Contact Info</span>
         </div>
         <div
           class="step"
-          :class="{ active: applicationStep === 2, completed: applicationStep > 2 }"
+          :class="{
+            active: applicationStep === 2,
+            completed: applicationStep > 2,
+          }"
         >
           <div class="step-number">2</div>
           <span class="step-text">Documents</span>
         </div>
-        <div
-          class="step"
-          :class="{ active: applicationStep === 3 }"
-        >
+        <div class="step" :class="{ active: applicationStep === 3 }">
           <div class="step-number">3</div>
           <span class="step-text">Experience</span>
         </div>
@@ -521,11 +558,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
+import Chart from "chart.js/auto";
 
 const router = useRouter();
 
@@ -997,12 +1035,246 @@ function goToPage(page) {
   currentPage.value = page;
 }
 
+// Chart.js logic
+const chartInstance = ref(null);
+
+const updateChart = () => {
+  if (chartInstance.value) {
+    chartInstance.value.destroy();
+  }
+
+  const ctx = document.getElementById("statsChart");
+  chartInstance.value = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Ongoing Applications", "Matching Jobs", "Offered Jobs"],
+      datasets: [
+        {
+          label: "Application Statistics",
+          data: [
+            ongoingApplicationsCount.value,
+            matchedJobCount.value,
+            acceptedApplicationsCount.value,
+          ],
+          backgroundColor: [
+            "rgba(4, 93, 86, 0.7)",
+            "rgba(4, 93, 86, 0.5)",
+            "rgba(4, 93, 86, 0.3)",
+          ],
+          borderColor: [
+            "rgba(4, 93, 86, 1)",
+            "rgba(4, 93, 86, 1)",
+            "rgba(4, 93, 86, 1)",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1,
+          },
+          max: 50,
+          grid: {
+            color: "rgba(0, 0, 0, 0.1)",
+            drawBorder: false,
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+        title: {
+          display: true,
+          text: "JOB STATISTICS",
+          color: "#045d56",
+          font: {
+            size: 16,
+            weight: "bold",
+          },
+        },
+      },
+    },
+  });
+};
+
+watch(
+  [ongoingApplicationsCount, matchedJobCount, acceptedApplicationsCount],
+  () => {
+    updateChart();
+  }
+);
+
 onMounted(() => {
   fetchHiredApplication();
   fetchJobs();
   fetchNotifications();
   fetchDashboardCounts();
+
+  setTimeout(() => {
+    updateChart();
+  }, 100);
 });
+
+const searchQuery = ref("");
+
+const handleSearch = () => {
+  console.log("Searching for:", searchQuery.value);
+};
+
+const showSalaryDropdown = ref(false);
+const selectedSalaryRange = ref(null);
+const salaryRanges = ref([
+  { id: 1, min: 0, max: 15000 },
+  { id: 2, min: 15001, max: 25000 },
+  { id: 3, min: 25001, max: 35000 },
+  { id: 4, min: 35001, max: 45000 },
+  { id: 5, min: 45001, max: 55000 },
+]);
+
+const toggleSalaryDropdown = () => {
+  showSalaryDropdown.value = !showSalaryDropdown.value;
+};
+
+const filterBySalary = async (range) => {
+  selectedSalaryRange.value = range.id;
+
+  try {
+    await fetchJobs();
+
+    recommendedJobs.value = recommendedJobs.value.filter((job) => {
+      const salary = parseInt(job.monthly_salary.replace(/[^0-9]/g, ""));
+      return salary >= range.min && salary <= range.max;
+    });
+
+    showSalaryDropdown.value = false;
+
+    createToast(
+      `Showing jobs with salary range: ₱${range.min.toLocaleString()} - ₱${range.max.toLocaleString()}`,
+      {
+        type: "info",
+        position: "top-right",
+        timeout: 3000,
+        showIcon: true,
+      }
+    );
+  } catch (error) {
+    console.error("Error filtering jobs:", error);
+    createToast("Error filtering jobs. Please try again.", {
+      type: "error",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+  }
+};
+
+const clearSalaryFilter = async () => {
+  selectedSalaryRange.value = null;
+  await fetchJobs();
+  showSalaryDropdown.value = false;
+};
+
+//expertise dropdown logic
+const showExpertiseDropdown = ref(false);
+const selectedExpertise = ref(null);
+const expertiseList = ref([]);
+
+const toggleExpertiseDropdown = () => {
+  showExpertiseDropdown.value = !showExpertiseDropdown.value;
+};
+
+const filterByExpertise = async (skill) => {
+  selectedExpertise.value = skill.id;
+
+  try {
+    await fetchJobs();
+
+    recommendedJobs.value = recommendedJobs.value.filter((job) => {
+      return job.skills && job.skills.includes(skill.name);
+    });
+
+    showExpertiseDropdown.value = false;
+
+    createToast(`Showing jobs requiring expertise: ${skill.name}`, {
+      type: "info",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+  } catch (error) {
+    console.error("Error filtering jobs by expertise:", error);
+    createToast("Error filtering jobs. Please try again.", {
+      type: "error",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+  }
+};
+
+const clearExpertiseFilter = async () => {
+  selectedExpertise.value = null;
+  await fetchJobs();
+  showExpertiseDropdown.value = false;
+};
+
+//programs dropdown logic
+const showProgramsDropdown = ref(false);
+const selectedProgram = ref(null);
+const programsList = ref([
+  { id: 1, name: 'BSIT' },
+  { id: 2, name: 'BSCS' },
+  { id: 3, name: 'BSIS' },
+  { id: 4, name: 'ACT' }
+]);
+
+const toggleProgramsDropdown = () => {
+  showProgramsDropdown.value = !showProgramsDropdown.value;
+};
+
+const filterByProgram = async (program) => {
+  selectedProgram.value = program.id;
+  
+  try {
+    await fetchJobs();
+    
+    recommendedJobs.value = recommendedJobs.value.filter(job => {
+      return job.required_course && 
+             job.required_course.toLowerCase() === program.name.toLowerCase();
+    });
+    
+    showProgramsDropdown.value = false;
+    
+    createToast(`Showing jobs for ${program.name} program`, {
+      type: 'info',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+    
+  } catch (error) {
+    console.error('Error filtering jobs by program:', error);
+    createToast('Error filtering jobs. Please try again.', {
+      type: 'error',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  }
+};
+
+const clearProgramFilter = async () => {
+  selectedProgram.value = null;
+  await fetchJobs();
+  showProgramsDropdown.value = false;
+};
 </script>
 
 <style scoped>
@@ -1150,6 +1422,11 @@ body,
   flex-shrink: 0;
 }
 
+.topbar p {
+  font-size: 0.5rem;
+  color: #333;
+}
+
 .hamburger {
   display: none;
   flex-direction: column;
@@ -1168,10 +1445,214 @@ body,
   border-radius: 3px;
 }
 
+.search-container {
+  position: relative;
+  margin-left: 20px;
+}
+
+.search-input {
+  padding: 8px 15px;
+  padding-left: 40px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  width: 300px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  text-indent: 4vh;
+  background-color: #f5f5f5;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #045d56;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(4, 93, 86, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+}
 .sidebar.collapsed {
   width: 0px;
   overflow: hidden;
   transition: width 0.3s ease;
+}
+
+.programs-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+.programs-dropdown .dropdown-header {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #045d56;
+}
+
+.programs-dropdown .dropdown-header h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.programs-dropdown .dropdown-options {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.programs-dropdown .dropdown-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+}
+
+.programs-dropdown .dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.programs-dropdown .dropdown-item.active {
+  background-color: #e0f2f1;
+  color: #045d56;
+  font-weight: bold;
+}
+
+.programs-dropdown .dropdown-item.clear {
+  border-top: 1px solid #e0e0e0;
+  color: #666;
+  font-weight: bold;
+}
+
+.programs-dropdown .dropdown-item.clear:hover {
+  background-color: #fee8e7;
+  color: #d32f2f;
+}
+
+.salary-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+.dropdown-header {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #045d56;
+}
+
+.dropdown-header h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.dropdown-options {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdown-item.active {
+  background-color: #e0f2f1;
+  color: #045d56;
+  font-weight: bold;
+}
+
+.dropdown-item.clear {
+  border-top: 1px solid #e0e0e0;
+  color: #666;
+  font-weight: bold;
+}
+
+.dropdown-item.clear:hover {
+  background-color: #fee8e7;
+  color: #d32f2f;
+}
+
+.expertise-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+.expertise-dropdown .dropdown-header {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e0e0e0;
+  color: #045d56;
+}
+
+.expertise-dropdown .dropdown-header h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.expertise-dropdown .dropdown-options {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.expertise-dropdown .dropdown-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+}
+
+.expertise-dropdown .dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.expertise-dropdown .dropdown-item.active {
+  background-color: #e0f2f1;
+  color: #045d56;
+  font-weight: bold;
+}
+
+.expertise-dropdown .dropdown-item.clear {
+  border-top: 1px solid #e0e0e0;
+  color: #666;
+  font-weight: bold;
+}
+
+.expertise-dropdown .dropdown-item.clear:hover {
+  background-color: #fee8e7;
+  color: #d32f2f;
 }
 
 .left-top {
@@ -1403,7 +1884,7 @@ body,
 }
 
 .step-indicator::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 20px;
   left: 50px;
@@ -1449,7 +1930,7 @@ body,
 }
 
 .step.completed .step-number::after {
-  content: '✓';
+  content: "✓";
 }
 
 .step-text {
@@ -1483,8 +1964,9 @@ body,
 }
 
 .cards {
-  margin-top: 2vh;
-  display: block;
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 15px;
 }
 .card {
@@ -1492,6 +1974,7 @@ body,
   padding: 15px;
   border-radius: 3vh;
   text-align: center;
+  font-size: 15px;
   flex: 1;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease-in-out;
@@ -1507,6 +1990,7 @@ body,
 
 .company-name {
   font-size: 20px;
+  margin-top: 2vh;
   font-weight: bold;
 }
 
@@ -1547,7 +2031,31 @@ body,
   color: #045d56;
   transform: scale(1.08);
 }
+.no-jobs-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin: 20px;
+  border-left: 4px solid #045d56;
+}
 
+.no-jobs-message img {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.no-jobs-message p {
+  color: #666;
+  font-size: 18px;
+  margin: 0;
+}
 .job-content {
   flex: 3;
   background: white;
@@ -1817,22 +2325,15 @@ label {
   color: white;
 }
 
-/* Add responsive styles */
-@media (max-width: 768px) {
-  .pagination {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .page-numbers {
-    order: 2;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .pagination-btn {
-    order: 1;
-    flex: 1;
-  }
+.chart-container {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 20px;
+  height: 35vh;
+  border-bottom: 4px solid #045d56;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
+
+
 </style>

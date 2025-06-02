@@ -80,6 +80,10 @@
       </div>
       <div class="content">
         <div class="left-content">
+          <div class="chart-container">
+            <canvas id="statsChart"></canvas>
+          </div>
+
           <div class="cards">
             <div class="card">
               <p>
@@ -146,120 +150,6 @@
               </div>
             </div>
           </div>
-          <!-- <form @submit.prevent="postJob">
-            <div class="post-box">
-              <h3>Job Description</h3>
-              <button>Post Job</button>
-              <input
-                v-model="jobData.job_title"
-                type="text"
-                placeholder="Enter Job Title"
-                class="job-title"
-              />
-
-              <textarea
-                v-model="jobData.job_description"
-                placeholder="Describe the job description of your company....."
-              ></textarea>
-
-              <div class="form-row">
-                <select
-                  v-model="jobData.job_type"
-                  class="job-form job-type"
-                  id="job_type"
-                >
-                  <option disabled selected value="">Job Type</option>
-                  <option value="full_time">Full-time</option>
-                  <option value="part_time">Part-time</option>
-                  <option value="internship">Internship</option>
-                  <option value="contract">Contract</option>
-                </select>
-
-                <div class="dropdown-checkbox">
-                  <button
-                    type="button"
-                    @click="toggleCourseDropdown"
-                    class="dropdown-btn"
-                  >
-                    Recommended Programs
-                    <span v-if="selectedCourses.length"
-                      >({{ selectedCourses.length }}/3)</span
-                    >
-                  </button>
-                  <div v-if="showCourseDropdown" class="dropdown-list">
-                    <label v-for="course in courseOptions" :key="course">
-                      <input
-                        type="checkbox"
-                        :value="course"
-                        :checked="selectedCourses.includes(course)"
-                        @change="handleCheckboxChange($event, course)"
-                      />
-                      {{ course }}
-                    </label>
-                  </div>
-                </div>
-
-                <input
-                  v-model="jobData.job_location"
-                  type="text"
-                  placeholder="Enter Job Location"
-                  class="job-input"
-                />
-
-                <input
-                  type="number"
-                  v-model="jobData.monthly_salary"
-                  placeholder="Enter Monthly Salary (in Php)"
-                  class="salary-input"
-                />
-
-                <input
-                  type="number"
-                  v-model="jobData.total_slots"
-                  placeholder="Hiring Slot"
-                  class="slot-input"
-                />
-              </div>
-            </div>
-          </form> -->
-        </div>
-
-        <!-- JOB DISPLAY -->
-        <div class="right-content">
-          <h3>POSTED JOBS</h3>
-          <div class="posted-jobs">
-            <div
-              class="posted-jobs-box"
-              v-for="(job, index) in postedJobs"
-              :key="index"
-              @click="selectJob(job)"
-            >
-              <h2>{{ job.job_title }}</h2>
-              <p><strong>Location:</strong> {{ job.job_location }}</p>
-              <p><strong>Type:</strong> {{ formatType(job.job_type) }}</p>
-              <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
-              <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
-              <p><strong>Status:</strong> {{ job.status }}</p>
-              <p>
-                <strong
-                  >Slot: {{ job.filled_slots }}/{{ job.total_slots }}</strong
-                >
-              </p>
-              <p>
-                <strong>Recommended programs:</strong>
-                {{
-                  [
-                    job.recommended_course,
-                    job.recommended_course_2,
-                    job.recommended_course_3,
-                  ]
-                    .filter((course) => course)
-                    .join(", ")
-                }}
-              </p>
-            </div>
-            <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
-          </div>
         </div>
       </div>
     </div>
@@ -267,11 +157,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
+import Chart from "chart.js/auto";
 
 const router = useRouter();
 
@@ -444,6 +335,98 @@ function formatType(type) {
 onMounted(() => {
   fetchNotifications();
   fetchDashboardCounts();
+
+  // Add slight delay to ensure DOM is ready
+  setTimeout(() => {
+    updateChart();
+  }, 100);
+});
+
+const chartInstance = ref(null);
+
+const updateChart = () => {
+  if (chartInstance.value) {
+    chartInstance.value.destroy();
+  }
+
+  const ctx = document.getElementById("statsChart");
+  chartInstance.value = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Hired Applicants", "Total Jobs", "Pending Applications"],
+      datasets: [
+        {
+          label: "Company Statistics",
+          data: [
+            totalClients.value,
+            totalJobs.value,
+            pendingApplications.value,
+          ],
+          backgroundColor: [
+            "rgba(4, 93, 86, 0.7)",
+            "rgba(4, 93, 86, 0.5)",
+            "rgba(4, 93, 86, 0.3)",
+          ],
+          borderColor: [
+            "rgba(4, 93, 86, 1)",
+            "rgba(4, 93, 86, 1)",
+            "rgba(4, 93, 86, 1)",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1,
+          },
+          // Add max value to ensure scale goes up to 100
+          max: 50,
+          // Add grid lines configuration for better visibility
+          grid: {
+            color: "rgba(0, 0, 0, 0.1)",
+            drawBorder: false,
+          },
+        },
+        x: {
+          grid: {
+            display: false,
+          },
+          ticks: {
+            font: {
+              size: 12,
+            },
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+        title: {
+          display: true,
+          text: "COMPANY STATISTICS",
+          color: "#045d56",
+          font: {
+            size: 16,
+            weight: "bold",
+          },
+          padding: {
+            bottom: 20,
+          },
+        },
+      },
+    },
+  });
+};
+
+watch([totalClients, totalJobs, pendingApplications], () => {
+  updateChart();
 });
 
 async function postJob() {
@@ -537,7 +520,9 @@ const maxValue = computed(() => {
 
 const pendingPercentage = computed(() => {
   const total = totalClients.value + pendingApplications.value;
-  return total === 0 ? 0 : Math.round((pendingApplications.value / total) * 100);
+  return total === 0
+    ? 0
+    : Math.round((pendingApplications.value / total) * 100);
 });
 
 const pieChartStyle = computed(() => {
@@ -545,7 +530,7 @@ const pieChartStyle = computed(() => {
     background: `conic-gradient(
       #004d40 0% ${pendingPercentage.value}%, 
       #e0e0e0 ${pendingPercentage.value}% 100%
-    )`
+    )`,
   };
 });
 </script>
@@ -801,221 +786,11 @@ body,
 .left-content {
   flex: 3;
 }
-.post-box {
-  background: white;
-  padding: 20px;
-  margin-bottom: 10px;
-  border-radius: 5vh;
-  width: 130vh;
-  border-bottom: #045d56 solid 4px;
-  overflow: auto;
-}
-.post-box textarea {
-  width: 100%;
-  background-color: #f1f1f1;
-  padding: 10px 15px;
-  margin-top: 2vh;
-  border-radius: 13px;
-  height: 30vh;
-  border: none;
-  font-size: 14px;
-  resize: none;
-  outline: none;
-}
-
-.post-box h3 {
-  text-align: left;
-  font-size: 30px;
-}
-.post-box button {
-  background: #00695c;
-  color: white;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 10px;
-  margin-top: -30px;
-  margin-bottom: 5px;
-  cursor: pointer;
-  transition: color 0.3s ease-in-out;
-  float: right;
-}
-.post-box button:hover {
-  color: #045d56;
-  background: #f1f1f1;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(2, 3fr);
-  gap: 1vh;
-  align-items: center;
-  margin-top: 3vh;
-}
-
-.upload-media {
-  display: flex;
-  align-items: center;
-  border-radius: 2vh;
-  cursor: pointer;
-}
-
-.job-form {
-  flex: 1;
-  position: relative;
-  padding: 10px 6px;
-  margin-left: 3vh;
-  border-radius: 2vh;
-  background-color: #045d56;
-  color: #e0f2f1;
-  font-size: 14px;
-  transition: background-color 0.3s ease-in-out;
-  z-index: 1;
-}
-
-.job-form:hover {
-  background-color: #e0f2f1;
-  color: #045d56;
-}
-
-.job-form:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px #80cbc4;
-}
-
-.job-title {
-  width: 100%;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 12px;
-  background-color: #f1f1f1;
-  font-size: 14px;
-  color: #333;
-  transition: all 0.3s ease-in-out;
-  box-shadow: inset 0 0 0 1px transparent;
-  outline: none;
-}
-
-.job-title:hover {
-  background-color: #e0f2f1;
-  color: #045d56;
-}
-
-.job-title:focus {
-  background-color: #ffffff;
-  box-shadow: 0 0 0 2px #00bfa5;
-  color: #000;
-}
-.job-input {
-  width: 44vh;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  color: #333;
-  margin-left: 2.5vh;
-}
-
-.dropdown-checkbox {
-  position: relative;
-  display: flex;
-  margin-top: 4vh;
-}
-
-.dropdown-btn {
-  padding: 10px;
-  border: 1px solid #ccc;
-  background: white;
-  cursor: pointer;
-  width: 80%;
-  text-align: left;
-}
-
-.dropdown-list {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: white;
-  border: 1px solid #ccc;
-  width: 80%;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 10;
-}
-
-.dropdown-list label {
-  display: block;
-  padding: 5px 10px;
-  cursor: pointer;
-}
-
-.salary-input {
-  width: 44vh;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  margin-left: 2.5vh;
-}
-.slot-input {
-  width: 44vh;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  margin-left: 2.5vh;
-}
-.job-type {
-  background-color: #045d56;
-  color: #ffffff;
-}
-
-.salary-range {
-  background-color: #045d56;
-  color: #ffffff;
-}
-
-.job-type,
-.salary-range {
-  display: block;
-  width: 70%;
-}
-
-.job-type option,
-.salary-range option {
-  background-color: white;
-  color: black;
-}
-
-.posted-jobs-box {
-  background-color: #ffffff;
-  border: 1px solid #e0e6ed;
-  border-radius: 16px;
-  margin: 2vh;
-  width: 35vh;
-  padding: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
-  overflow: hidden;
-  text-transform: capitalize;
-  border-left: #045d56 solid 5px;
-}
-
-.posted-jobs-box:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-}
-
-.cards {
-  display: flex;
-  gap: 15px;
-}
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 25px;
-  margin-bottom: 30px;
 }
 
 .card {
@@ -1024,7 +799,8 @@ body,
   border-radius: 20px;
   box-shadow: 0 10px 20px rgba(4, 93, 86, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 40vh;
+  min-height: 30vh;
+  margin-top: 3vh;
   position: relative;
   border: 1px solid rgba(4, 93, 86, 0.1);
   overflow: hidden;
@@ -1056,24 +832,38 @@ body,
   padding: 0;
 }
 
-.card p:first-child {
-  display: flex;
-  align-items: center;
-  font-size: 0.95rem;
-  color: #666;
-  margin-bottom: 20px;
-  letter-spacing: 0.5px;
+.chart-container {
+  background: white;
+  padding: 25px;
+
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(4, 93, 86, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 40vh;
+  position: relative;
+  border: 1px solid rgba(4, 93, 86, 0.1);
+  overflow: hidden;
 }
 
-.card p:first-child strong {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.chart-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #045d56, #00bfa5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.card p:nth-child(2) {
-  font-size: 2rem;
-  margin-bottom: 10px;
+.chart-container:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(4, 93, 86, 0.15);
+}
+
+.chart-container:hover::before {
+  opacity: 1;
 }
 
 .graph-container {
