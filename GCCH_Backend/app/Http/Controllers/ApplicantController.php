@@ -201,40 +201,64 @@ class ApplicantController extends Controller
         }
     }
 
-    public function jobdisplay(){
-        try{
+    public function jobdisplay(Request $request)
+    {
+        try { 
             $user = Auth::user();
-
             $applicant = $user->applicant;
-
             if (!$applicant) {
                 return response()->json(['error' => 'Applicant not found'], 404);
             }
 
-            $course = $applicant->course;
+            // Get filters from request, or use applicant's info if relevant
+            $program = $applicant->course;  // or $request->input('program') if passed explicitly
+            $expertises = $request->input('expertises', []);  // array of expertise IDs or names
+            $minSalary = $request->input('min_salary');
+            $maxSalary = $request->input('max_salary');
 
-            $matchedJobs = Job::with('company')
-                ->where(function ($query) use ($course) {
-                    $query->where('recommended_course', $course)
-                        ->orWhere('recommended_course_2', $course)
-                        ->orWhere('recommended_course_3', $course);
-                })
-                ->get();
+            $query = Job::with('company')->where('status', 'open');
 
-            $matchedJobsIds = $matchedJobs->pluck('id');
-            
-            $otherJobs = Job::whereNotIn('id', $matchedJobsIds)
-                ->get();
+            // Filter by applicant's program (assuming recommended_course fields)
+            if ($program) {
+                $query->where(function($q) use ($program) {
+                    $q->where('recommended_course', 'LIKE', "%$program%")
+                    ->orWhere('recommended_course_2', 'LIKE', "%$program%")
+                    ->orWhere('recommended_course_3', 'LIKE', "%$program%");
+                });
+            }
+
+            // Filter by expertises if provided (assuming many-to-many relationship)
+            if (!empty($expertises)) {
+                $query->where(function($q) use ($expertises) {
+                    foreach ($expertises as $expertise) {
+                        $q->orWhere('recommended_expertise', 'LIKE', "%$expertise%")
+                        ->orWhere('recommended_expertise_2', 'LIKE', "%$expertise%")
+                        ->orWhere('recommended_expertise_3', 'LIKE', "%$expertise%");
+                    }
+                });
+            }
+
+            // Filter by monthly salary range
+            if ($minSalary) {
+                $query->where('monthly_salary', '>=', $minSalary);
+            }
+            if ($maxSalary) {
+                $query->where('monthly_salary', '<=', $maxSalary);
+            }
+
+            // Get filtered jobs
+            $jobs = $query->get();
 
             return response()->json([
-                'matchedjobs' => $matchedJobs,
-                'otherjobs' => $otherJobs
+                'jobs' => $jobs
             ], 200);
 
-        } catch (ValidationException $e) {
-            return response()->json(['error' => $e->validator->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Something went wrong', 'details' => $e->getMessage()], 500);
         }
     }
+
+
 
     public function applicationStatus(){
         try{

@@ -71,7 +71,11 @@
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
               <li v-for="(notif, index) in notifications" :key="index">
-                {{ notif }}
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.content }}
+                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
+                ><br />
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
               </li>
             </ul>
             <button @click="toggleNotif">Close</button>
@@ -313,12 +317,22 @@ async function fetchNotifications() {
 
 function formatType(type) {
   switch (type) {
-    case "prefer_to_not_say":
-      return "Prefer Not to Say";
-    case "male":
-      return "Male";
-    case "female":
-      return "Female";
+    case "job_application":
+      return "Job Application";
+    case "inquiry":
+      return "Inquiry";
+    case "application_update":
+      return "Application Update";
+    case "message":
+      return "Message";
+    case "full_time":
+      return "Full-Time";
+    case "part_time":
+      return "Part-Time";
+    case "internship":
+      return "Internship";
+    case "contract":
+      return "Contract";
     case "other":
       return "Other";
   }

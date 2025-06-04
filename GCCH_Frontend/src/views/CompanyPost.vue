@@ -71,7 +71,11 @@
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
               <li v-for="(notif, index) in notifications" :key="index">
-                {{ notif }}
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.content }}
+                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
+                ><br />
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
               </li>
             </ul>
             <button @click="toggleNotif">Close</button>
@@ -286,14 +290,14 @@
                           type="checkbox"
                           @change="scheduleInterview(application.id)"
                         />
-                        📅 Schedule Interview
+                        📅 Schedule an Interview
                       </label>
                       <label>
                         <input
                           type="checkbox"
-                          @change="scheduleAssessment(application.id)"
+                          @change="screening(application.id)"
                         />
-                        📝 Schedule Assessment
+                        📝 Ongoing Screening
                       </label>
                     </div>
 
@@ -364,10 +368,8 @@ import "mosha-vue-toastify/dist/style.css";
 
 const router = useRouter();
 
-const showMail = ref(false);
 const showNotif = ref(false);
 const showSignOut = ref(false);
-const unreadMessages = ref(0);
 const newNotifications = ref(0);
 const isSidenavOpen = ref(true);
 
@@ -390,38 +392,10 @@ const scheduledAt = ref(null);
 //message variables
 const selectedApplicantId = ref(null);
 const showMessagePopup = ref(false);
-const messageContent = ref("");
 
 function sendMessage(applicationId) {
   selectedApplicantId.value = applicationId;
   showMessagePopup.value = true;
-}
-
-async function sendActualMessage() {
-  try {
-    const response = await axios.post("/message/send", {
-      receiver_id: selectedApplicantId.value,
-      message: messageContent.value,
-    });
-
-    console.log("Message Sent:", response.data);
-    showMessagePopup.value = false;
-    messageContent.value = "";
-    createToast("Message sent successfully!", {
-      type: "success",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-    });
-  } catch (error) {
-    console.error("Error sending message:", error);
-    createToast("Failed to send message. Please try again.", {
-      type: "danger",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-    });
-  }
 }
 
 function openConfirmModal(applicationId, type) {
@@ -434,7 +408,7 @@ async function scheduleInterview(applicationId) {
   const date = prompt("Enter interview date (YYYY-MM-DD HH:MM:SS):");
   if (date) {
     selectedApplicationId.value = applicationId;
-    decisionType.value = "interview";
+    decisionType.value = "for_interview";
     scheduledAt.value = date;
     showStatusOptions.value = true;
     createToast("Interview scheduled successfully", {
@@ -447,11 +421,11 @@ async function scheduleInterview(applicationId) {
   }
 }
 
-async function scheduleAssessment(applicationId) {
+async function screening(applicationId) {
   const date = prompt("Enter assessment date (YYYY-MM-DD HH:MM:SS):");
   if (date) {
     selectedApplicationId.value = applicationId;
-    decisionType.value = "assessment";
+    decisionType.value = "screening";
     scheduledAt.value = date;
     showStatusOptions.value = true;
     createToast("Assessment scheduled successfully", {
@@ -461,34 +435,6 @@ async function scheduleAssessment(applicationId) {
       showIcon: true,
       toastBackgroundColor: "#045d56",
     });
-  }
-}
-
-function closeConfirmModal() {
-  showConfirmModal.value = false;
-}
-
-function confirmDecision() {
-  assessApplication(
-    selectedApplicationId.value,
-    decisionType.value,
-    null,
-    comment.value
-  );
-  closeConfirmModal();
-}
-
-function getApplicationStatus(applicationId) {
-  const application = jobApplicants.value.find(
-    (app) => app.id === applicationId
-  );
-  return application ? application.status : null;
-}
-
-function toggleMail() {
-  showMail.value = !showMail.value;
-  if (showMail.value) {
-    unreadMessages.value = 0;
   }
 }
 
@@ -526,6 +472,40 @@ function confirmSignOut() {
         showIcon: true,
       });
     });
+}
+
+async function fetchNotifications() {
+  try {
+    const response = await axios.get("/notifications");
+    const rawNotifications = response.data.notifications || [];
+
+    const grouped = new Map();
+
+    rawNotifications.forEach((notif) => {
+      if (!notif || !notif.type) return;
+
+      const key = `${notif.sender_id || "system"}_${notif.type}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          ...notif,
+          count: 1,
+          latestContent: notif.content,
+        });
+      } else {
+        const existing = grouped.get(key);
+        existing.count += 1;
+        existing.latestContent = notif.content; // latest content
+        grouped.set(key, existing);
+      }
+    });
+
+    notifications.value = Array.from(grouped.values());
+    newNotifications.value = notifications.value.length;
+
+    console.log("Fetched notifications:", rawNotifications);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+  }
 }
 
 //Get Applicants of a Certain Job
@@ -601,7 +581,7 @@ async function assessApplication(
       comment,
     };
 
-    const response = await axios.post(
+    await axios.post(
       `/company/job-applications/${applicationId}/assess`,
       payload
     );
@@ -653,14 +633,33 @@ async function assessApplication(
   }
 }
 
-onMounted(fetchPostedJobs);
+function formatType(type) {
+  switch (type) {
+    case "job_application":
+      return "Job Application";
+    case "inquiry":
+      return "Inquiry";
+    case "application_update":
+      return "Application Update";
+    case "message":
+      return "Message";
+    case "other":
+      return "Other";
+    default:
+      return type;
+  }
+}
+
+onMounted(() => {
+  fetchPostedJobs();
+  fetchNotifications();
+});
 
 function selectJob(job) {
   selectedJob.value = job;
   fetchApplicants(job.id);
 }
 
-// Add these to your existing script setup
 const showCourseDropdown = ref(false);
 const selectedCourses = ref([]);
 const selectedExpertise = ref([]);

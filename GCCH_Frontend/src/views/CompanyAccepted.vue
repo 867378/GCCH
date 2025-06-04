@@ -71,7 +71,11 @@
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
               <li v-for="(notif, index) in notifications" :key="index">
-                {{ notif }}
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.content }}
+                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
+                ><br />
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
               </li>
             </ul>
             <button @click="toggleNotif">Close</button>
@@ -104,7 +108,7 @@
                 >
                 <span
                   ><strong>Gmail:</strong>
-                  {{ applicantUsers[application.applicant.user_id]?.email  }}</span
+                  {{ application.user?.email }}</span
                 >
               </li>
             </ul>
@@ -157,18 +161,9 @@ const isSidenavOpen = ref(true);
 const selectedJob = ref(null);
 const jobApplicants = ref([]);
 const applicantUsers = ref({});
-const messages = ref([]);
 
 const notifications = ref([]);
 const postedJobs = ref([]);
-// Dummy data for messages
-
-function toggleMail() {
-  showMail.value = !showMail.value;
-  if (showMail.value) {
-    unreadMessages.value = 0;
-  }
-}
 
 function toggleNotif() {
   showNotif.value = !showNotif.value;
@@ -205,6 +200,63 @@ function confirmSignOut() {
         showIcon: true
       });
     });
+}
+
+async function fetchNotifications() {
+  try {
+    const response = await axios.get("/notifications");
+    const rawNotifications = response.data.notifications || [];
+
+    const grouped = new Map();
+
+    rawNotifications.forEach((notif) => {
+      if (!notif || !notif.type) return;
+
+      const key = `${notif.sender_id || "system"}_${notif.type}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          ...notif,
+          count: 1,
+          latestContent: notif.content,
+        });
+      } else {
+        const existing = grouped.get(key);
+        existing.count += 1;
+        existing.latestContent = notif.content; // latest content
+        grouped.set(key, existing);
+      }
+    });
+
+    notifications.value = Array.from(grouped.values());
+    newNotifications.value = notifications.value.length;
+
+    console.log("Fetched notifications:", rawNotifications);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    createToast("Failed to load notifications", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+  }
+}
+
+function formatType(type) {
+  switch (type) {
+    case "job_application":
+      return "Job Application";
+    case "inquiry":
+      return "Inquiry";
+    case "application_update":
+      return "Application Update";
+    case "message":
+      return "Message";
+    case "other":
+      return "Other";
+    default:
+      return type;
+  }
 }
 
 const downloadJobReport = async () => {
@@ -300,6 +352,8 @@ async function fetchApplicants(jobId) {
         try {
           const userResponse = await axios.get(`user/applicant/${applicantId}`);
           applicantUsers.value[applicantId] = userResponse.data;
+
+          console.log(`Fetched user ${applicantId}:`, userResponse.data);
         } catch (err) {
           console.error(`Failed to fetch user ${applicantId}`, err);
           createToast('Failed to fetch some applicant details', {
@@ -329,7 +383,10 @@ function selectJob(job) {
   fetchApplicants(job.id);
 }
 
-onMounted(fetchPostedJobs);
+onMounted(() => {
+  fetchPostedJobs();
+  fetchNotifications();
+})
 </script>
 
 <style scoped>
