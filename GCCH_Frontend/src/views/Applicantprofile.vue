@@ -818,7 +818,7 @@ body,
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
   border-left: #045d56 solid 4px;
   padding: 2rem;
-  height: 95%;
+  height: 100%;
   width: 100%;
   margin-left: 35vh;
   gap: 3rem;

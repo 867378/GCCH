@@ -46,13 +46,7 @@
             </select>
 
             <span class="bday">BIRTHDAY</span>
-            <input
-              type="date"
-              v-model="form.birthday"
-              :max="maxDate"
-              required
-              @change="validateAge"
-            />
+            <input type="date" v-model="form.birthday" @blur="validateAge" />
 
             <input
               placeholder="Phone Number"
@@ -192,7 +186,9 @@
               <button type="button" class="back-btn" @click="goBackcompany">
                 Back
               </button>
-              <button @click="currentStep = 'photos'" class="kontinue-btn">Continue</button>
+              <button @click="currentStep = 'photos'" class="kontinue-btn">
+                Continue
+              </button>
             </div>
           </form>
         </div>
@@ -221,7 +217,11 @@
             </div>
 
             <div class="button-group">
-              <button type="button" class="back-btn" @click="currentStep = 'company'">
+              <button
+                type="button"
+                class="back-btn"
+                @click="currentStep = 'company'"
+              >
                 Back
               </button>
               <button type="submit" class="kontinue-btn">Submit</button>
@@ -266,27 +266,40 @@ const form = ref({
 });
 const previewUrl = ref(null);
 
+// FIXED: Correct min/max date calculations
+const minDate = computed(() => {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - 60); // 60 years ago
+  return date.toISOString().split("T")[0];
+});
+
 const maxDate = computed(() => {
   const date = new Date();
-  date.setFullYear(date.getFullYear() - 18);
+  date.setFullYear(date.getFullYear() - 18); // 18 years ago
   return date.toISOString().split("T")[0];
 });
 
 const validateAge = () => {
+  if (!form.value.birthday) return;
+
   const birthDate = new Date(form.value.birthday);
-  const today = new Date();
-  const age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
 
-  if (
-    monthDiff < 0 ||
-    (monthDiff === 0 && today.getDate() < birthDate.getDate())
-  ) {
-    age--;
-  }
+  // Skip if invalid date (e.g., partially typed)
+  if (isNaN(birthDate.getTime())) return;
 
-  if (age < 18) {
+  const minDateObj = new Date(minDate.value); // 60 years ago
+  const maxDateObj = new Date(maxDate.value); // 18 years ago
+
+  if (birthDate > maxDateObj) {
     createToast("You must be at least 18 years old to register", {
+      type: "error",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+    form.value.birthday = "";
+  } else if (birthDate < minDateObj) {
+    createToast("You must be 60 years old or younger to register", {
       type: "error",
       position: "top-right",
       timeout: 3000,
@@ -308,37 +321,62 @@ const expertiseMap = {
     "System Administration",
     "Other",
   ],
-  BSCS: ["Data Science", "AI", "Software Engineering", "Algorithms","Other"],
-  BSEMC: ["Multimedia Arts", "Animation", "Game Development","Other"],
-  BSN: ["Clinical Nursing", "Community Health", "Medical-Surgical Nursing","Other"],
-  BSM: ["Strategic Management", "Operations Management", "Entrepreneurship","Other"],
-  BSA: ["Financial Accounting", "Auditing", "Taxation","Other"],
-  "BSBA-FM": ["Corporate Finance", "Investment Analysis", "Banking","Other"],
+  BSCS: ["Data Science", "AI", "Software Engineering", "Algorithms", "Other"],
+  BSEMC: ["Multimedia Arts", "Animation", "Game Development", "Other"],
+  BSN: [
+    "Clinical Nursing",
+    "Community Health",
+    "Medical-Surgical Nursing",
+    "Other",
+  ],
+  BSM: [
+    "Strategic Management",
+    "Operations Management",
+    "Entrepreneurship",
+    "Other",
+  ],
+  BSA: ["Financial Accounting", "Auditing", "Taxation", "Other"],
+  "BSBA-FM": ["Corporate Finance", "Investment Analysis", "Banking", "Other"],
   "BSBA-HRM": [
     "Human Resources",
     "Talent Management",
     "Organizational Development",
     "Other",
   ],
-  "BSBA-MM": ["Marketing Strategy", "Advertising", "Sales Management","Other"],
-  BSCA: ["Customs Brokerage", "Trade Compliance", "Logistics","Other"],
-  BSHM: ["Hotel Management", "Food & Beverage Service", "Customer Relations","Other"],
-  BSTM: ["Tourism Planning", "Event Management", "Travel Services","Other"],
-  BAComm: ["Journalism", "Public Relations", "Media Production","Other"],
-  BECEd: ["Early Childhood Development", "Preschool Education","Other"],
-  BCAEd: ["Arts Education", "Cultural Studies", "Creative Expression","Other"],
-  BPEd: ["Sports Science", "Physical Fitness", "Coaching","Other"],
-  BEED: ["Elementary Teaching", "Child Psychology", "Classroom Management","Other"],
-  "BSEd-Eng": ["English Education", "Literature", "Language Teaching","Other"],
-  "BSEd-Math": ["Mathematics Education", "Algebra", "Calculus","Other"],
+  "BSBA-MM": ["Marketing Strategy", "Advertising", "Sales Management", "Other"],
+  BSCA: ["Customs Brokerage", "Trade Compliance", "Logistics", "Other"],
+  BSHM: [
+    "Hotel Management",
+    "Food & Beverage Service",
+    "Customer Relations",
+    "Other",
+  ],
+  BSTM: ["Tourism Planning", "Event Management", "Travel Services", "Other"],
+  BAComm: ["Journalism", "Public Relations", "Media Production", "Other"],
+  BECEd: ["Early Childhood Development", "Preschool Education", "Other"],
+  BCAEd: ["Arts Education", "Cultural Studies", "Creative Expression", "Other"],
+  BPEd: ["Sports Science", "Physical Fitness", "Coaching", "Other"],
+  BEED: [
+    "Elementary Teaching",
+    "Child Psychology",
+    "Classroom Management",
+    "Other",
+  ],
+  "BSEd-Eng": ["English Education", "Literature", "Language Teaching", "Other"],
+  "BSEd-Math": ["Mathematics Education", "Algebra", "Calculus", "Other"],
   "BSEd-Fil": [
     "Filipino Language",
     "Philippine Literature",
     "Language Teaching",
     "Other",
   ],
-  "BSEd-SS": ["Social Studies", "Philippine History", "Civics & Culture","Other"],
-  "BSEd-Sci": ["General Science", "Biology", "Chemistry", "Physics","Other"],
+  "BSEd-SS": [
+    "Social Studies",
+    "Philippine History",
+    "Civics & Culture",
+    "Other",
+  ],
+  "BSEd-Sci": ["General Science", "Biology", "Chemistry", "Physics", "Other"],
   Other: ["Other"],
 };
 
@@ -399,11 +437,11 @@ const goBackcompany = () => {
   currentStep.value = "select";
 };
 const submitApplicantForm = async () => {
-    currentStep.value = "photo";
+  currentStep.value = "photo";
 };
 
 const submitCompanyForm = async () => {
-    currentStep.value = "photo";
+  currentStep.value = "photo";
 };
 
 const handlePhotoUpload = (event) => {
@@ -484,7 +522,6 @@ const submitPhotoForm = async () => {
     });
   }
 };
-
 </script>
 
 <style scoped>

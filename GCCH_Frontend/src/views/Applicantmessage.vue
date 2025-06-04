@@ -78,6 +78,28 @@
 
       <!-- CHATS -->
       <div class="content">
+
+                <!-- Notifications -->
+        <div class="right-content">
+          <h3>CONTACTS</h3>
+          <div class="updates-list">
+            <div
+              v-for="(notif, index) in filteredNotifications"
+              :key="index"
+              @click="openChat(notif)"
+              style="cursor: pointer"
+              class="update-box"
+            >
+              <h2>{{ extractSenderName(notif.latestContent) }}</h2>
+              <p>
+                <span v-if="notif.count > 1">
+                  ({{ notif.count }} new messages)
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+        
         <div class="left-content">
           <div class="message-box">
             <h3 style="text-align: left; font-size: 30px">Messages</h3>
@@ -141,27 +163,6 @@
                 ></textarea>
                 <button @click="sendReply">Send</button>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Notifications -->
-        <div class="right-content">
-          <h3>CONTACTS</h3>
-          <div class="updates-list">
-            <div
-              v-for="(notif, index) in filteredNotifications"
-              :key="index"
-              @click="openChat(notif)"
-              style="cursor: pointer"
-              class="update-box"
-            >
-              <h2>{{ extractSenderName(notif.latestContent) }}</h2>
-              <p>
-                <span v-if="notif.count > 1">
-                  ({{ notif.count }} new messages)
-                </span>
-              </p>
             </div>
           </div>
         </div>

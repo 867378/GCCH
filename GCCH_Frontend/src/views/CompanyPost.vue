@@ -186,6 +186,7 @@
             </div>
           </form>
 
+
           <!-- Add the new sections here -->
           <div v-if="selectedJob" class="selected-job-box">
             <h2>{{ selectedJob.job_title }}</h2>
@@ -660,11 +661,9 @@ function selectJob(job) {
   fetchApplicants(job.id);
 }
 
-// Add these to your existing script setup
 const showCourseDropdown = ref(false);
 const selectedCourses = ref([]);
 const selectedExpertise = ref([]);
-
 const filteredExpertise = computed(() => {
   const expertiseSet = new Set();
 
