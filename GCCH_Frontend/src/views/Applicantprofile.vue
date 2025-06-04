@@ -844,7 +844,7 @@ body,
   padding: 2rem;
   height: 100%;
   width: 100%;
-  margin-left: 35vh;
+  margin-left: 25vh;
   gap: 3rem;
 }
 .profile-avatar {
@@ -852,7 +852,7 @@ body,
   height: 30vh;
   object-fit: cover;
   margin-top: 2vh;
-  margin-left: 33vh;
+  margin-left: 45vh;
   margin-bottom: 3vh;
   border-radius: 50%;
   border: 4px solid #045d56;
