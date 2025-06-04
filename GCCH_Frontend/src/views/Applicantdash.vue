@@ -62,32 +62,8 @@
             />
           </div>
         </div>
+        
         <div class="icons-right">
-          <div class="icon" @click="toggleProgramsDropdown">
-            <img src="/public/learning.png" />
-            <p>Programs</p>
-            <!-- Add the dropdown menu or logic -->
-            <div class="programs-dropdown" v-if="showProgramsDropdown">
-              <div class="dropdown-header">
-                <h4>Select Program</h4>
-              </div>
-              <div class="dropdown-options">
-                <div
-                  v-for="program in programsList"
-                  :key="program.id"
-                  class="dropdown-item"
-                  :class="{ active: selectedProgram === program.id }"
-                  @click="filterByProgram(program)"
-                >
-                  {{ program.name }}
-                </div>
-                <div class="dropdown-item clear" @click="clearProgramFilter">
-                  Clear Filter
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div class="icon" @click="toggleExpertiseDropdown">
             <img src="/public/expertise.png" />
             <p>Expertise</p>
@@ -98,13 +74,14 @@
               </div>
               <div class="dropdown-options">
                 <div
-                  v-for="skill in expertiseList"
-                  :key="skill.id"
+                  v-for="expertise in expertiseOptions"
+                  :key="expertise"
+                  :value="expertise"
                   class="dropdown-item"
-                  :class="{ active: selectedExpertise === skill.id }"
-                  @click="filterByExpertise(skill)"
+                  :class="{ active: selectedExpertise === expertise }"
+                  @click="filterByExpertise(expertise)"
                 >
-                  {{ skill.name }}
+                  {{ expertise }}
                 </div>
                 <div class="dropdown-item clear" @click="clearExpertiseFilter">
                   Clear Filter
@@ -149,7 +126,13 @@
         <div v-if="showNotif" class="popup-overlay" @click.self="toggleNotif">
           <div class="popup">
             <h3>🔔 Notifications</h3>
-            <ul class="popup-list"></ul>
+            <li v-for="(notif, index) in notifications" :key="index">
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.content }}
+                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
+                ><br />
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
+              </li>
             <button @click="toggleNotif">Close</button>
           </div>
         </div>
@@ -220,14 +203,14 @@
                     </p>
                   </div>
                 </div>
-                <!--  -->
+                <!-- Job Status  -->
                 <div class="job-info">
                   <div class="job-detail">
                     <img src="/public/updates.png" class="ikon" />
                     <p>Status: {{ matchedJob.status }}</p>
                   </div>
                 </div>
-                <!--  -->
+                <!--Job Location -->
                 <div class="job-info">
                   <div class="job-detail">
                     <img src="/public/location.png" class="ikon" />
@@ -237,7 +220,24 @@
                 <!-- Job Description -->
                 <p class="job-description">{{ matchedJob.job_description }}</p>
               </div>
-            </div>
+              <!-- Recommended Programs and Expertise -->
+              <p>
+                {{
+                  [matchedJob.recommended_course, matchedJob.recommended_course_2, matchedJob.recommended_course_3]
+                    .filter(Boolean)
+                    .join(', ')
+                }}
+              </p>
+
+              <p>
+                {{
+                  [matchedJob.recommended_expertise, matchedJob.recommended_expertise_2, matchedJob.recommended_expertise_3]
+                    .filter(Boolean)
+                    .join(', ')
+                }}
+              </p>
+
+              </div>
 
             <!-- Pagination Controls -->
             <div class="pagination">
@@ -568,10 +568,8 @@ import Chart from "chart.js/auto";
 const router = useRouter();
 
 // Reactive state variables
-const showMail = ref(false);
 const showNotif = ref(false);
 const showSignOut = ref(false);
-const unreadMessages = ref(0);
 const newNotifications = ref(0);
 const showApplyPopup = ref(false);
 const isSidenavOpen = ref(true);
@@ -602,6 +600,18 @@ const notifications = ref([]);
 const currentPage = ref(1);
 const jobsPerPage = ref(2); // Number of jobs to show per page
 
+const applicantProgram = ref(null);
+
+onMounted(async () => {
+  try {
+    const applicantId = localStorage.getItem("user_id");
+    const response = await axios.get(`/user/applicant/${applicantId}`); // Or your actual endpoint
+    applicantProgram.value = response.data.applicant.course || null;
+  } catch (error) {
+    console.error('Failed to get applicant program', error);
+  }
+});
+
 // Computed properties
 const totalPages = computed(() => {
   return Math.ceil(
@@ -621,12 +631,6 @@ const paginatedJobs = computed(() => {
 });
 
 // NavBar Logic
-function toggleMail() {
-  showMail.value = !showMail.value;
-  if (showMail.value) {
-    unreadMessages.value = 0;
-  }
-}
 function toggleNotif() {
   showNotif.value = !showNotif.value;
   if (showNotif.value) {
@@ -676,18 +680,16 @@ async function fetchDashboardCounts() {
   }
 }
 
-async function fetchJobs() {
+const fetchJobs = async (filters = {}) => {
   try {
-    const response = await axios.get("/applicant/jobdisplay");
-
-    console.log(response.data);
-
-    recommendedJobs.value = response.data.matchedjobs;
-  } catch (error) {
-    console.error("Error fetching jobs:", error);
+    const response = await axios.get("/applicant/jobdisplay", {
+      params: filters,
+    });
+    recommendedJobs.value = response.data.jobs;
+  } catch {
     alert("Failed to fetch jobs. Please try again later.");
   }
-}
+};
 
 function applyToJob(jobId) {
   selectedJobId.value = jobId;
@@ -761,7 +763,6 @@ function previousStep() {
   applicationStep.value = 1;
 }
 
-// Modify your submitApplication function
 async function submitApplication() {
   const formData = new FormData();
   formData.append("job_id", selectedJobId.value);
@@ -842,19 +843,6 @@ function closeApplyPopup() {
   coverLetterFile.value = null;
   selectedJobId.value = null;
 }
-
-// Notification Logic
-function pluralizeType(type, count) {
-  const formatted = formatType(type).toLowerCase();
-  return count > 1 ? `${formatted}s` : formatted;
-}
-
-const filteredNotifications = computed(() =>
-  notifications.value.filter(
-    (notif) =>
-      notif && ["message", "inquiry", "application_update"].includes(notif.type)
-  )
-);
 
 async function fetchNotifications() {
   try {
@@ -1146,134 +1134,110 @@ const filterBySalary = async (range) => {
   selectedSalaryRange.value = range.id;
 
   try {
-    await fetchJobs();
-
-    recommendedJobs.value = recommendedJobs.value.filter((job) => {
-      const salary = parseInt(job.monthly_salary.replace(/[^0-9]/g, ""));
-      return salary >= range.min && salary <= range.max;
+    await fetchJobs({
+      min_salary: range.min,
+      max_salary: range.max,
+      expertises: selectedExpertise.value ? [selectedExpertise.value] : [],
     });
 
     showSalaryDropdown.value = false;
 
-    createToast(
-      `Showing jobs with salary range: ₱${range.min.toLocaleString()} - ₱${range.max.toLocaleString()}`,
-      {
-        type: "info",
-        position: "top-right",
-        timeout: 3000,
-        showIcon: true,
-      }
-    );
-  } catch (error) {
-    console.error("Error filtering jobs:", error);
+    createToast(`Showing jobs with salary range: ₱${range.min.toLocaleString()} - ₱${range.max.toLocaleString()}`, {
+      type: "info", position: "top-right", timeout: 3000, showIcon: true,
+    });
+  } catch {
     createToast("Error filtering jobs. Please try again.", {
-      type: "error",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
+      type: "error", position: "top-right", timeout: 3000, showIcon: true,
+    });
+  }
+};
+
+const showExpertiseDropdown = ref(false);
+const selectedExpertise = ref(null);
+
+const toggleExpertiseDropdown = () => {
+  showExpertiseDropdown.value = !showExpertiseDropdown.value;
+};
+
+const expertiseMap = {
+  BSIT: ["Web Development", "Networking", "Cybersecurity", "System Administration", "Other"],
+  BSCS: ["Data Science", "AI", "Software Engineering", "Algorithms", "Other"],
+  BSEMC: ["Multimedia Arts", "Animation", "Game Development", "Other"],
+  BSN: ["Clinical Nursing", "Community Health", "Medical-Surgical Nursing", "Other"],
+  BSM: ["Strategic Management", "Operations Management", "Entrepreneurship", "Other"],
+  BSA: ["Financial Accounting", "Auditing", "Taxation", "Other"],
+  "BSBA-FM": ["Corporate Finance", "Investment Analysis", "Banking", "Other"],
+  "BSBA-HRM": ["Human Resources", "Talent Management", "Organizational Development", "Other"],
+  "BSBA-MM": ["Marketing Strategy", "Advertising", "Sales Management", "Other"],
+  BSCA: ["Customs Brokerage", "Trade Compliance", "Logistics", "Other"],
+  BSHM: ["Hotel Management", "Food & Beverage Service", "Customer Relations", "Other"],
+  BSTM: ["Tourism Planning", "Event Management", "Travel Services", "Other"],
+  BAComm: ["Journalism", "Public Relations", "Media Production", "Other"],
+  BECEd: ["Early Childhood Development", "Preschool Education", "Other"],
+  BCAEd: ["Arts Education", "Cultural Studies", "Creative Expression", "Other"],
+  BPEd: ["Sports Science", "Physical Fitness", "Coaching", "Other"],
+  BEED: ["Elementary Teaching", "Child Psychology", "Classroom Management", "Other"],
+  "BSEd-Eng": ["English Education", "Literature", "Language Teaching", "Other"],
+  "BSEd-Math": ["Mathematics Education", "Algebra", "Calculus", "Other"],
+  "BSEd-Fil": ["Filipino Language", "Philippine Literature", "Language Teaching", "Other"],
+  "BSEd-SS": ["Social Studies", "Philippine History", "Civics & Culture", "Other"],
+  "BSEd-Sci": ["General Science", "Biology", "Chemistry", "Physics", "Other"],
+  Other: ["Other"],
+};
+
+const expertiseOptions = computed(() => {
+  return applicantProgram.value ? (expertiseMap[applicantProgram.value] || []) : [];
+});
+
+const filterByExpertise = async (expertiseName) => {
+  selectedExpertise.value = expertiseName;
+
+  try {
+    await fetchJobs({
+      expertises: [expertiseName],
+      min_salary: selectedSalaryRange.value
+        ? salaryRanges.value.find(r => r.id === selectedSalaryRange.value).min
+        : null,
+      max_salary: selectedSalaryRange.value
+        ? salaryRanges.value.find(r => r.id === selectedSalaryRange.value).max
+        : null,
+    });
+
+    showExpertiseDropdown.value = false;
+
+    createToast(`Showing jobs requiring expertise: ${expertiseName}`, {
+      type: "info", position: "top-right", timeout: 3000, showIcon: true,
+    });
+  } catch {
+    createToast("Error filtering jobs. Please try again.", {
+      type: "error", position: "top-right", timeout: 3000, showIcon: true,
     });
   }
 };
 
 const clearSalaryFilter = async () => {
   selectedSalaryRange.value = null;
-  await fetchJobs();
+
+  await fetchJobs({
+    expertises: selectedExpertise.value ? [selectedExpertise.value] : [],
+  });
+
   showSalaryDropdown.value = false;
-};
-
-//expertise dropdown logic
-const showExpertiseDropdown = ref(false);
-const selectedExpertise = ref(null);
-const expertiseList = ref([]);
-
-const toggleExpertiseDropdown = () => {
-  showExpertiseDropdown.value = !showExpertiseDropdown.value;
-};
-
-const filterByExpertise = async (skill) => {
-  selectedExpertise.value = skill.id;
-
-  try {
-    await fetchJobs();
-
-    recommendedJobs.value = recommendedJobs.value.filter((job) => {
-      return job.skills && job.skills.includes(skill.name);
-    });
-
-    showExpertiseDropdown.value = false;
-
-    createToast(`Showing jobs requiring expertise: ${skill.name}`, {
-      type: "info",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-    });
-  } catch (error) {
-    console.error("Error filtering jobs by expertise:", error);
-    createToast("Error filtering jobs. Please try again.", {
-      type: "error",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-    });
-  }
 };
 
 const clearExpertiseFilter = async () => {
   selectedExpertise.value = null;
-  await fetchJobs();
+
+  await fetchJobs({
+    min_salary: selectedSalaryRange.value
+      ? salaryRanges.value.find(r => r.id === selectedSalaryRange.value).min
+      : null,
+    max_salary: selectedSalaryRange.value
+      ? salaryRanges.value.find(r => r.id === selectedSalaryRange.value).max
+      : null,
+  });
+
   showExpertiseDropdown.value = false;
-};
-
-//programs dropdown logic
-const showProgramsDropdown = ref(false);
-const selectedProgram = ref(null);
-const programsList = ref([
-  { id: 1, name: 'BSIT' },
-  { id: 2, name: 'BSCS' },
-  { id: 3, name: 'BSIS' },
-  { id: 4, name: 'ACT' }
-]);
-
-const toggleProgramsDropdown = () => {
-  showProgramsDropdown.value = !showProgramsDropdown.value;
-};
-
-const filterByProgram = async (program) => {
-  selectedProgram.value = program.id;
-  
-  try {
-    await fetchJobs();
-    
-    recommendedJobs.value = recommendedJobs.value.filter(job => {
-      return job.required_course && 
-             job.required_course.toLowerCase() === program.name.toLowerCase();
-    });
-    
-    showProgramsDropdown.value = false;
-    
-    createToast(`Showing jobs for ${program.name} program`, {
-      type: 'info',
-      position: 'top-right',
-      timeout: 3000,
-      showIcon: true
-    });
-    
-  } catch (error) {
-    console.error('Error filtering jobs by program:', error);
-    createToast('Error filtering jobs. Please try again.', {
-      type: 'error',
-      position: 'top-right',
-      timeout: 3000,
-      showIcon: true
-    });
-  }
-};
-
-const clearProgramFilter = async () => {
-  selectedProgram.value = null;
-  await fetchJobs();
-  showProgramsDropdown.value = false;
 };
 </script>
 

@@ -116,7 +116,7 @@
               <div class="resume-list">
                 <div
                   v-for="application in acceptedApplications"
-                  :key="index"
+                  :key="application.id"
                   class="resume-item received"
                 >
                   <h4>Job Application for {{ application.job_title }}</h4>

@@ -70,17 +70,26 @@ class CompanyController extends Controller
     }
 
     public function pendingApplications()
-{
-    $companyId = auth()->id();
+    {
+        $companyId = auth()->id();
 
-    $total = JobApplication::whereIn('status', ['applied', 'interview', 'assessment','accepted'])
-        ->whereHas('job', function ($query) use ($companyId) {
-            $query->where('company_id', $companyId);
-        })
-        ->count();
+        $applicationsQuery = JobApplication::whereIn('status', ['applied', 'for_interview', 'screening', 'accepted'])
+            ->whereHas('job', function ($query) use ($companyId) {
+                $query->where('company_id', $companyId);
+            });
 
-    return response()->json(['total' => $total]);
-}
+        $total = $applicationsQuery->count();
+
+        $countsPerStatus = $applicationsQuery
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status');
+
+        return response()->json([
+            'total' => $total,
+            'counts' => $countsPerStatus,
+        ]);
+    }
 
 
     public function postjob(){
@@ -223,7 +232,7 @@ class CompanyController extends Controller
             }
 
             $validated = $request->validate([
-                'status' => 'required|in:applied,interview,assessment,rejected,accepted,hired',
+                'status' => 'required|in:applied,for_interview,screening,rejected,accepted,hired',
                 'scheduled_at' => 'nullable|date_format:Y-m-d H:i:s',
                 'comment' => 'nullable|string',
             ]);
@@ -235,7 +244,7 @@ class CompanyController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 
-            if (in_array($validated['status'], ['interview', 'assessment'])) {
+            if (in_array($validated['status'], ['for_interview', 'screening'])) {
                 if (empty($validated['scheduled_at'])) {
                     return response()->json(['error' => 'Scheduled date is required for interview or assessment'], 422);
                 }
@@ -253,7 +262,6 @@ class CompanyController extends Controller
                     $job->status = 'closed';
                     $job->save();
 
-                    // Automatically reject all other pending or accepted applications
                     JobApplication::where('job_id', $job->id)
                         ->whereNotIn('status', ['hired'])
                         ->update([
@@ -273,7 +281,6 @@ class CompanyController extends Controller
 
             $application->save();
 
-            // Notify applicant
             $notifier = new NotificationController();
             $content = "Your application for " . $job->job_title . " has been updated";
             $notifier->notifyUser($application->applicant->user_id, $content, 'application_update');

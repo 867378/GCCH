@@ -63,9 +63,13 @@
           <div class="popup">
             <h3>🔔 Notifications</h3>
             <ul class="popup-list">
-              <li>3 new applicants this week</li>
-              <li>Company profile approved</li>
-              <li>New feature: Analytics tab</li>
+              <li v-for="(notif, index) in notifications" :key="index">
+                <strong>{{ formatType(notif.type) }}</strong
+                >: {{ notif.content }}
+                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
+                ><br />
+                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
+              </li>
             </ul>
             <button @click="toggleNotif">Close</button>
           </div>
@@ -147,6 +151,16 @@
                     :placeholder="formatType(applicant.applicant?.sex)"
                   />
                 </div>
+                <!-- Paayos nlng rin boss hahha -->
+                <div class="form-group">
+                  <label>Program</label>
+                  <input
+                    type="email"
+                    :readonly="!isEditing"
+                    v-model="email"
+                    :placeholder="applicant.applicant.course || ''"
+                  />
+                </div>
               </div>
 
               <div class="form-row">
@@ -166,6 +180,16 @@
                     :readonly="!isEditing"
                     v-model="email"
                     :placeholder="applicant.user.email || ''"
+                  />
+                </div>
+                <!-- Paayos nlng somewhere this div for expertise -->
+                <div class="form-group">
+                  <label>Expertise</label>
+                  <input
+                    type="email"
+                    :readonly="!isEditing"
+                    v-model="email"
+                    :placeholder="applicant.applicant.expertise"
                   />
                 </div>
               </div>

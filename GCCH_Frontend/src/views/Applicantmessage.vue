@@ -65,7 +65,7 @@
             <ul class="popup-list">
               <li v-for="(notif, index) in notifications" :key="index">
                 <strong>{{ formatType(notif.type) }}</strong
-                >: {{ notif.latestContent }}
+                >: {{ notif.content }}
                 <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
                 ><br />
                 <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
@@ -387,9 +387,9 @@ async function fetchNotifications() {
     const grouped = new Map();
 
     rawNotifications.forEach((notif) => {
-      if (!notif || !notif.sender_id || !notif.type) return;
+      if (!notif || !notif.type) return;
 
-      const key = `${notif.sender_id}_${notif.type}`;
+      const key = `${notif.sender_id || "system"}_${notif.type}`;
       if (!grouped.has(key)) {
         grouped.set(key, {
           ...notif,
@@ -406,14 +406,10 @@ async function fetchNotifications() {
 
     notifications.value = Array.from(grouped.values());
     newNotifications.value = notifications.value.length;
+
+    console.log("Fetched notifications:", rawNotifications);
   } catch (error) {
     console.error("Error fetching notifications:", error);
-    createToast("Failed to load notifications", {
-      type: "danger",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-    });
   }
 }
 
