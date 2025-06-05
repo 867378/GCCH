@@ -83,115 +83,126 @@
         </div>
       </div>
 
-      <!-- POSTED JOBS DISPLAY -->
-      <div class="content">
-        <div class="left-content">
+      <div
+        v-if="showPostPopup"
+        class="popup-overlay"
+        @click.self="togglePostPopup"
+      >
+        <div class="popup post-popup">
+          <h3>Create New Job Post</h3>
           <form @submit.prevent="postJob">
-            <div class="post-box">
-              <h3>Job Description</h3>
-              <button>Post Job</button>
+            <input
+              v-model="jobData.job_title"
+              type="text"
+              placeholder="Enter Job Title"
+              class="job-title"
+            />
+
+            <textarea
+              v-model="jobData.job_description"
+              placeholder="Describe the job responsibilities, requirements, and any other relevant details."
+            ></textarea>
+
+            <div class="form-row">
+              <select
+                v-model="jobData.job_type"
+                class="job-form job-type"
+                id="job_type"
+              >
+                <option disabled selected value="">Job Type</option>
+                <option value="full_time">Full-time</option>
+                <option value="part_time">Part-time</option>
+                <option value="internship">Internship</option>
+                <option value="contract">Contract</option>
+              </select>
+
               <input
-                v-model="jobData.job_title"
+                v-model="jobData.job_location"
                 type="text"
-                placeholder="Enter Job Title"
-                class="job-title"
+                placeholder="Enter Job Location"
+                class="job-input"
               />
 
-              <textarea
-                v-model="jobData.job_description"
-                placeholder="Describe the job responsibilities, requirements, and any other relevant details."
-              ></textarea>
-
-              <div class="form-row">
-                <select
-                  v-model="jobData.job_type"
-                  class="job-form job-type"
-                  id="job_type"
+              <div class="dropdown-checkbox">
+                <button
+                  type="button"
+                  @click="toggleCourseDropdown"
+                  class="dropdown-btn"
                 >
-                  <option disabled selected value="">Job Type</option>
-                  <option value="full_time">Full-time</option>
-                  <option value="part_time">Part-time</option>
-                  <option value="internship">Internship</option>
-                  <option value="contract">Contract</option>
-                </select>
-
-                <div class="dropdown-checkbox">
-                  <button
-                    type="button"
-                    @click="toggleCourseDropdown"
-                    class="dropdown-btn"
+                  Recommended Programs
+                  <span v-if="selectedCourses.length"
+                    >({{ selectedCourses.length }}/3)</span
                   >
-                    Recommended Programs
-                    <span v-if="selectedCourses.length"
-                      >({{ selectedCourses.length }}/3)</span
-                    >
-                  </button>
-                  <div v-if="showCourseDropdown" class="dropdown-list">
-                    <label v-for="course in courseOptions" :key="course">
-                      <input
-                        type="checkbox"
-                        :value="course"
-                        :checked="selectedCourses.includes(course)"
-                        @change="handleCheckboxChange($event, course)"
-                      />
-                      {{ course }}
-                    </label>
-                  </div>
+                </button>
+                <div v-if="showCourseDropdown" class="dropdown-list">
+                  <label v-for="course in courseOptions" :key="course">
+                    <input
+                      type="checkbox"
+                      :value="course"
+                      :checked="selectedCourses.includes(course)"
+                      @change="handleCheckboxChange($event, course)"
+                    />
+                    {{ course }}
+                  </label>
                 </div>
-
-                <input
-                  v-model="jobData.job_location"
-                  type="text"
-                  placeholder="Enter Job Location"
-                  class="job-input"
-                />
-                <div class="dropdown-checkbox">
-                  <button
-                    type="button"
-                    @click="toggleExpertiseDropdown"
-                    class="dropdown-btn"
-                  >
-                    Recommended Expertise
-                    <span v-if="selectedExpertise.length"
-                      >({{ selectedExpertise.length }}/3)</span
-                    >
-                  </button>
-                  <div v-if="showExpertiseDropdown" class="dropdown-list">
-                    <label
-                      v-for="expertise in filteredExpertise"
-                      :key="expertise"
-                    >
-                      <input
-                        type="checkbox"
-                        :value="expertise"
-                        :checked="selectedExpertise.includes(expertise)"
-                        @change="
-                          handleExpertiseCheckboxChange($event, expertise)
-                        "
-                      />
-                      {{ expertise }}
-                    </label>
-                  </div>
-                </div>
-                <input
-                  type="number"
-                  v-model="jobData.monthly_salary"
-                  placeholder="Enter Monthly Salary (in Php)"
-                  class="salary-input"
-                />
-
-                <input
-                  type="number"
-                  v-model="jobData.total_slots"
-                  placeholder="Hiring Slot"
-                  class="slot-input"
-                />
               </div>
+
+              <input
+                type="number"
+                v-model="jobData.monthly_salary"
+                placeholder="Enter Monthly Salary (in Php)"
+                class="salary-input"
+              />
+              <div class="dropdown-checkbox">
+                <button
+                  type="button"
+                  @click="toggleExpertiseDropdown"
+                  class="dropdown-btn"
+                >
+                  Recommended Expertise
+                  <span v-if="selectedExpertise.length"
+                    >({{ selectedExpertise.length }}/3)</span
+                  >
+                </button>
+                <div v-if="showExpertiseDropdown" class="dropdown-list">
+                  <label
+                    v-for="expertise in filteredExpertise"
+                    :key="expertise"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="expertise"
+                      :checked="selectedExpertise.includes(expertise)"
+                      @change="handleExpertiseCheckboxChange($event, expertise)"
+                    />
+                    {{ expertise }}
+                  </label>
+                </div>
+              </div>
+              <input
+                type="number"
+                v-model="jobData.total_slots"
+                placeholder="Hiring Slot"
+                class="slot-input"
+              />
+            </div>
+            <div class="popup-actions">
+              <button type="button" class="cancel-btn" @click="togglePostPopup">
+                Cancel
+              </button>
+              <button type="submit" class="submit-btn">Post Job</button>
             </div>
           </form>
+        </div>
+      </div>
 
+      <div class="content">
+        <div class="left-content">
+          <div class="post-box collapsed" @click="togglePostPopup">
+            <h3>Create New Job Post</h3>
+            <p>Click to create a new job posting</p>
+          </div>
 
-          <!-- Add the new sections here -->
           <div v-if="selectedJob" class="selected-job-box">
             <h2>{{ selectedJob.job_title }}</h2>
             <p>{{ selectedJob.job_description }}</p>
@@ -213,32 +224,31 @@
             <h3>Ongoing Applications</h3>
             <ul v-if="jobApplicants.length > 0">
               <li
-                v-for="application in jobApplicants"
+                v-for="application in paginatedApplicants"
                 :key="application.id"
                 class="mb-4"
               >
                 <strong
                   >{{ application.applicant.first_name }}
                   {{ application.applicant.last_name }}</strong
-                ><br />
+                >
                 <span
                   ><strong>Course:</strong>
                   {{ application.applicant.course }}</span
-                ><br />
+                >
                 <span
                   ><strong>Phone:</strong>
                   {{ application.applicant.phone_number }}</span
-                ><br />
+                >
                 <span
                   ><strong>Date Applied:</strong>
                   {{ application.date_applied }}</span
-                ><br />
-                <span><strong>Status:</strong> {{ application.status }}</span
-                ><br />
+                >
+                <span><strong>Status:</strong> {{ application.status }}</span>
                 <span
                   ><strong>Schedule: </strong
                   >{{ application.scheduled_at }}</span
-                ><br />
+                >
 
                 <div>
                   <a :href="application.cover_letter.embed_url" target="_blank">
@@ -322,6 +332,38 @@
                 </div>
               </li>
             </ul>
+
+            <!-- Add pagination controls -->
+            <div v-if="jobApplicants.length > 0" class="pagination">
+              <button
+                class="pagination-btn"
+                @click="previousPage"
+                :disabled="currentPage === 1"
+              >
+                Previous
+              </button>
+
+              <div class="page-numbers">
+                <button
+                  v-for="page in totalPages"
+                  :key="page"
+                  @click="goToPage(page)"
+                  class="page-number"
+                  :class="{ active: currentPage === page }"
+                >
+                  {{ page }}
+                </button>
+              </div>
+
+              <button
+                class="pagination-btn"
+                @click="nextPage"
+                :disabled="currentPage === totalPages"
+              >
+                Next
+              </button>
+            </div>
+
             <p v-else>No applicants have applied yet.</p>
           </div>
 
@@ -383,6 +425,9 @@ const postedJobs = ref([]);
 
 const showStatusOptions = ref(false);
 const comment = ref("");
+
+const showPostPopup = ref(false);
+const isPostBoxCollapsed = ref(false);
 
 //popup confirmation
 const showConfirmModal = ref(false);
@@ -495,7 +540,7 @@ async function fetchNotifications() {
       } else {
         const existing = grouped.get(key);
         existing.count += 1;
-        existing.latestContent = notif.content; // latest content
+        existing.latestContent = notif.content;
         grouped.set(key, existing);
       }
     });
@@ -528,11 +573,13 @@ async function fetchApplicants(jobId) {
 async function fetchPostedJobs() {
   try {
     const response = await axios.get("/company/jobdisplay");
-    postedJobs.value = response.data.jobs;
+    postedJobs.value = response.data.jobs.sort((a, b) => {
+      return new Date(b.date_posted) - new Date(a.date_posted);
+    });
     console.log(response.data);
 
     if (postedJobs.value.length > 0) {
-      selectedJob.value = postedJobs.value[0]; // or let user pick
+      selectedJob.value = postedJobs.value[0];
       await fetchApplicants(selectedJob.value.id);
     } else {
       jobApplicants.value = [];
@@ -860,12 +907,6 @@ async function postJob() {
       job_location: "",
       monthly_salary: "",
       job_type: "",
-      recommended_course: "",
-      recommended_course_2: "",
-      recommended_course_3: "",
-      recommended_expertise: "",
-      recommended_expertise_2: "",
-      recommended_expertise_3: "",
       total_slots: "",
     };
 
@@ -891,6 +932,53 @@ async function postJob() {
         showIcon: true,
       });
     }
+  }
+}
+
+// Add to the existing refs
+const currentPage = ref(1);
+const applicantsPerPage = ref(2);
+
+const totalPages = computed(() => {
+  return Math.ceil(jobApplicants.value.length / applicantsPerPage.value);
+});
+
+const paginatedApplicants = computed(() => {
+  const start = (currentPage.value - 1) * applicantsPerPage.value;
+  const end = start + applicantsPerPage.value;
+  return jobApplicants.value.slice(start, end);
+});
+
+function nextPage() {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+}
+
+function previousPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+}
+
+function goToPage(page) {
+  currentPage.value = page;
+}
+
+function togglePostPopup() {
+  showPostPopup.value = !showPostPopup.value;
+  if (!showPostPopup.value) {
+    // Reset form when closing
+    jobData.value = {
+      job_title: "",
+      job_description: "",
+      job_location: "",
+      monthly_salary: "",
+      job_type: "",
+      total_slots: "",
+    };
+    selectedCourses.value = [];
+    selectedExpertise.value = [];
   }
 }
 </script>
@@ -1167,6 +1255,61 @@ body,
   overflow: auto;
 }
 
+.post-box.collapsed {
+  background: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 15px;
+  width: 100%;
+  height: auto;
+  border-bottom: #045d56 solid 4px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-box.collapsed:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.post-box.collapsed h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.post-box.collapsed p {
+  margin: 10px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.post-popup {
+  width: 80%;
+  max-width: 105vh;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.submit-btn {
+  background-color: #045d56;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background-color: #033f3a;
+}
+
 .post-box textarea {
   width: 100%;
   background-color: #f1f1f1;
@@ -1215,7 +1358,7 @@ body,
   flex: 1;
   position: relative;
   width: 45vh;
-  padding: 10px 6px;
+  padding: 8px 6px;
   margin-left: 3vh;
   border-radius: 2vh;
   background-color: #045d56;
@@ -1233,6 +1376,7 @@ body,
 .job-title {
   width: 100%;
   padding: 10px 15px;
+  margin-bottom: 2vh;
   border: none;
   border-radius: 12px;
   background-color: #f1f1f1;
@@ -1250,12 +1394,20 @@ body,
 }
 
 .dropdown-btn {
-  padding: 10px;
+  width: 88%;
+  margin-left: 2.5vh;
+  padding: 10px 15px;
   border: 1px solid #ccc;
+  border-radius: 8px;
   background: white;
   cursor: pointer;
-  width: 75%;
   text-align: left;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .dropdown-list {
@@ -1280,7 +1432,8 @@ body,
 .salary-input,
 .slot-input {
   width: 44vh;
-  padding: 8px 12px;
+  margin-top: 2vh;
+  padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 14px;
@@ -1338,11 +1491,6 @@ body,
   margin-left: 8vh;
   margin-bottom: 10vh;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.selected-job-box li:hover {
-  transform: scale(1.03);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
 }
 
 .selected-job-box li strong {
@@ -1453,6 +1601,7 @@ textarea {
   border-radius: 8px;
   font-size: 14px;
   width: 100%;
+  height: 20vh;
   resize: none;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -1514,6 +1663,61 @@ textarea {
   width: 0px;
   overflow: hidden;
   transition: width 0.3s ease;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 20px 0;
+}
+
+.pagination-btn {
+  background-color: #045d56;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #033f3a;
+  transform: translateY(-2px);
+}
+
+.pagination-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.page-number {
+  width: 35px;
+  height: 35px;
+  border: none;
+  border-radius: 50%;
+  background-color: #f1f1f1;
+  color: #045d56;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.page-number:hover {
+  background-color: #e0e0e0;
+}
+
+.page-number.active {
+  background-color: #045d56;
+  color: white;
 }
 
 @media (max-width: 1024px) {

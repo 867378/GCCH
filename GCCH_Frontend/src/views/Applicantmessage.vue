@@ -59,18 +59,37 @@
           </div>
         </div>
 
+        <!-- CHANGED NOTIFICATION POPUP -->
         <div v-if="showNotif" class="popup-overlay" @click.self="toggleNotif">
           <div class="popup">
             <h3>🔔 Notifications</h3>
-            <ul class="popup-list">
-              <li v-for="(notif, index) in notifications" :key="index">
-                <strong>{{ formatType(notif.type) }}</strong
-                >: {{ notif.content }}
-                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
-                ><br />
-                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
-              </li>
-            </ul>
+            <div
+              v-for="(notif, index) in notifications"
+              :key="index"
+              class="notification-item"
+            >
+              <div class="notification-icon">
+                <img
+                  :src="getNotificationIcon(notif.type)"
+                  alt="notification icon"
+                  class="notif-icon"
+                />
+              </div>
+              <div class="notification-content">
+                <div class="notification-header">
+                  <strong class="notification-type">{{
+                    formatType(notif.type)
+                  }}</strong>
+                  <span v-if="notif.count > 1" class="notification-badge">
+                    {{ notif.count }} new
+                  </span>
+                </div>
+                <p class="notification-message">{{ notif.content }}</p>
+                <small class="notification-time">
+                  {{ new Date(notif.created_at).toLocaleString() }}
+                </small>
+              </div>
+            </div>
             <button @click="toggleNotif">Close</button>
           </div>
         </div>
@@ -78,8 +97,7 @@
 
       <!-- CHATS -->
       <div class="content">
-
-                <!-- Notifications -->
+        <!-- Notifications -->
         <div class="right-content">
           <h3>CONTACTS</h3>
           <div class="updates-list">
@@ -99,7 +117,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="left-content">
           <div class="message-box">
             <h3 style="text-align: left; font-size: 30px">Messages</h3>
@@ -325,8 +343,7 @@ async function sendReply() {
       position: "top-right",
       timeout: 3000,
       showIcon: true,
-            toastBackgroundColor: "#045d56",
-
+      toastBackgroundColor: "#045d56",
     });
     return;
   }
@@ -353,8 +370,7 @@ async function sendReply() {
       position: "top-right",
       timeout: 2000,
       showIcon: true,
-            toastBackgroundColor: "#045d56",
-
+      toastBackgroundColor: "#045d56",
     });
   } catch (error) {
     console.error("Error sending message:", error);
@@ -429,6 +445,21 @@ function formatType(type) {
       return type;
   }
 }
+
+const getNotificationIcon = (type) => {
+  switch (type) {
+    case "job_application":
+      return "/public/resume.png";
+    case "inquiry":
+      return "/public/question.png";
+    case "application_update":
+      return "/public/updates.png";
+    case "message":
+      return "/public/mail.png";
+    default:
+      return "/public/notification.png";
+  }
+};
 
 onMounted(() => {
   fetchNotifications();
@@ -981,6 +1012,72 @@ body,
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
   background: #033f3a;
+}
+
+.notification-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+  background-color: #f8f9fa;
+}
+
+.notification-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background-color: #e0f2f1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.notification-type {
+  color: #045d56;
+  font-size: 14px;
+}
+
+.notification-badge {
+  background-color: #045d56;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.notification-message {
+  color: #333;
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.notification-time {
+  color: #666;
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
 }
 
 @media (max-width: 1024px) {

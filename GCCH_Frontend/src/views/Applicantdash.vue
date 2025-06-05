@@ -62,7 +62,7 @@
             />
           </div>
         </div>
-        
+
         <div class="icons-right">
           <div class="icon" @click="toggleExpertiseDropdown">
             <img src="/public/expertise.png" />
@@ -126,13 +126,33 @@
         <div v-if="showNotif" class="popup-overlay" @click.self="toggleNotif">
           <div class="popup">
             <h3>🔔 Notifications</h3>
-            <li v-for="(notif, index) in notifications" :key="index">
-                <strong>{{ formatType(notif.type) }}</strong
-                >: {{ notif.content }}
-                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
-                ><br />
-                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
-              </li>
+            <div
+              v-for="(notif, index) in notifications"
+              :key="index"
+              class="notification-item"
+            >
+              <div class="notification-icon">
+                <img
+                  :src="getNotificationIcon(notif.type)"
+                  alt="notification icon"
+                  class="notif-icon"
+                />
+              </div>
+              <div class="notification-content">
+                <div class="notification-header">
+                  <strong class="notification-type">{{
+                    formatType(notif.type)
+                  }}</strong>
+                  <span v-if="notif.count > 1" class="notification-badge">
+                    {{ notif.count }} new
+                  </span>
+                </div>
+                <p class="notification-message">{{ notif.content }}</p>
+                <small class="notification-time">
+                  {{ new Date(notif.created_at).toLocaleString() }}
+                </small>
+              </div>
+            </div>
             <button @click="toggleNotif">Close</button>
           </div>
         </div>
@@ -223,21 +243,28 @@
               <!-- Recommended Programs and Expertise -->
               <p>
                 {{
-                  [matchedJob.recommended_course, matchedJob.recommended_course_2, matchedJob.recommended_course_3]
+                  [
+                    matchedJob.recommended_course,
+                    matchedJob.recommended_course_2,
+                    matchedJob.recommended_course_3,
+                  ]
                     .filter(Boolean)
-                    .join(', ')
+                    .join(", ")
                 }}
               </p>
 
               <p>
                 {{
-                  [matchedJob.recommended_expertise, matchedJob.recommended_expertise_2, matchedJob.recommended_expertise_3]
+                  [
+                    matchedJob.recommended_expertise,
+                    matchedJob.recommended_expertise_2,
+                    matchedJob.recommended_expertise_3,
+                  ]
                     .filter(Boolean)
-                    .join(', ')
+                    .join(", ")
                 }}
               </p>
-
-              </div>
+            </div>
 
             <!-- Pagination Controls -->
             <div class="pagination">
@@ -608,7 +635,7 @@ onMounted(async () => {
     const response = await axios.get(`/user/applicant/${applicantId}`); // Or your actual endpoint
     applicantProgram.value = response.data.applicant.course || null;
   } catch (error) {
-    console.error('Failed to get applicant program', error);
+    console.error("Failed to get applicant program", error);
   }
 });
 
@@ -685,7 +712,9 @@ const fetchJobs = async (filters = {}) => {
     const response = await axios.get("/applicant/jobdisplay", {
       params: filters,
     });
-    recommendedJobs.value = response.data.jobs;
+    recommendedJobs.value = response.data.jobs.sort((a, b) => {
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
   } catch {
     alert("Failed to fetch jobs. Please try again later.");
   }
@@ -1142,12 +1171,21 @@ const filterBySalary = async (range) => {
 
     showSalaryDropdown.value = false;
 
-    createToast(`Showing jobs with salary range: ₱${range.min.toLocaleString()} - ₱${range.max.toLocaleString()}`, {
-      type: "info", position: "top-right", timeout: 3000, showIcon: true,
-    });
+    createToast(
+      `Showing jobs with salary range: ₱${range.min.toLocaleString()} - ₱${range.max.toLocaleString()}`,
+      {
+        type: "info",
+        position: "top-right",
+        timeout: 3000,
+        showIcon: true,
+      }
+    );
   } catch {
     createToast("Error filtering jobs. Please try again.", {
-      type: "error", position: "top-right", timeout: 3000, showIcon: true,
+      type: "error",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
     });
   }
 };
@@ -1160,33 +1198,76 @@ const toggleExpertiseDropdown = () => {
 };
 
 const expertiseMap = {
-  BSIT: ["Web Development", "Networking", "Cybersecurity", "System Administration", "Other"],
+  BSIT: [
+    "Web Development",
+    "Networking",
+    "Cybersecurity",
+    "System Administration",
+    "Other",
+  ],
   BSCS: ["Data Science", "AI", "Software Engineering", "Algorithms", "Other"],
   BSEMC: ["Multimedia Arts", "Animation", "Game Development", "Other"],
-  BSN: ["Clinical Nursing", "Community Health", "Medical-Surgical Nursing", "Other"],
-  BSM: ["Strategic Management", "Operations Management", "Entrepreneurship", "Other"],
+  BSN: [
+    "Clinical Nursing",
+    "Community Health",
+    "Medical-Surgical Nursing",
+    "Other",
+  ],
+  BSM: [
+    "Strategic Management",
+    "Operations Management",
+    "Entrepreneurship",
+    "Other",
+  ],
   BSA: ["Financial Accounting", "Auditing", "Taxation", "Other"],
   "BSBA-FM": ["Corporate Finance", "Investment Analysis", "Banking", "Other"],
-  "BSBA-HRM": ["Human Resources", "Talent Management", "Organizational Development", "Other"],
+  "BSBA-HRM": [
+    "Human Resources",
+    "Talent Management",
+    "Organizational Development",
+    "Other",
+  ],
   "BSBA-MM": ["Marketing Strategy", "Advertising", "Sales Management", "Other"],
   BSCA: ["Customs Brokerage", "Trade Compliance", "Logistics", "Other"],
-  BSHM: ["Hotel Management", "Food & Beverage Service", "Customer Relations", "Other"],
+  BSHM: [
+    "Hotel Management",
+    "Food & Beverage Service",
+    "Customer Relations",
+    "Other",
+  ],
   BSTM: ["Tourism Planning", "Event Management", "Travel Services", "Other"],
   BAComm: ["Journalism", "Public Relations", "Media Production", "Other"],
   BECEd: ["Early Childhood Development", "Preschool Education", "Other"],
   BCAEd: ["Arts Education", "Cultural Studies", "Creative Expression", "Other"],
   BPEd: ["Sports Science", "Physical Fitness", "Coaching", "Other"],
-  BEED: ["Elementary Teaching", "Child Psychology", "Classroom Management", "Other"],
+  BEED: [
+    "Elementary Teaching",
+    "Child Psychology",
+    "Classroom Management",
+    "Other",
+  ],
   "BSEd-Eng": ["English Education", "Literature", "Language Teaching", "Other"],
   "BSEd-Math": ["Mathematics Education", "Algebra", "Calculus", "Other"],
-  "BSEd-Fil": ["Filipino Language", "Philippine Literature", "Language Teaching", "Other"],
-  "BSEd-SS": ["Social Studies", "Philippine History", "Civics & Culture", "Other"],
+  "BSEd-Fil": [
+    "Filipino Language",
+    "Philippine Literature",
+    "Language Teaching",
+    "Other",
+  ],
+  "BSEd-SS": [
+    "Social Studies",
+    "Philippine History",
+    "Civics & Culture",
+    "Other",
+  ],
   "BSEd-Sci": ["General Science", "Biology", "Chemistry", "Physics", "Other"],
   Other: ["Other"],
 };
 
 const expertiseOptions = computed(() => {
-  return applicantProgram.value ? (expertiseMap[applicantProgram.value] || []) : [];
+  return applicantProgram.value
+    ? expertiseMap[applicantProgram.value] || []
+    : [];
 });
 
 const filterByExpertise = async (expertiseName) => {
@@ -1196,21 +1277,27 @@ const filterByExpertise = async (expertiseName) => {
     await fetchJobs({
       expertises: [expertiseName],
       min_salary: selectedSalaryRange.value
-        ? salaryRanges.value.find(r => r.id === selectedSalaryRange.value).min
+        ? salaryRanges.value.find((r) => r.id === selectedSalaryRange.value).min
         : null,
       max_salary: selectedSalaryRange.value
-        ? salaryRanges.value.find(r => r.id === selectedSalaryRange.value).max
+        ? salaryRanges.value.find((r) => r.id === selectedSalaryRange.value).max
         : null,
     });
 
     showExpertiseDropdown.value = false;
 
     createToast(`Showing jobs requiring expertise: ${expertiseName}`, {
-      type: "info", position: "top-right", timeout: 3000, showIcon: true,
+      type: "info",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
     });
   } catch {
     createToast("Error filtering jobs. Please try again.", {
-      type: "error", position: "top-right", timeout: 3000, showIcon: true,
+      type: "error",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
     });
   }
 };
@@ -1230,14 +1317,29 @@ const clearExpertiseFilter = async () => {
 
   await fetchJobs({
     min_salary: selectedSalaryRange.value
-      ? salaryRanges.value.find(r => r.id === selectedSalaryRange.value).min
+      ? salaryRanges.value.find((r) => r.id === selectedSalaryRange.value).min
       : null,
     max_salary: selectedSalaryRange.value
-      ? salaryRanges.value.find(r => r.id === selectedSalaryRange.value).max
+      ? salaryRanges.value.find((r) => r.id === selectedSalaryRange.value).max
       : null,
   });
 
   showExpertiseDropdown.value = false;
+};
+
+const getNotificationIcon = (type) => {
+  switch (type) {
+    case "job_application":
+      return "/public/resume.png";
+    case "inquiry":
+      return "/public/question.png";
+    case "application_update":
+      return "/public/updates.png";
+    case "message":
+      return "/public/mail.png";
+    default:
+      return "/public/notification.png";
+  }
 };
 </script>
 
@@ -2299,5 +2401,69 @@ label {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
+.notification-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s ease;
+}
 
+.notification-item:hover {
+  background-color: #f8f9fa;
+}
+
+.notification-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background-color: #e0f2f1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.notification-type {
+  color: #045d56;
+  font-size: 14px;
+}
+
+.notification-badge {
+  background-color: #045d56;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.notification-message {
+  color: #333;
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.notification-time {
+  color: #666;
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+}
 </style>
