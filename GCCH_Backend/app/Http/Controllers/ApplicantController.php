@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Models\Applicant;
+use App\Http\Models\ProfilePicture;
 use App\Models\Job;
 use App\Models\User;
 use App\Models\Resume;
@@ -348,6 +349,4 @@ class ApplicantController extends Controller
 
         return response()->json(['message' => 'Offer response recorded successfully']);
     }
-
-
 }

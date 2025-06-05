@@ -106,9 +106,9 @@
                   :class="{ active: selectedSalaryRange === range.id }"
                   @click="filterBySalary(range)"
                 >
-                  ₱{{ range.min.toLocaleString() }} - ₱{{
-                    range.max.toLocaleString()
-                  }}
+                  ₱{{ range.min.toLocaleString() }}
+                  <template v-if="range.max"> - ₱{{ range.max.toLocaleString() }}</template>
+                  <template v-else> and above</template>
                 </div>
                 <div class="dropdown-item clear" @click="clearSalaryFilter">
                   Clear Filter
@@ -627,6 +627,8 @@ const notifications = ref([]);
 const currentPage = ref(1);
 const jobsPerPage = ref(2); // Number of jobs to show per page
 
+//User Data
+const applicant = ref(null);
 const applicantProgram = ref(null);
 
 onMounted(async () => {
@@ -727,8 +729,47 @@ const fetchJobs = async (filters = {}) => {
   }
 };
 
-function applyToJob(jobId) {
+async function fetchUserData() {
+  try {
+    const userId = localStorage.getItem("user_id");
+    const response = await axios.get(`user/applicant/${userId}`);
+    applicant.value = response.data;
+    console.log("Fetched User Data", response.data);
+    createToast("Profile loaded successfully", {
+      type: "success",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
+    });
+  } catch (error) {
+    console.error("Failed to fetch user data", error);
+    createToast("Failed to load profile data", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+  }
+}
+
+async function applyToJob(jobId) {
   selectedJobId.value = jobId;
+
+  await fetchUserData();
+
+  const first = applicant.value.applicant.first_name || "";
+  const middle = applicant.value.applicant.middle_name
+    ? ` ${applicant.value.applicant.middle_name} `
+    : " ";
+  const last = applicant.value?.applicant?.last_name || "";
+
+  contactInfo.value = {
+    name: `${first}${middle}${last}`.replace(/\s+/g, " ").trim(),
+    phone: applicant.value?.applicant?.phone_number,
+    email: applicant.value?.user?.email,
+  };
+
   showApplyPopup.value = true;
 }
 
@@ -821,6 +862,8 @@ async function submitApplication() {
       },
     });
 
+
+    await fetchDashboardCounts();
     createToast(response.data.message, {
       type: "success",
       position: "top-right",
@@ -1157,6 +1200,7 @@ const salaryRanges = ref([
   { id: 3, min: 25001, max: 35000 },
   { id: 4, min: 35001, max: 45000 },
   { id: 5, min: 45001, max: 55000 },
+  { id: 6, min: 55001 }
 ]);
 
 const toggleSalaryDropdown = () => {
@@ -1169,14 +1213,16 @@ const filterBySalary = async (range) => {
   try {
     await fetchJobs({
       min_salary: range.min,
-      max_salary: range.max,
+      max_salary: range.max ?? undefined,
       expertises: selectedExpertise.value ? [selectedExpertise.value] : [],
     });
 
     showSalaryDropdown.value = false;
 
     createToast(
-      `Showing jobs with salary range: ₱${range.min.toLocaleString()} - ₱${range.max.toLocaleString()}`,
+      range.max
+        ? `Showing jobs with salary range: ₱${range.min.toLocaleString()} - ₱${range.max.toLocaleString()}`
+        : `Showing jobs with salary: ₱${range.min.toLocaleString()} and above`,
       {
         type: "info",
         position: "top-right",

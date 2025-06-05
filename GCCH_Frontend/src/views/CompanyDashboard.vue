@@ -116,16 +116,21 @@
                     alt="total job listings Icon"
                     class="ikon"
                   />
-                  TOTAL JOB LISTINGS
+                  POSTED JOBS
                 </strong>
               </p>
               <p>{{ totalJobs }}</p>
-              <div class="graph-container">
+              <ul>
+                <li v-for="job in jobs" :key="job.id">
+                  {{ job.job_title }}
+                </li>
+              </ul>
+              <!-- <div class="graph-container">
                 <div
                   class="graph-bar jobs"
                   :style="{ height: `${(totalJobs / maxValue) * 100}%` }"
                 ></div>
-              </div>
+              </div> -->
             </div>
             <div class="card">
               <p>
@@ -161,6 +166,7 @@
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -190,6 +196,8 @@ const pendingScreening = ref(0);
 const pendingInterview = ref(0);
 const pendingAccepted = ref(0);
 
+const jobs = ref([]);
+
 const isSidenavOpen = ref(true);
 
 const notifications = ref({});
@@ -206,7 +214,7 @@ function toggleSignOut() {
 function confirmSignOut() {
   axios
     .post("/logout")
-    .then((response) => {
+    .then(() => {
       createToast("Successfully signed out!", {
         type: "success",
         position: "top-right",
@@ -283,6 +291,22 @@ function formatType(type) {
       return "Part-time";
     case "other":
       return "Other";
+  }
+}
+
+async function fetchJobs(){
+  try{
+    const response = await axios.get("/company/jobdisplay");
+    jobs.value = response.data.jobs;
+    console.log("Jobs fetched successfully:", jobs.value);
+  } catch (error) {
+    console.error("Error fetching jobs:", error);
+    createToast("Failed to fetch jobs. Please try again.", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
   }
 }
 
@@ -384,7 +408,7 @@ const updatePendingPieChart = () => {
   pendingPieInstance.value = new Chart(ctx, {
     type: "pie",
     data: {
-      labels: ["Applied", "Screening", "For Interview", "Accepted"],
+      labels: ["Applied", "Screening", "For Interview", "Offered"],
       datasets: [
         {
           data: [
@@ -426,23 +450,15 @@ const maxValue = computed(() => {
   );
 });
 
-const pendingPercentage = computed(() => {
-  const total = hiredApplicants.value + pendingApplications.value;
-  return total === 0
-    ? 0
-    : Math.round((pendingApplications.value / total) * 100);
-});
-
-const pieChartStyle = computed(() => {
-  return {
-    background: `conic-gradient(
-      #004d40 0% ${pendingPercentage.value}%, 
-      #e0e0e0 ${pendingPercentage.value}% 100%
-    )`,
-  };
-});
+watch(
+  [pendingApplied, pendingScreening, pendingInterview, pendingAccepted],
+  () => {
+    updatePendingPieChart();
+  }
+);
 
 onMounted(() => {
+  fetchJobs();
   fetchNotifications();
   fetchDashboardCounts();
 
@@ -451,13 +467,6 @@ onMounted(() => {
     updatePendingPieChart();
   }, 100);
 });
-
-watch(
-  [pendingApplied, pendingScreening, pendingInterview, pendingAccepted],
-  () => {
-    updatePendingPieChart();
-  }
-);
 </script>
 
 <style scoped>

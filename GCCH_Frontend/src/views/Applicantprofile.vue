@@ -211,7 +211,7 @@
                   />
                 </div>
               </div>
-              <div class="btn-group">
+              <!-- <div class="btn-group">
                 <button
                   v-if="!isEditing"
                   @click="enableEditing"
@@ -229,7 +229,7 @@
                 >
                   Cancel
                 </button>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -290,7 +290,7 @@ function toggleSignOut() {
 function confirmSignOut() {
   axios
     .post("/logout")
-    .then((response) => {
+    .then(() => {
       createToast("Successfully signed out", {
         type: "success",
         position: "top-right",
@@ -312,57 +312,57 @@ function confirmSignOut() {
     });
 }
 
-function enableEditing() {
-  isEditing.value = true;
-  const {
-    first_name,
-    middle_name,
-    last_name,
-    date_of_birth,
-    sex: s,
-    phone_number,
-    email: e,
-  } = applicant.value.applicant;
-  fullName.value = `${first_name} ${middle_name} ${last_name}`.trim();
-  dateOfBirth.value = date_of_birth;
-  sex.value = s;
-  phoneNumber.value = phone_number;
-  email.value = applicant.value.email;
-  originalData.value = {
-    fullName: fullName.value,
-    dateOfBirth: dateOfBirth.value,
-    sex: sex.value,
-    phoneNumber: phoneNumber.value,
-    email: email.value,
-  };
-}
+// function enableEditing() {
+//   isEditing.value = true;
+//   const {
+//     first_name,
+//     middle_name,
+//     last_name,
+//     date_of_birth,
+//     sex: s,
+//     phone_number,
+//     email: e,
+//   } = applicant.value.applicant;
+//   fullName.value = `${first_name} ${middle_name} ${last_name}`.trim();
+//   dateOfBirth.value = date_of_birth;
+//   sex.value = s;
+//   phoneNumber.value = phone_number;
+//   email.value = applicant.value.email;
+//   originalData.value = {
+//     fullName: fullName.value,
+//     dateOfBirth: dateOfBirth.value,
+//     sex: sex.value,
+//     phoneNumber: phoneNumber.value,
+//     email: email.value,
+//   };
+// }
 
-function cancelEditing() {
-  isEditing.value = false;
-  avatarPreview.value = null;
-  ({
-    fullName: fullName.value,
-    dateOfBirth: dateOfBirth.value,
-    sex: sex.value,
-    phoneNumber: phoneNumber.value,
-    email: email.value,
-  } = originalData.value);
-}
+// function cancelEditing() {
+//   isEditing.value = false;
+//   avatarPreview.value = null;
+//   ({
+//     fullName: fullName.value,
+//     dateOfBirth: dateOfBirth.value,
+//     sex: sex.value,
+//     phoneNumber: phoneNumber.value,
+//     email: email.value,
+//   } = originalData.value);
+// }
 
-async function saveChanges() {
-  const [first, middle = "", last = ""] = fullName.value.split(" ");
-  const data = {
-    first_name: first,
-    middle_name: middle,
-    last_name: last,
-    date_of_birth: dateOfBirth.value,
-    sex: sex.value,
-    phone_number: phoneNumber.value,
-    email: email.value,
-  };
-  await updateProfile(data);
-  isEditing.value = false;
-}
+// async function saveChanges() {
+//   const [first, middle = "", last = ""] = fullName.value.split(" ");
+//   const data = {
+//     first_name: first,
+//     middle_name: middle,
+//     last_name: last,
+//     date_of_birth: dateOfBirth.value,
+//     sex: sex.value,
+//     phone_number: phoneNumber.value,
+//     email: email.value,
+//   };
+//   await updateProfile(data);
+//   isEditing.value = false;
+// }
 
 async function fetchUserData() {
   try {
