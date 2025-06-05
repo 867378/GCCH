@@ -109,8 +109,7 @@
                 >
                   <h4>Job Application for "{{ application.job_title }}"</h4>
                   <br />
-                  <p><strong>Status:</strong> {{ application.status }}</p>
-                  <!-- will be updated later -->
+                  <p><strong>Status:</strong> {{ formatType(application.status) }}</p>
                   <p>
                     <strong>Schedule:</strong>
                     {{ application.schedule || "To be announced" }}
@@ -139,7 +138,7 @@
                   class="resume-item received"
                 >
                   <h4>Job Application for {{ application.job_title }}</h4>
-                  <p><strong>Status:</strong> {{ application.status }}</p>
+                  <p><strong>Status:</strong> {{ formatType(application.status) }}</p>
                   <p>
                     <strong>Updated At:</strong>
                     {{ formatDate(application.updated_at) }}
@@ -195,13 +194,10 @@ import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
 
 const isSidenavOpen = ref(true);
-const showMail = ref(false);
 const showNotif = ref(false);
 const showSignOut = ref(false);
-const unreadMessages = ref(0);
 const newNotifications = ref(0);
 
-const messages = ref([]);
 const notifications = ref([]);
 
 const applications = ref([]);
@@ -214,15 +210,6 @@ const router = useRouter();
 
 //Methods for Nav Bars
 
-function handleAccept(applicationId) {
-  showDownloadButton.value.set(applicationId, true);
-}
-function toggleMail() {
-  showMail.value = !showMail.value;
-  if (showMail.value) {
-    unreadMessages.value = 0;
-  }
-}
 function toggleNotif() {
   showNotif.value = !showNotif.value;
   if (showNotif.value) {
@@ -236,7 +223,7 @@ function toggleSignOut() {
 function confirmSignOut() {
   axios
     .post("/logout")
-    .then((response) => {
+    .then(() => {
       createToast("Successfully signed out!", {
         type: "success",
         position: "top-right",
@@ -257,19 +244,6 @@ function confirmSignOut() {
       });
     });
 }
-
-// // Notification Logic
-// function pluralizeType(type, count) {
-//   const formatted = formatType(type).toLowerCase();
-//   return count > 1 ? `${formatted}s` : formatted;
-// }
-
-// const filteredNotifications = computed(() =>
-//   notifications.value.filter(
-//     (notif) =>
-//       notif && ["message", "inquiry", "application_update"].includes(notif.type)
-//   )
-// );
 
 async function fetchNotifications() {
   try {
@@ -315,6 +289,12 @@ function formatType(type) {
       return "Application Update";
     case "message":
       return "Message";
+    case "for_interview":
+      return "For Interview";
+    case "screening":
+      return "For Screening";
+    case "applied":
+      return "  Applied";
     case "other":
       return "Other";
   }
@@ -412,14 +392,6 @@ onMounted(() => {
   fetchJobApplications();
   fetchNotifications();
 });
-
-//   mounted() {
-//     setInterval(() => {
-//       this.unreadMessages += 1;
-//       this.newNotifications += 1;
-//     }, 20000);
-//   },
-// };
 
 function formatDate(dateString) {
   const date = new Date(dateString);
