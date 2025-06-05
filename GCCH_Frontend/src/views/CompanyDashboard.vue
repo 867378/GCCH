@@ -69,15 +69,33 @@
         <div v-if="showNotif" class="popup-overlay" @click.self="toggleNotif">
           <div class="popup">
             <h3>🔔 Notifications</h3>
-            <ul class="popup-list">
-              <li v-for="(notif, index) in notifications" :key="index">
-                <strong>{{ formatType(notif.type) }}</strong
-                >: {{ notif.content }}
-                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
-                ><br />
-                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
-              </li>
-            </ul>
+            <div
+              v-for="(notif, index) in notifications"
+              :key="index"
+              class="notification-item"
+            >
+              <div class="notification-icon">
+                <img
+                  :src="getNotificationIcon(notif.type)"
+                  alt="notification icon"
+                  class="notif-icon"
+                />
+              </div>
+              <div class="notification-content">
+                <div class="notification-header">
+                  <strong class="notification-type">{{
+                    formatType(notif.type)
+                  }}</strong>
+                  <span v-if="notif.count > 1" class="notification-badge">
+                    {{ notif.count }} new
+                  </span>
+                </div>
+                <p class="notification-message">{{ notif.content }}</p>
+                <small class="notification-time">
+                  {{ new Date(notif.created_at).toLocaleString() }}
+                </small>
+              </div>
+            </div>
             <button @click="toggleNotif">Close</button>
           </div>
         </div>
@@ -285,6 +303,21 @@ function formatType(type) {
       return "Other";
   }
 }
+
+const getNotificationIcon = (type) => {
+  switch (type) {
+    case 'job_application':
+      return '/public/resume.png';
+    case 'inquiry':
+      return '/public/question.png';
+    case 'application_update':
+      return '/public/updates.png';
+    case 'message':
+      return '/public/mail.png';
+    default:
+      return '/public/notification.png';
+  }
+};
 
 const chartInstance = ref(null);
 
@@ -707,6 +740,7 @@ body,
   padding: 20px;
   display: flex;
   gap: 20px;
+  overflow: auto;
 }
 .left-content {
   flex: 3;
@@ -889,6 +923,71 @@ body,
   transition: width 0.3s ease;
 }
 
+.notification-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+  background-color: #f8f9fa;
+}
+
+.notification-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background-color: #e0f2f1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.notification-type {
+  color: #045d56;
+  font-size: 14px;
+}
+
+.notification-badge {
+  background-color: #045d56;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.notification-message {
+  color: #333;
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.notification-time {
+  color: #666;
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+}
 @media (max-width: 1024px) {
   .hamburger {
     display: flex;

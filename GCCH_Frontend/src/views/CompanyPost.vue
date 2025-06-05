@@ -69,15 +69,33 @@
         <div v-if="showNotif" class="popup-overlay" @click.self="toggleNotif">
           <div class="popup">
             <h3>🔔 Notifications</h3>
-            <ul class="popup-list">
-              <li v-for="(notif, index) in notifications" :key="index">
-                <strong>{{ formatType(notif.type) }}</strong
-                >: {{ notif.content }}
-                <span v-if="notif.count > 1"> ({{ notif.count }} new)</span
-                ><br />
-                <small>{{ new Date(notif.created_at).toLocaleString() }}</small>
-              </li>
-            </ul>
+            <div
+              v-for="(notif, index) in notifications"
+              :key="index"
+              class="notification-item"
+            >
+              <div class="notification-icon">
+                <img
+                  :src="getNotificationIcon(notif.type)"
+                  alt="notification icon"
+                  class="notif-icon"
+                />
+              </div>
+              <div class="notification-content">
+                <div class="notification-header">
+                  <strong class="notification-type">{{
+                    formatType(notif.type)
+                  }}</strong>
+                  <span v-if="notif.count > 1" class="notification-badge">
+                    {{ notif.count }} new
+                  </span>
+                </div>
+                <p class="notification-message">{{ notif.content }}</p>
+                <small class="notification-time">
+                  {{ new Date(notif.created_at).toLocaleString() }}
+                </small>
+              </div>
+            </div>
             <button @click="toggleNotif">Close</button>
           </div>
         </div>
@@ -226,108 +244,102 @@
               <li
                 v-for="application in paginatedApplicants"
                 :key="application.id"
-                class="mb-4"
+                class="application-item"
+                :class="{ 'expanded': expandedItems.has(application.id) }"
+                @click="toggleItem(application.id)"
               >
-                <strong
-                  >{{ application.applicant.first_name }}
-                  {{ application.applicant.last_name }}</strong
-                >
-                <span
-                  ><strong>Course:</strong>
-                  {{ application.applicant.course }}</span
-                >
-                <span
-                  ><strong>Phone:</strong>
-                  {{ application.applicant.phone_number }}</span
-                >
-                <span
-                  ><strong>Date Applied:</strong>
-                  {{ application.date_applied }}</span
-                >
-                <span><strong>Status:</strong> {{ application.status }}</span>
-                <span
-                  ><strong>Schedule: </strong
-                  >{{ application.scheduled_at }}</span
-                >
-
-                <div>
-                  <a :href="application.cover_letter.embed_url" target="_blank">
-                    📄 View Cover Letter
-                  </a>
-                </div>
-                <div v-if="application.resume">
-                  <a :href="application.resume.embed_url" target="_blank">
-                    📄 View Resume
-                  </a>
+                <!-- Always visible header -->
+                <div class="application-header">
+                  <strong>{{ application.applicant.first_name }}
+                    {{ application.applicant.last_name }}</strong
+                  >
+                  <span class="expand-icon">
+                    {{ expandedItems.has(application.id) ? '▼' : '▶' }}
+                  </span>
                 </div>
 
-                <div>
-                  <div v-if="!showStatusOptions">
-                    <button
-                      class="message-btn"
-                      @click="sendMessage(application.applicant.id)"
-                    >
-                      Send Message
-                    </button>
-                    <button
-                      v-if="application.status !== 'accepted'"
-                      @click="showStatusOptions = true"
-                    >
-                      Select Status
-                    </button>
-                    <span v-else class="italic text-gray-600">
-                      ⏳ Waiting for the applicant's response to the job offer
-                    </span>
+                <!-- Collapsible content -->
+                <div class="application-details" v-if="expandedItems.has(application.id)">
+                  <span><strong>Course:</strong> {{ application.applicant.course }}</span>
+                  <span><strong>Phone:</strong> {{ application.applicant.phone_number }}</span>
+                  <span><strong>Date Applied:</strong> {{ application.date_applied }}</span>
+                  <span><strong>Status:</strong> {{ application.status }}</span>
+                  <span><strong>Schedule: </strong>{{ application.scheduled_at }}</span>
+
+                  <div class="application-documents">
+                    <a :href="application.cover_letter.embed_url" target="_blank">
+                      📄 View Cover Letter
+                    </a>
+                    <div v-if="application.resume">
+                      <a :href="application.resume.embed_url" target="_blank">
+                        📄 View Resume
+                      </a>
+                    </div>
                   </div>
 
-                  <div v-else>
-                    <div class="button-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          @change="openConfirmModal(application.id, 'accepted')"
-                        />
-                        ✅ Accept
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          @change="openConfirmModal(application.id, 'rejected')"
-                        />
-                        ❌ Reject
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          @change="scheduleInterview(application.id)"
-                        />
-                        📅 Schedule an Interview
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          @change="screening(application.id)"
-                        />
-                        📝 Ongoing Screening
-                      </label>
+                  <div class="application-actions">
+                    <div v-if="!showStatusOptions">
+                      <button class="message-btn" @click.stop="sendMessage(application.applicant.id)">
+                        Send Message
+                      </button>
+                      <button v-if="application.status !== 'accepted'"
+                              @click.stop="showStatusOptions = true">
+                        Select Status
+                      </button>
+                      <span v-else class="italic text-gray-600">
+                        ⏳ Waiting for the applicant's response to the job offer
+                      </span>
                     </div>
 
-                    <textarea
-                      v-model="comment"
-                      placeholder="Add a comment (optional)"
-                      rows="3"
-                      class="border p-2 mt-2 w-full"
-                    ></textarea>
+                    <div v-else @click.stop>
+                      <div class="button-group">
+                        <label>
+                          <input
+                            type="checkbox"
+                            @change="openConfirmModal(application.id, 'accepted')"
+                          />
+                          ✅ Accept
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            @change="openConfirmModal(application.id, 'rejected')"
+                          />
+                          ❌ Reject
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            @change="scheduleInterview(application.id)"
+                          />
+                          📅 Schedule an Interview
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            @change="screening(application.id)"
+                          />
+                          📝 Ongoing Screening
+                        </label>
+                      </div>
 
-                    <button
-                      @click="showStatusOptions = false"
-                      class="cancel-button"
-                    >
-                      Cancel
-                    </button>
-                    <button @click="submitApplicationDecision">
-                      Submit Update
-                    </button>
+                      <textarea
+                        v-model="comment"
+                        placeholder="Add a comment (optional)"
+                        rows="3"
+                        class="border p-2 mt-2 w-full"
+                      ></textarea>
+
+                      <button
+                        @click="showStatusOptions = false"
+                        class="cancel-button"
+                      >
+                        Cancel
+                      </button>
+                      <button @click="submitApplicationDecision">
+                        Submit Update
+                      </button>
+                    </div>
                   </div>
                 </div>
               </li>
@@ -981,6 +993,33 @@ function togglePostPopup() {
     selectedExpertise.value = [];
   }
 }
+
+const getNotificationIcon = (type) => {
+  switch (type) {
+    case 'job_application':
+      return '/public/resume.png';
+    case 'inquiry':
+      return '/public/question.png';
+    case 'application_update':
+      return '/public/updates.png';
+    case 'message':
+      return '/public/mail.png';
+    default:
+      return '/public/notification.png';
+  }
+};
+
+// Add this in your script setup section after other refs
+const expandedItems = ref(new Set());
+
+// Add this function to toggle item expansion
+const toggleItem = (applicationId) => {
+  if (expandedItems.value.has(applicationId)) {
+    expandedItems.value.delete(applicationId);
+  } else {
+    expandedItems.value.add(applicationId);
+  }
+};
 </script>
 
 <style scoped>
@@ -1528,6 +1567,137 @@ body,
   margin-right: 5vh;
 }
 
+
+.application-item {
+  background-color: #ffffff;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid #e0e6ed;
+  border-left: 4px solid #045d56;
+  width: 100vh;
+  margin: 0 0 16px 8vh;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+}
+
+.application-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.application-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.application-header strong {
+  font-size: 16px;
+  color: #2d3748;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.expand-icon {
+  color: #045d56;
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.application-item.expanded .expand-icon {
+  transform: rotate(180deg);
+}
+
+.application-details {
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e6ed;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: slideDown 0.3s ease;
+}
+
+.application-details span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.application-details strong {
+  color: #2d3748;
+  min-width: 100px;
+}
+
+.application-documents {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e6ed;
+}
+
+.application-documents a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #e0f2f1;
+  color: #045d56;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.application-documents a:hover {
+  background-color: #045d56;
+  color: white;
+}
+
+.application-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e6ed;
+}
+
+.application-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.message-btn {
+  background-color: #e0f2f1;
+  color: #045d56;
+  margin-right: 12px;
+}
+
+.message-btn:hover {
+  background-color: #045d56;
+  color: white;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 .button-group {
   display: flex;
   gap: 10px;
@@ -1718,6 +1888,72 @@ textarea {
 .page-number.active {
   background-color: #045d56;
   color: white;
+}
+
+.notification-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+  background-color: #f8f9fa;
+}
+
+.notification-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background-color: #e0f2f1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.notification-type {
+  color: #045d56;
+  font-size: 14px;
+}
+
+.notification-badge {
+  background-color: #045d56;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.notification-message {
+  color: #333;
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.notification-time {
+  color: #666;
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
 }
 
 @media (max-width: 1024px) {
