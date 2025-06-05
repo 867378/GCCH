@@ -140,15 +140,23 @@
               </p>
               <p>{{ pendingApplications }}</p>
               <div class="pie-chart-container">
-                <div class="pie-chart" :style="pieChartStyle"></div>
+                <canvas id="pendingPieChart"></canvas>
                 <div class="pie-legend">
                   <div class="legend-item">
-                    <span class="legend-color pending"></span>
-                    <span>Pending ({{ pendingPercentage }}%)</span>
+                    <span class="legend-color applied"></span>
+                    <span>Applied ({{ pendingApplied }})</span>
                   </div>
                   <div class="legend-item">
-                    <span class="legend-color total"></span>
-                    <span>Total ({{ 100 - pendingPercentage }}%)</span>
+                    <span class="legend-color screening"></span>
+                    <span>Screening ({{ pendingScreening }})</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-color interview"></span>
+                    <span>For Interview ({{ pendingInterview }})</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-color accepted"></span>
+                    <span>Accepted ({{ pendingAccepted }})</span>
                   </div>
                 </div>
               </div>
@@ -176,6 +184,12 @@ const newNotifications = ref(0);
 const hiredApplicants = ref(0);
 const totalJobs = ref(0);
 const pendingApplications = ref(0);
+
+const pendingApplied = ref(0);
+const pendingScreening = ref(0);
+const pendingInterview = ref(0);
+const pendingAccepted = ref(0);
+
 const isSidenavOpen = ref(true);
 
 const notifications = ref({});
@@ -224,16 +238,22 @@ async function fetchDashboardCounts() {
 
     hiredApplicants.value = clientsRes.data.count;
     totalJobs.value = jobsRes.data.count;
+
+    // Extract status counts
+    const counts = pendingRes.data.counts || {};
+    pendingApplied.value = counts.applied || 0;
+    pendingScreening.value = counts.screening || 0;
+    pendingInterview.value = counts.for_interview || 0;
+    pendingAccepted.value = counts.accepted || 0;
     pendingApplications.value = pendingRes.data.total;
-  } catch (error) {
-    console.error("Failed to fetch dashboard stats:", error);
-    createToast("Failed to load dashboard statistics", {
-      type: "danger",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-      toastBackgroundColor: "#045d56",
+
+    console.log("Dashboard counts fetched successfully:", {
+      hiredApplicants: hiredApplicants.value,
+      totalJobs: totalJobs.value,
+      pendingApplications: pendingRes.data,
     });
+  } catch (error) {
+    // ...existing error handling...
   }
 }
 
@@ -265,16 +285,6 @@ function formatType(type) {
       return "Other";
   }
 }
-
-onMounted(() => {
-  fetchNotifications();
-  fetchDashboardCounts();
-
-  // Add slight delay to ensure DOM is ready
-  setTimeout(() => {
-    updateChart();
-  }, 100);
-});
 
 const chartInstance = ref(null);
 
@@ -363,6 +373,50 @@ watch([hiredApplicants, totalJobs, pendingApplications], () => {
   updateChart();
 });
 
+const pendingPieInstance = ref(null);
+
+const updatePendingPieChart = () => {
+  if (pendingPieInstance.value) {
+    pendingPieInstance.value.destroy();
+  }
+  const ctx = document.getElementById("pendingPieChart");
+  if (!ctx) return;
+  pendingPieInstance.value = new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels: ["Applied", "Screening", "For Interview", "Accepted"],
+      datasets: [
+        {
+          data: [
+            pendingApplied.value,
+            pendingScreening.value,
+            pendingInterview.value,
+            pendingAccepted.value,
+          ],
+          backgroundColor: [
+            "#ffc107", // Applied
+            "#42a5f5", // Screening
+            "#ab47bc", // For Interview
+            "#66bb6a", // Accepted
+          ],
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          // text: "Pending Applications by Status",
+          // color: "#045d56",
+          font: { size: 14, weight: "bold" },
+        },
+      },
+    },
+  });
+};
+
 const maxValue = computed(() => {
   return Math.max(
     hiredApplicants.value,
@@ -387,6 +441,23 @@ const pieChartStyle = computed(() => {
     )`,
   };
 });
+
+onMounted(() => {
+  fetchNotifications();
+  fetchDashboardCounts();
+
+  setTimeout(() => {
+    updateChart();
+    updatePendingPieChart();
+  }, 100);
+});
+
+watch(
+  [pendingApplied, pendingScreening, pendingInterview, pendingAccepted],
+  () => {
+    updatePendingPieChart();
+  }
+);
 </script>
 
 <style scoped>
@@ -1155,6 +1226,14 @@ body,
   border-radius: 50%;
   transition: all 0.3s ease;
 }
+
+/* id of pendingPieChart in canvas idk dko gets frontend e HAHAH */
+/* #pendingPieChart {
+  width: 180px !important;
+  height: 180px !important;
+  max-width: 100%;
+  max-height: 100%;
+} */
 
 .pie-legend {
   display: flex;
