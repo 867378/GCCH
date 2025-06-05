@@ -284,7 +284,7 @@
                 />
                 <h3>YOU'RE HIRED!</h3>
               </div>
-              <div class="hired-content">
+              <div class="hired-content" v-if="hiredJobDetails">
                 <p>Company Name: {{ hiredJobDetails.company.company_name }}</p>
                 <p>Job Title: {{ hiredJobDetails.job_title }}</p>
                 <p>Job Type: {{ formatType(hiredJobDetails.job_type) }}</p>
@@ -615,15 +615,23 @@ onMounted(async () => {
 // Computed properties
 const totalPages = computed(() => {
   return Math.ceil(
-    recommendedJobs.value.filter((job) => job.status === "open").length /
-      jobsPerPage.value
+    recommendedJobs.value.filter(
+      (job) =>
+        job.status === "open" &&
+        (!searchQuery.value ||
+          job.job_title.toLowerCase().includes(searchQuery.value.toLowerCase()))
+    ).length / jobsPerPage.value
   );
 });
 
 // Computed property for paginated jobs
 const paginatedJobs = computed(() => {
+  // Filter jobs by status and search query
   const filteredJobs = recommendedJobs.value.filter(
-    (job) => job.status === "open"
+    (job) =>
+      job.status === "open" &&
+      (!searchQuery.value ||
+        job.job_title.toLowerCase().includes(searchQuery.value.toLowerCase()))
   );
   const start = (currentPage.value - 1) * jobsPerPage.value;
   const end = start + jobsPerPage.value;
@@ -686,6 +694,7 @@ const fetchJobs = async (filters = {}) => {
       params: filters,
     });
     recommendedJobs.value = response.data.jobs;
+    console.log("Recommended Jobs:", recommendedJobs.value);
   } catch {
     alert("Failed to fetch jobs. Please try again later.");
   }
@@ -915,15 +924,11 @@ async function fetchHiredApplication() {
     const response = await axios.get("/applicant/applications");
     console.log("Applications:", response.data.applications);
 
-    hiredApplication.value =
-      response.data.applications.find((app) => app.status === "hired") || null;
+    hiredApplication.value = response.data.applications.find((app) => app.status === "hired") || null;
 
     if (hiredApplication.value) {
-      await fetchJobs(hiredApplication.value.job_id);
-
       const allJobs = [...recommendedJobs.value];
-      hiredJobDetails.value =
-        allJobs.find((job) => job.id === hiredApplication.value.job_id) || null;
+      hiredJobDetails.value = allJobs.find((job) => String(job.id) === String(hiredApplication.value.job_id)) || null;
 
       console.log("Hired job details:", hiredJobDetails.value);
     }
@@ -1099,9 +1104,9 @@ watch(
   }
 );
 
-onMounted(() => {
-  fetchHiredApplication();
-  fetchJobs();
+onMounted(async () => {
+  await fetchJobs();
+  await fetchHiredApplication();
   fetchNotifications();
   fetchDashboardCounts();
 
@@ -1113,6 +1118,7 @@ onMounted(() => {
 const searchQuery = ref("");
 
 const handleSearch = () => {
+  
   console.log("Searching for:", searchQuery.value);
 };
 
