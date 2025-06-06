@@ -265,7 +265,6 @@ async function fetchDashboardCounts() {
     hiredApplicants.value = clientsRes.data.count;
     totalJobs.value = jobsRes.data.count;
 
-    // Extract status counts
     const counts = pendingRes.data.counts || {};
     pendingApplied.value = counts.applied || 0;
     pendingScreening.value = counts.screening || 0;
