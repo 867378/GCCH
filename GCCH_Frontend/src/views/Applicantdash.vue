@@ -187,7 +187,7 @@
                   <div class="button-group">
                     <button
                       class="message-btn"
-                      @click="sendMessage(matchedJob.company.user_id)"
+                      @click="sendMessage(matchedJob.company.user_id, matchedJob)"
                     >
                       Send Message
                     </button>
@@ -572,6 +572,12 @@
   >
     <div class="popup">
       <h3>✉️ Message</h3>
+      <div v-if="selectedJobForMessage">
+        <p>
+          <strong>Inquiring about:</strong>
+          {{ selectedJobForMessage.job_title }}
+        </p>
+      </div>
       <textarea
         v-model="messageContent"
         placeholder="Type your message here..."
@@ -1065,21 +1071,30 @@ const downloadCertificate = async () => {
   }
 };
 
-function sendMessage(companyId) {
+const selectedJobForMessage = ref(null);
+
+function sendMessage(companyId, job = null) {
   selectedCompanyId.value = companyId;
+  selectedJobForMessage.value = job;
   showMessagePopup.value = true;
 }
 
 async function sendActualMessage() {
   try {
+    let messageToSend = messageContent.value;
+    if (selectedJobForMessage.value) {
+      messageToSend =
+        `[Job Inquiry: ${selectedJobForMessage.value.job_title}] ` +
+        messageToSend;
+    }
     const response = await axios.post("/message/send", {
       receiver_id: selectedCompanyId.value,
-      message: messageContent.value,
+      message: messageToSend,
     });
 
-    console.log("Message Sent:", response.data);
     showMessagePopup.value = false;
     messageContent.value = "";
+    selectedJobForMessage.value = null;
     createToast("Message sent successfully!", {
       type: "success",
       position: "top-right",

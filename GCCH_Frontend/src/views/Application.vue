@@ -149,7 +149,7 @@
                     <button
                       v-if="!showDownloadButton.get(application.id)"
                       class="acrj-btn"
-                      @click="respondToOffer(application.id, 'accepted')"
+                      @click="openConfirmPopup(application.id, 'accepted')"
                     >
                       Accept Offer
                     </button>
@@ -171,7 +171,7 @@
                     <button
                       v-if="!showDownloadButton.get(application.id)"
                       class="acrj-btn"
-                      @click="respondToOffer(application.id, 'rejected')"
+                      @click="openConfirmPopup(application.id, 'rejected')"
                     >
                       Reject Offer
                     </button>
@@ -179,6 +179,29 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="showConfirmPopup" class="popup-overlay" @click.self="showConfirmPopup = false">
+        <div class="popup">
+          <h3>Are you sure?</h3>
+          <p>
+            Are you sure you want to
+            <strong>{{ confirmAction === 'accepted' ? 'accept' : 'reject' }}</strong>
+            this job offer?
+          </p>
+          <div class="signout-actions">
+            <button class="cancel-btn" @click="showConfirmPopup = false">Cancel</button>
+            <button
+              class="signout-btn"
+              @click="() => {
+                respondToOffer(confirmApplicationId, confirmAction);
+                showConfirmPopup = false;
+              }"
+            >
+              Yes, {{ confirmAction === 'accepted' ? 'Accept' : 'Reject' }}
+            </button>
           </div>
         </div>
       </div>
@@ -203,6 +226,10 @@ const notifications = ref([]);
 const applications = ref([]);
 const ongoingApplications = ref([]);
 const acceptedApplications = ref([]);
+
+const showConfirmPopup = ref(false);
+const confirmAction = ref("");
+const confirmApplicationId = ref(null);
 
 const showDownloadButton = ref(new Map());
 
@@ -295,6 +322,8 @@ function formatType(type) {
       return "For Screening";
     case "applied":
       return "  Applied";
+    case "accepted":
+      return "Offered";
     case "other":
       return "Other";
   }
@@ -323,6 +352,12 @@ async function fetchJobApplications() {
       showIcon: true,
     });
   }
+}
+
+function openConfirmPopup(applicationId, action) {
+  confirmApplicationId.value = applicationId;
+  confirmAction.value = action;
+  showConfirmPopup.value = true;
 }
 
 async function respondToOffer(applicationId, response) {

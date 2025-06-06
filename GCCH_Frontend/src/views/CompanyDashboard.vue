@@ -178,6 +178,10 @@
                     <span>For Interview ({{ pendingInterview }})</span>
                   </div>
                   <div class="legend-item">
+                    <span class="legend-color interview"></span>
+                    <span>Interviewed ({{ pendingInterviewed }})</span>
+                  </div>
+                  <div class="legend-item">
                     <span class="legend-color accepted"></span>
                     <span>Accepted ({{ pendingAccepted }})</span>
                   </div>
@@ -211,6 +215,7 @@ const pendingApplications = ref(0);
 const pendingApplied = ref(0);
 const pendingScreening = ref(0);
 const pendingInterview = ref(0);
+const pendingInterviewed = ref(0);
 const pendingAccepted = ref(0);
 
 const jobs = ref([]);
@@ -270,6 +275,7 @@ async function fetchDashboardCounts() {
     pendingScreening.value = counts.screening || 0;
     pendingInterview.value = counts.for_interview || 0;
     pendingAccepted.value = counts.accepted || 0;
+    pendingInterviewed.value = counts.interviewed || 0;
     pendingApplications.value = pendingRes.data.total;
 
     console.log("Dashboard counts fetched successfully:", {
@@ -446,19 +452,21 @@ const updatePendingPieChart = () => {
   pendingPieInstance.value = new Chart(ctx, {
     type: "pie",
     data: {
-      labels: ["Applied", "Screening", "For Interview", "Offered"],
+      labels: ["Applied", "Screening", "For Interview","Interviewed", "Offered"],
       datasets: [
         {
           data: [
             pendingApplied.value,
             pendingScreening.value,
             pendingInterview.value,
+            pendingInterviewed.value,
             pendingAccepted.value,
           ],
           backgroundColor: [
             "#ffc107", // Applied
             "#42a5f5", // Screening
             "#ab47bc", // For Interview
+            "#ff7043", // Interviewed
             "#66bb6a", // Accepted
           ],
         },

@@ -83,7 +83,7 @@ class CompanyController extends Controller
         try{
             $userId = auth()->id();
 
-            $applicationsQuery = JobApplication::whereIn('status', ['applied', 'for_interview', 'screening', 'accepted'])
+            $applicationsQuery = JobApplication::whereIn('status', ['applied', 'for_interview', 'screening', 'accepted', 'interviewed'])
                 ->whereHas('job.company', function ($query) use ($userId) {
                     $query->where('user_id', $userId);
                 });
@@ -244,10 +244,18 @@ class CompanyController extends Controller
             }
 
             $validated = $request->validate([
-                'status' => 'required|in:applied,for_interview,screening,rejected,accepted,hired',
+                'status' => 'required|in:applied,for_interview,screening,interviewed,rejected,accepted,hired',
                 'scheduled_at' => 'nullable|date_format:Y-m-d H:i:s',
                 'comment' => 'nullable|string',
             ]);
+
+            if ($application->status !== 'applied' && $validated['status'] === 'screening') {
+                return response()->json(['error' => 'Can only move to screening from applied status.'], 403);
+            }
+
+            if ($validated['status'] === 'interviewed' && $application->status !== 'for_interview') {
+                return response()->json(['error' => 'Can only mark as interviewed after interview is scheduled.'], 403);
+            }
 
             $user = Auth::user();
             $company = $user->company;
@@ -256,7 +264,7 @@ class CompanyController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 403);
             }
 
-            if (in_array($validated['status'], ['for_interview', 'screening'])) {
+            if (in_array($validated['status'], ['for_interview'])) {
                 if (empty($validated['scheduled_at'])) {
                     return response()->json(['error' => 'Scheduled date is required for interview or assessment'], 422);
                 }
