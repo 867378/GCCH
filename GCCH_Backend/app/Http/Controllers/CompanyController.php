@@ -45,52 +45,64 @@ class CompanyController extends Controller
     }
 
 
-    public function totalClients()
-    {
-        $companyId = auth()->id();
+    public function totalClients(){
+        try{
+            $userId = auth()->id();
 
-        $clients = JobApplication::whereHas('job', function ($q) use ($companyId) {
-                $q->where('company_id', $companyId);
-            })
-            ->where('offer_status', 'accepted')
-            ->where('finalized', true)
-            ->distinct('applicant_id')
-            ->count('applicant_id');
+            $clients = JobApplication::whereHas('job', function ($q) use ($userId) {
+                    $q->whereHas('company', function ($qq) use ($userId) {
+                        $qq->where('user_id', $userId);
+                    });
+                })
+                ->where('offer_status', 'accepted')
+                ->where('finalized', true)
+                ->distinct('applicant_id')
+                ->count('applicant_id');
 
-        return response()->json(['count' => $clients]);
+            return response()->json(['count' => $clients]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Could not retrieve total clients'], 500);
+        }
     }
 
 
-    public function totalJobs()
-    {
-        $companyId = auth()->id();
-        $jobs = Job::where('company_id', $companyId)->count();
+    public function totalJobs(){
+        try{
+            $userId = auth()->id();
+            $jobs = Job::whereHas('company', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })->count();
 
-        return response()->json(['count' => $jobs]);
+            return response()->json(['count' => $jobs]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Could not retrieve total jobs'], 500);
+        }
     }
 
-    public function pendingApplications()
-    {
-        $companyId = auth()->id();
+    public function pendingApplications(){
+        try{
+            $userId = auth()->id();
 
-        $applicationsQuery = JobApplication::whereIn('status', ['applied', 'for_interview', 'screening', 'accepted'])
-            ->whereHas('job', function ($query) use ($companyId) {
-                $query->where('company_id', $companyId);
-            });
+            $applicationsQuery = JobApplication::whereIn('status', ['applied', 'for_interview', 'screening', 'accepted'])
+                ->whereHas('job.company', function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                });
 
-        $total = $applicationsQuery->count();
+            $total = $applicationsQuery->count();
 
-        $countsPerStatus = $applicationsQuery
-            ->selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->pluck('count', 'status');
+            $countsPerStatus = $applicationsQuery
+                ->selectRaw('status, COUNT(*) as count')
+                ->groupBy('status')
+                ->pluck('count', 'status');
 
-        return response()->json([
-            'total' => $total,
-            'counts' => $countsPerStatus,
+            return response()->json([
+                'total' => $total,
+                'counts' => $countsPerStatus,
         ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Could not retrieve pending applications'], 500);
+        }
     }
-
 
     public function postjob(){
         try{
@@ -163,7 +175,7 @@ class CompanyController extends Controller
 
             return response()->json(['jobs' => $jobs], 200);
 
-        } catch (JWTException $e) {
+        } catch (ValidationException $e) {
             return response()->json(['error' => 'Could not retrieve jobs'], 500);
         }
     }

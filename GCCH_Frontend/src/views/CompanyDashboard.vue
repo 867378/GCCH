@@ -265,7 +265,6 @@ async function fetchDashboardCounts() {
     hiredApplicants.value = clientsRes.data.count;
     totalJobs.value = jobsRes.data.count;
 
-    // Extract status counts
     const counts = pendingRes.data.counts || {};
     pendingApplied.value = counts.applied || 0;
     pendingScreening.value = counts.screening || 0;
@@ -279,7 +278,13 @@ async function fetchDashboardCounts() {
       pendingApplications: pendingRes.data,
     });
   } catch (error) {
-    // ...existing error handling...
+    console.error("Error fetching dashboard counts:", error);
+    createToast("Failed to fetch dashboard counts. Please try again.", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
   }
 }
 
