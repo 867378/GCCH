@@ -279,7 +279,13 @@ async function fetchDashboardCounts() {
       pendingApplications: pendingRes.data,
     });
   } catch (error) {
-    // ...existing error handling...
+    console.error("Error fetching dashboard counts:", error);
+    createToast("Failed to fetch dashboard counts. Please try again.", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
   }
 }
 
