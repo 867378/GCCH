@@ -215,6 +215,49 @@
       </div>
 
       <div class="content">
+
+                <div class="right-content">
+          <h3>POSTED JOBS</h3>
+          <div class="posted-jobs">
+            <div
+              class="posted-jobs-box"
+              v-for="(job, index) in paginatedPostedJobs"
+              :key="index"
+              @click="selectJob(job)"
+            >
+              <h2>{{ job.job_title }}</h2>
+              <p><strong>Location:</strong> {{ job.job_location }}</p>
+              <p><strong>Type:</strong> {{ job.job_type }}</p>
+              <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
+              <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
+              <p><strong>Status:</strong> {{ job.status }}</p>
+              <p>
+                <strong>Slots: </strong> {{ job.filled_slots }}/{{ job.total_slots }}
+              </p>
+            </div>
+            <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
+            
+            <div v-if="postedJobs.length > 0" class="pagination">
+              <button 
+                class="pagination-btn" 
+                :disabled="currentJobPage === 1"
+                @click="previousJobPage"
+              >
+                Previous
+              </button>
+              <span class="page-info">
+                Page {{ currentJobPage }} of {{ totalJobPages }}
+              </span>
+              <button 
+                class="pagination-btn" 
+                :disabled="currentJobPage === totalJobPages"
+                @click="nextJobPage"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
         <div class="left-content">
           <div class="post-box collapsed" @click="togglePostPopup">
             <h3>Create New Job Post</h3>
@@ -381,32 +424,6 @@
 
           <div v-else>
             <p>Select a job to view details and applicants.</p>
-          </div>
-        </div>
-
-        <!-- Keep your existing right-content section -->
-        <div class="right-content">
-          <h3>POSTED JOBS</h3>
-          <div class="posted-jobs">
-            <div
-              class="posted-jobs-box"
-              v-for="(job, index) in postedJobs"
-              :key="index"
-              @click="selectJob(job)"
-            >
-              <h2>{{ job.job_title }}</h2>
-              <p><strong>Location:</strong> {{ job.job_location }}</p>
-              <p><strong>Type:</strong> {{ job.job_type }}</p>
-              <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
-              <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
-              <p><strong>Status:</strong> {{ job.status }}</p>
-              <p>
-                <strong>Slots: </strong> {{ job.filled_slots }}/{{
-                  job.total_slots
-                }}
-              </p>
-            </div>
-            <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
         </div>
       </div>
@@ -961,20 +978,34 @@ const paginatedApplicants = computed(() => {
   return jobApplicants.value.slice(start, end);
 });
 
-function nextPage() {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
+// Add these refs
+const jobsPerPage = ref(3); // Number of jobs to show per page
+const currentJobPage = ref(1);
+
+// Add these computed properties
+const totalJobPages = computed(() => Math.ceil(postedJobs.value.length / jobsPerPage.value));
+
+const paginatedPostedJobs = computed(() => {
+  const start = (currentJobPage.value - 1) * jobsPerPage.value;
+  const end = start + jobsPerPage.value;
+  return postedJobs.value.slice(start, end);
+});
+
+// Add these methods for job pagination
+function nextJobPage() {
+  if (currentJobPage.value < totalJobPages.value) {
+    currentJobPage.value++;
   }
 }
 
-function previousPage() {
-  if (currentPage.value > 1) {
-    currentPage.value--;
+function previousJobPage() {
+  if (currentJobPage.value > 1) {
+    currentJobPage.value--;
   }
 }
 
-function goToPage(page) {
-  currentPage.value = page;
+function goToJobPage(page) {
+  currentJobPage.value = page;
 }
 
 function togglePostPopup() {
@@ -1784,6 +1815,42 @@ textarea {
   padding: 20px;
   height: 85vh;
   overflow: auto;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.pagination-btn {
+  background-color: #045d56;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.pagination-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.pagination-btn:not(:disabled):hover {
+  background-color: #034442;
+  transform: translateY(-2px);
+}
+
+.page-info {
+  color: #045d56;
+  font-weight: 500;
+  font-size: 14px;
 }
 .icons-right {
   display: flex;

@@ -184,7 +184,6 @@
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -265,6 +264,7 @@ async function fetchDashboardCounts() {
     hiredApplicants.value = clientsRes.data.count;
     totalJobs.value = jobsRes.data.count;
 
+    // Extract status counts
     const counts = pendingRes.data.counts || {};
     pendingApplied.value = counts.applied || 0;
     pendingScreening.value = counts.screening || 0;
@@ -317,8 +317,8 @@ function formatType(type) {
   }
 }
 
-async function fetchJobs(){
-  try{
+async function fetchJobs() {
+  try {
     const response = await axios.get("/company/jobdisplay");
     jobs.value = response.data.jobs;
     console.log("Jobs fetched successfully:", jobs.value);
@@ -335,16 +335,16 @@ async function fetchJobs(){
 
 const getNotificationIcon = (type) => {
   switch (type) {
-    case 'job_application':
-      return '/public/resume.png';
-    case 'inquiry':
-      return '/public/question.png';
-    case 'application_update':
-      return '/public/updates.png';
-    case 'message':
-      return '/public/mail.png';
+    case "job_application":
+      return "/public/resume.png";
+    case "inquiry":
+      return "/public/question.png";
+    case "application_update":
+      return "/public/updates.png";
+    case "message":
+      return "/public/mail.png";
     default:
-      return '/public/notification.png';
+      return "/public/notification.png";
   }
 };
 
@@ -772,8 +772,9 @@ body,
   border-radius: 20px;
   box-shadow: 0 10px 20px rgba(4, 93, 86, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 30vh;
-  margin-top: 3vh;
+  min-height: 20vh;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
   position: relative;
   border: 1px solid rgba(4, 93, 86, 0.1);
   overflow: hidden;
@@ -803,6 +804,33 @@ body,
 .card p {
   margin: 0;
   padding: 0;
+  line-height: 1.4;
+}
+
+.card ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.card li {
+  padding: 8px 10px;
+  margin-bottom: 5px;
+  background: #f5f5f5;
+  border-left: 3px solid #045d56;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #333;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card li:hover {
+  background: #e0f2f1;
+  transform: translateX(5px);
+  cursor: pointer;
 }
 
 .chart-container {

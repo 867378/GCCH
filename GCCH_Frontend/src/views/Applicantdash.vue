@@ -107,7 +107,9 @@
                   @click="filterBySalary(range)"
                 >
                   ₱{{ range.min.toLocaleString() }}
-                  <template v-if="range.max"> - ₱{{ range.max.toLocaleString() }}</template>
+                  <template v-if="range.max">
+                    - ₱{{ range.max.toLocaleString() }}</template
+                  >
                   <template v-else> and above</template>
                 </div>
                 <div class="dropdown-item clear" @click="clearSalaryFilter">
@@ -237,10 +239,7 @@
                     <p>Location: {{ matchedJob.job_location }}</p>
                   </div>
                 </div>
-                <!-- Job Description -->
-                <p class="job-description">{{ matchedJob.job_description }}</p>
-              </div>
-              <!-- Recommended Programs and Expertise -->
+                <!-- Recommended Programs and Expertise -->
               <p>
                 {{
                   [
@@ -264,6 +263,10 @@
                     .join(", ")
                 }}
               </p>
+                <!-- Job Description -->
+                <p class="job-description">{{ matchedJob.job_description }}</p>
+              </div>
+              
             </div>
 
             <!-- Pagination Controls -->
@@ -653,15 +656,21 @@ const totalPages = computed(() => {
   );
 });
 
-// Computed property for paginated jobs
+
 const paginatedJobs = computed(() => {
-  // Filter jobs by status and search query
-  const filteredJobs = recommendedJobs.value.filter(
-    (job) =>
-      job.status === "open" &&
-      (!searchQuery.value ||
-        job.job_title.toLowerCase().includes(searchQuery.value.toLowerCase()))
-  );
+  const filteredJobs = recommendedJobs.value
+    .filter(
+      (job) =>
+        job.status === "open" &&
+        (!searchQuery.value ||
+          job.job_title.toLowerCase().includes(searchQuery.value.toLowerCase()))
+    )
+    .sort((a, b) => {
+      const dateA = new Date(a.date_posted);
+      const dateB = new Date(b.date_posted);
+      return dateB - dateA; // newest jobs first
+    });
+
   const start = (currentPage.value - 1) * jobsPerPage.value;
   const end = start + jobsPerPage.value;
   return filteredJobs.slice(start, end);
@@ -722,7 +731,12 @@ const fetchJobs = async (filters = {}) => {
     const response = await axios.get("/applicant/jobdisplay", {
       params: filters,
     });
-    recommendedJobs.value = response.data.jobs;
+    // Sort jobs by date before assigning to recommendedJobs
+    recommendedJobs.value = response.data.jobs.sort((a, b) => {
+      const dateA = new Date(a.date_posted);
+      const dateB = new Date(b.date_posted);
+      return dateB - dateA;
+    });
     console.log("Recommended Jobs:", recommendedJobs.value);
   } catch {
     alert("Failed to fetch jobs. Please try again later.");
@@ -862,7 +876,6 @@ async function submitApplication() {
       },
     });
 
-
     await fetchDashboardCounts();
     createToast(response.data.message, {
       type: "success",
@@ -994,11 +1007,15 @@ async function fetchHiredApplication() {
     const response = await axios.get("/applicant/applications");
     console.log("Applications:", response.data.applications);
 
-    hiredApplication.value = response.data.applications.find((app) => app.status === "hired") || null;
+    hiredApplication.value =
+      response.data.applications.find((app) => app.status === "hired") || null;
 
     if (hiredApplication.value) {
       const allJobs = [...recommendedJobs.value];
-      hiredJobDetails.value = allJobs.find((job) => String(job.id) === String(hiredApplication.value.job_id)) || null;
+      hiredJobDetails.value =
+        allJobs.find(
+          (job) => String(job.id) === String(hiredApplication.value.job_id)
+        ) || null;
 
       console.log("Hired job details:", hiredJobDetails.value);
     }
@@ -1188,7 +1205,6 @@ onMounted(async () => {
 const searchQuery = ref("");
 
 const handleSearch = () => {
-  
   console.log("Searching for:", searchQuery.value);
 };
 
@@ -1200,7 +1216,7 @@ const salaryRanges = ref([
   { id: 3, min: 25001, max: 35000 },
   { id: 4, min: 35001, max: 45000 },
   { id: 5, min: 45001, max: 55000 },
-  { id: 6, min: 55001 }
+  { id: 6, min: 55001 },
 ]);
 
 const toggleSalaryDropdown = () => {
@@ -2181,33 +2197,53 @@ body,
   overflow: auto;
 }
 .job-box {
-  border: 1px solid #ddd;
-  padding: 15px;
-  max-width: 90%;
-  margin-left: 5vh;
-  margin-bottom: 20px;
-  border-radius: 12px;
+  border: 1px solid #edf2f7;
+  padding: 25px;
+  max-width: 95%;
+  margin: 0 auto 25px auto;
+  border-radius: 16px;
   white-space: pre-line;
-  border-left: #045d56 4px solid;
   background-color: #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  text-transform: capitalize;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
+.job-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(4, 93, 86, 0.1);
+  border-color: #045d56;
+}
+.job-box::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: #045d56;
+}
 .job-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
-  margin-bottom: 10px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #edf2f7;
+  margin-bottom: 20px;
 }
 
 .job-title-section {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
 }
 
+.job-title-section h3 {
+  font-size: 1.5rem;
+  color: #2d3748;
+  margin: 0;
+}
 .job-description {
   font-size: 15px;
   margin-top: 3vh;

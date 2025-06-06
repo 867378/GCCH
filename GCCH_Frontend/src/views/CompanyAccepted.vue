@@ -103,6 +103,49 @@
 
       <!-- JOB POSTING -->
       <div class="content">
+        <div class="right-content">
+          <h3>POSTED JOBS</h3>
+          <div class="posted-jobs">
+            <div
+              class="posted-jobs-box"
+              v-for="(job, index) in paginatedJobs"
+              :key="index"
+              @click="selectJob(job)"
+            >
+              <h2>{{ job.job_title }}</h2>
+              <p>{{ job.job_description }}</p>
+              <p><strong>Location:</strong> {{ job.job_location }}</p>
+              <p><strong>Type:</strong> {{ job.job_type }}</p>
+              <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
+              <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
+              <p>Status: {{ job.status }}</p>
+            </div>
+            
+            <!-- Pagination Controls -->
+            <div class="pagination" v-if="postedJobs.length > 0">
+              <button 
+                class="pagination-btn" 
+                :disabled="currentPage === 1"
+                @click="currentPage--"
+              >
+                Previous
+              </button>
+              <span class="page-info">
+                Page {{ currentPage }} of {{ totalPages }}
+              </span>
+              <button 
+                class="pagination-btn" 
+                :disabled="currentPage === totalPages"
+                @click="currentPage++"
+              >
+                Next
+              </button>
+            </div>
+            
+            <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
+          </div>
+        </div>
+        
         <div class="left-content">
           <div v-if="selectedJob" class="selected-job-box">
             <h3>Hired Applicants for {{ selectedJob.job_title }}</h3>
@@ -134,34 +177,13 @@
           </div>
         </div>
 
-        <div class="right-content">
-          <h3>POSTED JOBS</h3>
-          <div class="posted-jobs">
-            <div
-              class="posted-jobs-box"
-              v-for="(job, index) in postedJobs"
-              :key="index"
-              @click="selectJob(job)"
-            >
-              <h2>{{ job.job_title }}</h2>
-              <p>{{ job.job_description }}</p>
-              <p><strong>Location:</strong> {{ job.job_location }}</p>
-              <p><strong>Type:</strong> {{ job.job_type }}</p>
-              <p><strong>Monthly Salary:</strong> ₱{{ job.monthly_salary }}</p>
-              <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
-              <p>Status: {{ job.status }}</p>
-
-            </div>           
-            <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { createToast } from 'mosha-vue-toastify';
@@ -182,6 +204,24 @@ const applicantUsers = ref({});
 
 const notifications = ref([]);
 const postedJobs = ref([]);
+
+const currentPage = ref(1);
+const itemsPerPage = ref(3); // Number of jobs to show per page
+
+const totalPages = computed(() => Math.ceil(postedJobs.value.length / itemsPerPage.value));
+const paginatedJobs = computed(() => {
+  // Sort jobs by date (most recent first)
+  const sortedJobs = [...postedJobs.value].sort((a, b) => {
+    const dateA = new Date(a.date_posted);
+    const dateB = new Date(b.date_posted);
+    return dateB - dateA; // Most recent first
+  });
+
+  // Then paginate the sorted jobs
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return sortedJobs.slice(start, end);
+});
 
 function toggleNotif() {
   showNotif.value = !showNotif.value;
@@ -420,6 +460,10 @@ const getNotificationIcon = (type) => {
       return '/public/notification.png';
   }
 };
+
+watch(postedJobs, () => {
+  currentPage.value = 1;
+});
 </script>
 
 <style scoped>
@@ -810,7 +854,54 @@ textarea {
   padding: 20px;
   height: 85vh;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
 }
+
+.posted-jobs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.pagination-btn {
+  background-color: #045d56;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.pagination-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.pagination-btn:not(:disabled):hover {
+  background-color: #034442;
+  transform: translateY(-2px);
+}
+
+.page-info {
+  color: #045d56;
+  font-weight: 500;
+  font-size: 14px;
+  position: bottom;
+}
+
 .icons-right {
   display: flex;
   gap: 20px;
