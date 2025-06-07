@@ -398,7 +398,7 @@ const updateChart = () => {
             stepSize: 1,
           },
           // Add max value to ensure scale goes up to 100
-          max: 50,
+          max: 100,
           // Add grid lines configuration for better visibility
           grid: {
             color: "rgba(0, 0, 0, 0.1)",

@@ -1189,7 +1189,7 @@ const updateChart = () => {
           ticks: {
             stepSize: 1,
           },
-          max: 50,
+          max: 100,
           grid: {
             color: "rgba(0, 0, 0, 0.1)",
             drawBorder: false,

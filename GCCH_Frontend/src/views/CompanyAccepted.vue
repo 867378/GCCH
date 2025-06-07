@@ -866,23 +866,54 @@ textarea {
 }
 
 .posted-jobs-box {
-  background-color: #ffffff;
-  border: 1px solid #e0e6ed;
-  border-radius: 16px;
-  border-left: #045d56 4px solid;
-  margin: 2vh;
-  width: 35vh;
-  padding: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #f9fbfa;
+  border: 1.5px solid #e0e6ed;
+  border-left: 5px solid #045d56;
+  border-radius: 18px;
+  margin: 18px 0;
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 28px 18px 28px;
+  box-shadow: 0 4px 18px rgba(4, 93, 86, 0.07);
+  transition: transform 0.18s, box-shadow 0.18s;
   cursor: pointer;
-  text-transform: sentence-case;
+  position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .posted-jobs-box:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(4, 93, 86, 0.13);
+  background: #f3f8f7;
+}
+
+.posted-jobs-box h2 {
+  font-size: 1.5rem;
+  color: #151718;
+  margin-bottom: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: capitalize;
+}
+
+.posted-jobs-box p {
+  margin: 0;
+  font-size: 15px;
+  color: #222;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.posted-jobs-box strong {
+  color: #045d56;
+  font-weight: 600;
+  min-width: 90px;
+  display: inline-block;
 }
 
 .sidebar.collapsed {
