@@ -452,7 +452,13 @@ const updatePendingPieChart = () => {
   pendingPieInstance.value = new Chart(ctx, {
     type: "pie",
     data: {
-      labels: ["Applied", "Screening", "For Interview", "Interviewed", "Offered"],
+      labels: [
+        "Applied",
+        "Screening",
+        "For Interview",
+        "Interviewed",
+        "Offered",
+      ],
       datasets: [
         {
           data: [
@@ -771,7 +777,7 @@ body,
 .cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
+  gap: 15px;
 }
 
 .card {
@@ -781,7 +787,7 @@ body,
   box-shadow: 0 10px 20px rgba(4, 93, 86, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 20vh;
-  margin-top: 2vh;
+  margin-top: 1vh;
   margin-bottom: 2vh;
   position: relative;
   border: 1px solid rgba(4, 93, 86, 0.1);
@@ -1038,6 +1044,49 @@ body,
   display: block;
   margin-top: 4px;
 }
+
+.pie-chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.pie-chart {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.legend-color.pending {
+  background-color: #004d40;
+}
+
+.legend-color.total {
+  background-color: #e0e0e0;
+}
+
 @media (max-width: 1024px) {
   .hamburger {
     display: flex;
@@ -1077,22 +1126,28 @@ body,
   .post-box textarea {
     height: 20vh;
   }
-
-  .cards {
-    flex-wrap: wrap;
-    gap: 10px;
+  .chart-container {
+    min-height: 40vh;
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
   }
-
   .card {
-    min-width: 200px;
-    font-size: 0.6rem;
+    width: 260px;
+    padding: 12px !important;
+    font-size: 0.8rem !important;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  .form-row {
-    grid-template-columns: 2fr, 3;
-    width: 90%;
-    margin-left: 5vh;
-    gap: 3vh;
+  .card .pie-chart-container {
+    margin-top: 8px;
+    gap: 6px;
+  }
+
+  .card .pie-legend {
+    font-size: 0.7rem;
+    gap: 3px;
   }
 
   .job-input,
@@ -1178,78 +1233,35 @@ body,
     margin-bottom: 10vh;
   }
 
-  .post-box {
-    width: 90%;
-    padding: 15px;
-    border-radius: 2vh;
-    margin: 0 auto 15px;
-    overflow: visible;
-  }
-
-  .post-box textarea {
-    height: 20vh;
-  }
-
-  .post-box h3 {
-    font-size: 24px;
-  }
-  .post-box button {
-    padding: 6px 15px;
-    margin-top: 10px;
-  }
-  .form-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2vh;
-    width: 100%;
-    margin: 2vh 0;
-    align-items: center;
-  }
-  .dropdown-checkbox {
-    margin-top: 0vh;
-  }
   .icon img {
     width: 20px;
     height: 20px;
   }
-  label {
-    padding: 6px 10px;
-    margin-right: 13vh;
-  }
-  .cards {
-    height: 5vh;
-    width: 90%;
-    margin-bottom: 7vh;
-    padding-left: 5.6vh;
-    font-size: 8px;
-  }
 
-  .update-box {
-    border-radius: 1vh;
-    padding: 20px;
-    font-size: 7px;
+  .chart-container {
+    min-height: 40vh;
+    width: 100%;
+    padding: 15px;
     margin-bottom: 20px;
   }
-
-  .avatar {
-    width: 30px;
-    height: 30px;
+  .card {
+    width: 200px;
+    padding: 12px !important;
+    font-size: 0.8rem !important;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  .right-content {
-    padding: 15px;
-    height: auto;
-    min-height: 300px;
-    width: 90%;
-    margin-left: 5vh;
-    overflow: auto;
+  .card .pie-chart-container {
+    margin-top: 8px;
+    gap: 6px;
   }
-  .posted-jobs-box {
-    width: 100%;
-    margin: 10px 0;
-    padding: 8px;
-    font-size: 12px;
+
+  .card .pie-legend {
+    font-size: 0.7rem;
+    gap: 3px;
   }
+
   .sign-out {
     width: 60px;
     height: 40px;
@@ -1268,10 +1280,38 @@ body,
     margin-top: 5vh;
     margin-bottom: 5vh;
   }
+  .chart-container {
+    min-height: 40vh;
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
   .cards {
     display: grid;
-    grid-template-columns: (2, 1fr);
+    grid-template-columns: 1fr;
+    gap: 18px;
+    width: 100%;
+    justify-items: center;
+  }
+
+  .card {
     width: 90%;
+    max-width: 320px;
+    min-width: 180px;
+    padding: 12px !important;
+    font-size: 0.8rem !important;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .card .pie-chart-container {
+    margin-top: 8px;
+    gap: 6px;
+  }
+
+  .card .pie-legend {
+    font-size: 0.7rem;
+    gap: 3px;
   }
 
   .sidebar {
@@ -1287,43 +1327,7 @@ body,
   .sidebar.active {
     transform: translateX(0);
   }
-
-  .post-box {
-    margin-top: 33vh;
-    margin-bottom: 10px;
-    border-radius: 1vh;
-  }
-  .post-box textarea {
-    margin-top: 2vh;
-    height: 15vh;
-  }
-  .post-box button {
-    padding: 6px 10px;
-    margin-top: 10px;
-    font-size: 10px;
-  }
-
-  .right-content {
-    width: 90%;
-    margin-left: 3vh;
-    overflow: auto;
-  }
-  .form-row {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-    gap: 2vh;
-    width: 100%;
-    margin: 2vh 0;
-    align-items: center;
-  }
-
-  .posted-jobs-box {
-    width: 90%;
-    margin: 10px 0;
-    padding: 15px;
-    font-size: 12px;
-    margin-left: 2vh;
-  }
+ 
 }
 @media (max-width: 380px) {
   .ikon {
@@ -1346,68 +1350,39 @@ body,
     margin-left: 3vh;
     margin-bottom: 5vh;
   }
-  .post-box {
-    margin-bottom: 5px;
-    border-radius: 2vh;
+  .chart-container {
+    min-height: 40vh;
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
   }
-  .post-box textarea {
-    margin-top: 2vh;
-    height: 12vh;
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    width: 100%;
+    justify-items: center;
   }
-  .post-box button {
-    padding: 6px 8px;
-    margin-top: 10px;
+
+  .card {
+    width: 90%;
+    max-width: 320px;
+    min-width: 180px;
+    padding: 12px !important;
+    font-size: 0.8rem !important;
+    margin-left: auto;
+    margin-right: auto;
   }
-}
 
-/* Add to your existing <style> section */
-.pie-chart-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  margin-top: 20px;
-}
+  .card .pie-chart-container {
+    margin-top: 8px;
+    gap: 6px;
+  }
 
-.pie-chart {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-}
+  .card .pie-legend {
+    font-size: 0.7rem;
+    gap: 3px;
+  }
 
-/* id of pendingPieChart in canvas idk dko gets frontend e HAHAH */
-/* #pendingPieChart {
-  width: 180px !important;
-  height: 180px !important;
-  max-width: 100%;
-  max-height: 100%;
-} */
-
-.pie-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 0.8rem;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-}
-
-.legend-color.pending {
-  background-color: #004d40;
-}
-
-.legend-color.total {
-  background-color: #e0e0e0;
 }
 </style>

@@ -1078,7 +1078,7 @@ body,
   }
 
   .profile-card {
-    margin-left: 27vh;
+    margin-left: 15vh;
     width: 100%;
     height: 100%;
   }
@@ -1139,7 +1139,7 @@ body,
     height: 30px;
   }
   .profile-card {
-    margin-left: 8vh;
+    margin-left: 6vh;
     width: 90%;
     height: 100%;
   }

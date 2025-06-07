@@ -120,11 +120,11 @@
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
               <p>Status: {{ job.status }}</p>
             </div>
-            
+
             <!-- Pagination Controls -->
             <div class="pagination" v-if="postedJobs.length > 0">
-              <button 
-                class="pagination-btn" 
+              <button
+                class="pagination-btn"
                 :disabled="currentPage === 1"
                 @click="currentPage--"
               >
@@ -133,19 +133,19 @@
               <span class="page-info">
                 Page {{ currentPage }} of {{ totalPages }}
               </span>
-              <button 
-                class="pagination-btn" 
+              <button
+                class="pagination-btn"
                 :disabled="currentPage === totalPages"
                 @click="currentPage++"
               >
                 Next
               </button>
             </div>
-            
+
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
           </div>
         </div>
-        
+
         <div class="left-content">
           <div v-if="selectedJob" class="selected-job-box">
             <h3>Hired Applicants for {{ selectedJob.job_title }}</h3>
@@ -169,8 +169,7 @@
                     {{ application.applicant.phone_number }}</span
                   >
                   <span
-                    ><strong>Email:</strong>
-                    {{ application.user.email }}</span
+                    ><strong>Email:</strong> {{ application.user.email }}</span
                   >
                 </li>
               </ul>
@@ -182,7 +181,6 @@
             </template>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -192,8 +190,8 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { createToast } from 'mosha-vue-toastify';
-import 'mosha-vue-toastify/dist/style.css';
+import { createToast } from "mosha-vue-toastify";
+import "mosha-vue-toastify/dist/style.css";
 
 const router = useRouter();
 
@@ -214,7 +212,9 @@ const postedJobs = ref([]);
 const currentPage = ref(1);
 const itemsPerPage = ref(3); // Number of jobs to show per page
 
-const totalPages = computed(() => Math.ceil(postedJobs.value.length / itemsPerPage.value));
+const totalPages = computed(() =>
+  Math.ceil(postedJobs.value.length / itemsPerPage.value)
+);
 const paginatedJobs = computed(() => {
   // Sort jobs by date (most recent first)
   const sortedJobs = [...postedJobs.value].sort((a, b) => {
@@ -244,24 +244,23 @@ function confirmSignOut() {
   axios
     .post("/logout")
     .then(() => {
-      createToast('Successfully signed out!', {
-        type: 'success',
-        position: 'top-right',
+      createToast("Successfully signed out!", {
+        type: "success",
+        position: "top-right",
         timeout: 2000,
         showIcon: true,
-              toastBackgroundColor: "#045d56",
-
+        toastBackgroundColor: "#045d56",
       });
       localStorage.clear();
       router.push("/login");
     })
     .catch((error) => {
       console.error("Error signing out:", error);
-      createToast('Failed to sign out. Please try again.', {
-        type: 'danger',
-        position: 'top-right',
+      createToast("Failed to sign out. Please try again.", {
+        type: "danger",
+        position: "top-right",
         timeout: 3000,
-        showIcon: true
+        showIcon: true,
       });
     });
 }
@@ -335,22 +334,21 @@ async function fetchPostedJobs() {
       await fetchApplicants(selectedJob.value.id);
     } else {
       jobApplicants.value = [];
-      createToast('No jobs found', {
-        type: 'info',
-        position: 'top-right',
+      createToast("No jobs found", {
+        type: "info",
+        position: "top-right",
         timeout: 3000,
         showIcon: true,
-              toastBackgroundColor: "#045d56",
-
+        toastBackgroundColor: "#045d56",
       });
     }
   } catch (error) {
     console.error("Error fetching posted jobs:", error);
-    createToast('Failed to fetch jobs', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to fetch jobs", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
@@ -363,19 +361,26 @@ async function fetchApplicants(jobId) {
     );
 
     // Fetch user data for each applicant and attach to application.user
-    await Promise.all(acceptedApplicants.map(async (app) => {
-      const applicantId = app.applicant.user_id;
-      if (applicantId) {
-        try {
-          const userResponse = await axios.get(`user/applicant/${applicantId}`);
-          app.user = userResponse.data && userResponse.data.user ? userResponse.data.user : userResponse.data;
-        } catch (err) {
-          app.user = { email: 'N/A' };
+    await Promise.all(
+      acceptedApplicants.map(async (app) => {
+        const applicantId = app.applicant.user_id;
+        if (applicantId) {
+          try {
+            const userResponse = await axios.get(
+              `user/applicant/${applicantId}`
+            );
+            app.user =
+              userResponse.data && userResponse.data.user
+                ? userResponse.data.user
+                : userResponse.data;
+          } catch (err) {
+            app.user = { email: "N/A" };
+          }
+        } else {
+          app.user = { email: "N/A" };
         }
-      } else {
-        app.user = { email: 'N/A' };
-      }
-    }));
+      })
+    );
 
     jobApplicants.value = acceptedApplicants;
   } catch (error) {
@@ -391,20 +396,20 @@ function selectJob(job) {
 onMounted(() => {
   fetchPostedJobs();
   fetchNotifications();
-})
+});
 
 const getNotificationIcon = (type) => {
   switch (type) {
-    case 'job_application':
-      return '/public/resume.png';
-    case 'inquiry':
-      return '/public/question.png';
-    case 'application_update':
-      return '/public/updates.png';
-    case 'message':
-      return '/public/mail.png';
+    case "job_application":
+      return "/public/resume.png";
+    case "inquiry":
+      return "/public/question.png";
+    case "application_update":
+      return "/public/updates.png";
+    case "message":
+      return "/public/mail.png";
     default:
-      return '/public/notification.png';
+      return "/public/notification.png";
   }
 };
 
@@ -666,19 +671,6 @@ body,
 }
 
 .selected-job-box {
-  /* background-color: #fff;
-  padding: 20px;
-  margin-left: 3vh;
-  border-radius: 12px;
-  border-left: #045d56 4px solid;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  width: 125vh;
-  max-width: 140vh;
-  max-height: 85vh;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  overflow: auto; */
-
   background: white;
   padding: 20px;
   border-radius: 10px;
@@ -722,13 +714,13 @@ body,
   border-radius: 10px;
   border: 2px solid #e0e6ed;
   border-bottom: #045d56 4px solid;
-  width: 40vh;
+  width: 60%;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .selected-job-box li:hover {
   transform: scale(1.03);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .selected-job-box li strong {
@@ -1012,10 +1004,16 @@ textarea {
   }
 
   .posted-jobs-box {
-    width: 35vh;
-    height: auto;
-    margin: 10px;
+    width: 100%;
+    margin: 10px 0;
+    padding: 15px;
     font-size: 14px;
+  }
+  .posted-jobs-box h2 {
+    font-size: 20px;
+  }
+  .posted-jobs-box p {
+    font-size: 12px;
   }
   .selected-job-box {
     width: 95%;
@@ -1025,8 +1023,19 @@ textarea {
     padding: 20px;
     border-radius: 3vh;
   }
+  .selected-job-box li {
+    width: 90%;
+  }
   .selected-job-box h3 {
     font-size: 30px;
+  }
+  .pagination-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .page-info {
+    font-size: 10px;
+    color: #045d56;
   }
 
   .sign-out {
@@ -1085,6 +1094,7 @@ textarea {
     min-height: 300px;
     width: 90%;
     margin-left: 5vh;
+    margin-bottom: 2vh;
     overflow: auto;
   }
 
@@ -1209,9 +1219,13 @@ textarea {
     z-index: 1000;
     transition: transform 0.3s ease;
   }
+  .left-content {
+    padding-left: 2vh;
+    margin-top: 2vh;
+  }
   .right-content {
     flex: 1;
-    margin-left: 4vh;
+    margin-left: 2vh;
     padding-top: 3vh;
     height: auto;
     overflow: auto;
@@ -1221,6 +1235,14 @@ textarea {
     margin: 10px 0;
     padding: 8px;
     font-size: 12px;
+  }
+  .selected-job-box {
+    width: 95%;
+    max-height: 43vh;
+    margin-left: -2vh;
+    font-size: 14px;
+    padding: 20px;
+    border-radius: 3vh;
   }
   .sign-out {
     width: 60px;

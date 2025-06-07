@@ -653,8 +653,8 @@ body,
   background: white;
   padding: 25px;
   border-radius: 15px;
-  width: 350px;
-  max-height: 400px;
+  width: 25%;
+    max-height: 400px;
   overflow-y: auto;
   text-align: left;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);

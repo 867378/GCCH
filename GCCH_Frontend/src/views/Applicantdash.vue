@@ -179,7 +179,6 @@
                 <!-- Header -->
                 <div class="job-header">
                   <div class="job-title-section">
-                    <img src="/public/user.png" class="ikon" />
                     <h3 class="company-name">{{ matchedJob.job_title }}</h3>
                   </div>
 
@@ -187,7 +186,9 @@
                   <div class="button-group">
                     <button
                       class="message-btn"
-                      @click="sendMessage(matchedJob.company.user_id, matchedJob)"
+                      @click="
+                        sendMessage(matchedJob.company.user_id, matchedJob)
+                      "
                     >
                       Send Message
                     </button>
@@ -199,8 +200,13 @@
                     </button>
                   </div>
                 </div>
+                <div class="job-info">
+                  <div class="job-detail">
+                    <img src="/public/user.png" class="ikon" />
+                    <p>{{ matchedJob.company.company_name }}</p>
+                  </div>
+                </div>
 
-                <p>{{ matchedJob.company.company_name }}</p>
                 <!-- Move salary here BELOW description -->
                 <div class="job-info">
                   <div class="job-detail">
@@ -240,33 +246,43 @@
                   </div>
                 </div>
                 <!-- Recommended Programs and Expertise -->
-              <p>
-                {{
-                  [
-                    matchedJob.recommended_course,
-                    matchedJob.recommended_course_2,
-                    matchedJob.recommended_course_3,
-                  ]
-                    .filter(Boolean)
-                    .join(", ")
-                }}
-              </p>
 
-              <p>
-                {{
-                  [
-                    matchedJob.recommended_expertise,
-                    matchedJob.recommended_expertise_2,
-                    matchedJob.recommended_expertise_3,
-                  ]
-                    .filter(Boolean)
-                    .join(", ")
-                }}
-              </p>
+                <div class="job-info">
+                  <div class="job-detail">
+                    <img src="/public/learning.png" class="ikon" />
+                    <p>
+                      {{
+                        [
+                          matchedJob.recommended_course,
+                          matchedJob.recommended_course_2,
+                          matchedJob.recommended_course_3,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")
+                      }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="job-info">
+                  <div class="job-detail">
+                    <img src="/public/user-experience.png" class="ikon" />
+                    <p>
+                      {{
+                        [
+                          matchedJob.recommended_expertise,
+                          matchedJob.recommended_expertise_2,
+                          matchedJob.recommended_expertise_3,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")
+                      }}
+                    </p>
+                  </div>
+                </div>
                 <!-- Job Description -->
                 <p class="job-description">{{ matchedJob.job_description }}</p>
               </div>
-              
             </div>
 
             <!-- Pagination Controls -->
@@ -661,7 +677,6 @@ const totalPages = computed(() => {
     ).length / jobsPerPage.value
   );
 });
-
 
 const paginatedJobs = computed(() => {
   const filteredJobs = recommendedJobs.value
@@ -2231,7 +2246,7 @@ body,
   border-color: #045d56;
 }
 .job-box::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
@@ -2566,5 +2581,242 @@ label {
   font-size: 12px;
   display: block;
   margin-top: 4px;
+}
+@media (max-width: 1024px) {
+  .content {
+    flex-direction: column;
+    gap: 0;
+    padding: 10px;
+  }
+  .left-content,
+  .right-content {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 0 20px 0;
+  }
+  .job-content {
+    padding: 10px;
+  }
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+
+  .popup {
+    width: 60%;
+    max-width: 60%;
+    padding: 20px;
+  }
+  .content {
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    padding: 20px;
+    margin-top: 10px;
+    overflow: auto;
+  }
+
+  .sidebar {
+    font-size: 14px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 28vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .ikon {
+    height: 15px;
+    width: 15px;
+  }
+
+  .icon img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .logo {
+    height: 8vh;
+    width: 13vh;
+    margin-left: 4vh;
+    margin-bottom: 10vh;
+  }
+
+  .right-content {
+    padding: 15px;
+    height: auto;
+    min-height: 300px;
+    width: 90%;
+    margin-left: 5vh;
+  }
+
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+  .topbar {
+    height: 12.5vh;
+  }
+  .content {
+    display: grid;
+    flex-direction: column;
+  }
+  .logo {
+    margin-left: 5vh;
+    margin-top: 5vh;
+    margin-bottom: 5vh;
+  }
+  .ikon {
+    height: 15px;
+    width: 15px;
+  }
+  .topbar input[type="text"] {
+    width: 25vh;
+  }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  .job-content {
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 10px;
+    border-bottom: #045d56 4px solid;
+    overflow: auto;
+  }
+  .job-box {
+    width: 100%;
+    padding: 15px;
+    margin: 0 auto 15px auto;
+    border-radius: 16px;
+  }
+  .job-description {
+    font-size: 14px;
+    margin-left: 5vh;
+    margin-right: 5vh;
+    line-height: 1.2;
+    text-align: justify;
+    text-indent: 2em;
+  }
+  .message-btn,
+  .apply-btn {
+    font-size: 10px;
+  }
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
+  }
+}
+
+@media (max-width: 380px) {
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+  .topbar {
+    height: 12.5vh;
+  }
+  .content {
+    display: grid;
+    flex-direction: column;
+  }
+  .logo {
+    height: 6vh;
+    width: 10vh;
+    margin-left: 3vh;
+    margin-bottom: 5vh;
+  }
+  .ikon {
+    height: 15px;
+    width: 15px;
+  }
+  .topbar input[type="text"] {
+    width: 20vh;
+  }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 35vh;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  .job-content {
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 10px;
+    border-bottom: #045d56 4px solid;
+    margin-left: -1vh;
+  }
+  .job-box {
+    width: 100%;
+    padding: 15px;
+    margin: 0 auto 15px auto;
+    border-radius: 16px;
+  }
+  .job-description {
+    font-size: 14px;
+    margin-left: 5vh;
+    margin-right: 5vh;
+    line-height: 1.2;
+    text-align: justify;
+    text-indent: 2em;
+  }
+  .message-btn,
+  .apply-btn {
+    font-size: 10px;
+  }
+  .right-content {
+    flex: 1;
+    margin-left: 3vh;
+    padding-top: 3vh;
+    height: auto;
+  }
+  .sign-out {
+    width: 60px;
+    height: 40px;
+    margin-left: 7.5vh;
+  }
+}
+@media (max-width: 320px) {
+  .topbar input[type="text"] {
+    width: 15vh;
+  }
 }
 </style>

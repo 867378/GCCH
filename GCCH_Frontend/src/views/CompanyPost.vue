@@ -231,9 +231,16 @@
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
               <p><strong>Status:</strong> {{ job.status }}</p>
               <p>
-                <strong>Slots: </strong> {{ job.filled_slots }}/{{ job.total_slots }}
+                <strong>Slots: </strong> {{ job.filled_slots }}/{{
+                  job.total_slots
+                }}
               </p>
-              <button @click.stop="downloadJobReport(job)">Download Job Report</button> 
+              <button
+                @click.stop="downloadJobReport(job)"
+                class="download-report-btn"
+              >
+                Download Job Report
+              </button>
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
 
@@ -1261,13 +1268,13 @@ function statusDescription(status) {
 onMounted(() => {
   fetchPostedJobs();
   fetchNotifications();
-}); 
+});
 const downloadJobReport = async (job) => {
   const jobToDownload = job || selectedJob.value;
   if (!jobToDownload) {
-    createToast('Please select a job first', {
-      type: 'warning',
-      position: 'top-right',
+    createToast("Please select a job first", {
+      type: "warning",
+      position: "top-right",
       timeout: 3000,
       showIcon: true,
       toastBackgroundColor: "#045d56",
@@ -1276,9 +1283,12 @@ const downloadJobReport = async (job) => {
   }
 
   try {
-    const response = await axios.get(`/report/job/${jobToDownload.id}/download`, {
-      responseType: "blob",
-    });
+    const response = await axios.get(
+      `/report/job/${jobToDownload.id}/download`,
+      {
+        responseType: "blob",
+      }
+    );
 
     const blob = new Blob([response.data], { type: "application/pdf" });
     const url = window.URL.createObjectURL(blob);
@@ -1289,20 +1299,20 @@ const downloadJobReport = async (job) => {
     link.click();
     document.body.removeChild(link);
 
-    createToast('Report downloaded successfully!', {
-      type: 'success',
-      position: 'top-right',
+    createToast("Report downloaded successfully!", {
+      type: "success",
+      position: "top-right",
       timeout: 3000,
       showIcon: true,
       toastBackgroundColor: "#045d56",
     });
   } catch (error) {
     console.error("Error downloading job report:", error);
-    createToast('Failed to download report', {
-      type: 'danger',
-      position: 'top-right',
+    createToast("Failed to download report", {
+      type: "danger",
+      position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 };
@@ -1577,7 +1587,7 @@ body,
   max-width: 95vw;
   box-shadow: 0 8px 32px rgba(4, 93, 86, 0.18);
   animation: popIn 0.25s;
-  font-family: 'Work Sans', sans-serif;
+  font-family: "Work Sans", sans-serif;
 }
 
 .confirm-update-popup h3 {
@@ -1677,6 +1687,8 @@ body,
   padding: 20px;
   margin-bottom: 20px;
   border-radius: 15px;
+  text-align: center;
+  text-transform: uppercase;
   width: 100%;
   height: auto;
   border-bottom: #045d56 solid 4px;
@@ -1691,7 +1703,9 @@ body,
 
 .post-box.collapsed h3 {
   margin: 0;
-  font-size: 20px;
+  font-size: 30px;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .post-box.collapsed p {
@@ -1782,19 +1796,19 @@ body,
 .job-form {
   flex: 1;
   position: relative;
-  width: 45vh;
+  width: 41vh;
   padding: 8px 6px;
   margin-left: 3vh;
   border-radius: 2vh;
-  background-color: #045d56;
-  color: #e0f2f1;
+  background-color: #f5f5f5;
+  color: #333;
   font-size: 14px;
   transition: background-color 0.3s ease-in-out;
   z-index: 1;
 }
 
 .job-form:hover {
-  background-color: #e0f2f1;
+  background-color: #e0e0e0;
   color: #045d56;
 }
 
@@ -2258,23 +2272,75 @@ textarea {
 }
 
 .posted-jobs-box {
-  background-color: #ffffff;
-  border: 1px solid #e0e6ed;
-  border-radius: 16px;
-  border-left: #045d56 4px solid;
-  margin: 2vh;
-  width: 35vh;
-  padding: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #f9fbfa;
+  border: 1.5px solid #e0e6ed;
+  border-left: 5px solid #045d56;
+  border-radius: 18px;
+  margin: 18px 0;
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 28px 18px 28px;
+  box-shadow: 0 4px 18px rgba(4, 93, 86, 0.07);
+  transition: transform 0.18s, box-shadow 0.18s;
   cursor: pointer;
-  text-transform: capitalize;
+  position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .posted-jobs-box:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(4, 93, 86, 0.13);
+  background: #f3f8f7;
+}
+
+.posted-jobs-box h2 {
+  font-size: 1.5rem;
+  color: #151718;
+  margin-bottom: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: capitalize;
+}
+
+.posted-jobs-box p {
+  margin: 0;
+  font-size: 15px;
+  color: #222;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.posted-jobs-box strong {
+  color: #045d56;
+  font-weight: 600;
+  min-width: 90px;
+  display: inline-block;
+}
+
+.posted-jobs-box .download-report-btn {
+  margin-top: 18px;
+  align-self: center;
+  background-color: #045d56;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 22px;
+  font-size: 15px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+}
+
+.posted-jobs-box .download-report-btn:hover {
+  background-color: #033f3a;
+  color: #e3f2fd;
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.18);
 }
 
 .sidebar.collapsed {
@@ -2337,7 +2403,36 @@ textarea {
   background-color: #045d56;
   color: white;
 }
+.accept-btn {
+  background-color: #1976d2;
+  color: white;
+  margin-right: 8px;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.accept-btn:hover {
+  background-color: #1565c0;
+}
+.reject-btn {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.reject-btn:hover {
+  background-color: #b71c1c;
+}
 
+.waiting-response {
+  margin-top: 12px;
+  color: #1976d2;
+  font-style: italic;
+  font-weight: 500;
+}
 .notification-item {
   display: flex;
   gap: 12px;
@@ -2409,9 +2504,9 @@ textarea {
     display: flex;
     z-index: 1001;
   }
-  .content {
-    gap: 0;
-    overflow: hidden;
+
+  .main {
+    margin-left: 0;
   }
   .sidebar {
     position: fixed;
@@ -2426,7 +2521,9 @@ textarea {
   .sidebar.active {
     transform: translateX(0);
   }
-
+  .post-box.collapsed {
+    width: 100%;
+  }
   .logo {
     margin-top: 4vh;
     margin-left: 4vh;
@@ -2442,23 +2539,44 @@ textarea {
   }
 
   .posted-jobs-box {
-    width: 35vh;
-    height: auto;
-    margin: 10px;
+    width: 100%;
+    margin: 10px 0;
+    padding: 15px;
     font-size: 14px;
   }
+  .posted-jobs-box h2 {
+    font-size: 20px;
+  }
+  .posted-jobs-box p {
+    font-size: 12px;
+  }
+  .posted-jobs-box .download-report-btn {
+    width: 100%;
+    font-size: 10px;
+  }
+
   .selected-job-box {
-    width: 95%;
+    width: 90%;
     max-height: 43vh;
     margin-left: 2vh;
     font-size: 14px;
     padding: 20px;
     border-radius: 3vh;
   }
+  .selected-job-box li {
+    width: 90%;
+  }
   .selected-job-box h3 {
     font-size: 30px;
   }
-
+  .pagination-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .page-info {
+    font-size: 10px;
+    color: #045d56;
+  }
   .sign-out {
     margin-left: 7.5vh;
   }
@@ -2520,9 +2638,10 @@ textarea {
 
   .posted-jobs-box {
     width: 100%;
-    margin: 10px 0;
+    margin: 5px 0;
     padding: 8px;
-    font-size: 12px;
+    font-size: 10px;
+    margin-left: 15vh;
   }
 
   .selected-job-box {
@@ -2550,6 +2669,7 @@ textarea {
   .topbar {
     height: 12.5vh;
   }
+
   .content {
     display: grid;
     flex-direction: column;
@@ -2577,12 +2697,15 @@ textarea {
     transform: translateX(0);
   }
   .selected-job-box {
-    width: 80%;
+    width: 100%;
     max-height: 50vh;
-    margin-left: 5vh;
+    margin-left: -1vh;
     font-size: 12px;
     padding: 15px;
     border-radius: 3vh;
+  }
+  .selected-job-box h2 {
+    font-size: 20px;
   }
   .selected-job-box h3 {
     font-size: 20px;
@@ -2590,11 +2713,18 @@ textarea {
   .selected-job-box p {
     font-size: 10px;
   }
-  .selected-job-box li {
-    font-size: 10px;
-    width: 100%;
+  .selected-job-box ul {
+    margin-left: -10vh;
   }
-
+  .selected-job-box li {
+    width: 90%;
+  }
+  .selected-job-box li strong {
+    font-size: 12px;
+  }
+  .application-header {
+    font-size: 12px;
+  }
   .right-content {
     width: 90%;
     margin-left: 3vh;
@@ -2653,35 +2783,5 @@ textarea {
     height: 40px;
     margin-left: 7.5vh;
   }
-}
-.accept-btn {
-  background-color: #1976d2;
-  color: white;
-  margin-right: 8px;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  cursor: pointer;
-}
-.accept-btn:hover {
-  background-color: #1565c0;
-}
-.reject-btn {
-  background-color: #d32f2f;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  cursor: pointer;
-}
-.reject-btn:hover {
-  background-color: #b71c1c;
-}
-
-.waiting-response {
-  margin-top: 12px;
-  color: #1976d2;
-  font-style: italic;
-  font-weight: 500;
 }
 </style>
