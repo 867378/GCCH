@@ -232,7 +232,8 @@
               <p><strong>Status:</strong> {{ job.status }}</p>
               <p>
                 <strong>Slots: </strong> {{ job.filled_slots }}/{{ job.total_slots }}
-              </p> 
+              </p>
+              <button @click.stop="downloadJobReport(job)">Download Job Report</button> 
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
 
@@ -266,18 +267,6 @@
           <div v-if="selectedJob" class="selected-job-box">
             <h2>{{ selectedJob.job_title }}</h2>
             <p>{{ selectedJob.job_description }}</p>
-            <p><strong>Location:</strong> {{ selectedJob.job_location }}</p>
-            <p><strong>Type:</strong> {{ selectedJob.job_type }}</p>
-            <p>
-              <strong>Monthly Salary:</strong> ₱{{ selectedJob.monthly_salary }}
-            </p>
-            <p><strong>Date Posted:</strong> {{ selectedJob.date_posted }}</p>
-            <p><strong>Status:</strong> {{ selectedJob.status }}</p>
-            <p>
-              <strong>Slots:</strong>{{ selectedJob.filled_slots }}/{{
-                selectedJob.total_slots
-              }}
-            </p>
           </div>
 
           <div v-if="selectedJob" class="selected-job-box">
@@ -997,7 +986,7 @@ function sendMessage(applicationId) {
 const messageContent = ref("");
 async function sendActualMessage() {
   try {
-    const response = await axios.post("/message/send", {
+    await axios.post("/message/send", {
       receiver_id: selectedApplicantId.value,
       message: messageContent.value,
     });
@@ -1045,7 +1034,51 @@ function statusDescription(status) {
 onMounted(() => {
   fetchPostedJobs();
   fetchNotifications();
-});
+}); 
+const downloadJobReport = async (job) => {
+  const jobToDownload = job || selectedJob.value;
+  if (!jobToDownload) {
+    createToast('Please select a job first', {
+      type: 'warning',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
+    });
+    return;
+  }
+
+  try {
+    const response = await axios.get(`/report/job/${jobToDownload.id}/download`, {
+      responseType: "blob",
+    });
+
+    const blob = new Blob([response.data], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${jobToDownload.job_title}_report.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    createToast('Report downloaded successfully!', {
+      type: 'success',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
+    });
+  } catch (error) {
+    console.error("Error downloading job report:", error);
+    createToast('Failed to download report', {
+      type: 'danger',
+      position: 'top-right',
+      timeout: 3000,
+      showIcon: true
+    });
+  }
+};
 async function fetchPostedJobs() {
   try {
     const response = await axios.get("/company/jobdisplay");
