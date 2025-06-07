@@ -452,7 +452,7 @@ const updatePendingPieChart = () => {
   pendingPieInstance.value = new Chart(ctx, {
     type: "pie",
     data: {
-      labels: ["Applied", "Screening", "For Interview","Interviewed", "Offered"],
+      labels: ["Applied", "Screening", "For Interview", "Interviewed", "Offered"],
       datasets: [
         {
           data: [

@@ -149,31 +149,37 @@
         <div class="left-content">
           <div v-if="selectedJob" class="selected-job-box">
             <h3>Hired Applicants for {{ selectedJob.job_title }}</h3>
-            <ul v-if="jobApplicants.length > 0">
-              <li
-                v-for="application in jobApplicants"
-                :key="application.id"
-                class="mb-4"
-              >
-                <strong
-                  >{{ application.applicant.first_name }}
-                  {{ application.applicant.last_name }}</strong
+            <template v-if="jobApplicants.length > 0">
+              <ul>
+                <li
+                  v-for="application in jobApplicants"
+                  :key="application.id"
+                  class="mb-4"
                 >
-                <span
-                  ><strong>Course:</strong>
-                  {{ application.applicant.course }}</span
-                >
-                <span
-                  ><strong>Phone:</strong>
-                  {{ application.applicant.phone_number }}</span
-                >
-                <span
-                  ><strong>Gmail:</strong>
-                  {{ application.user?.email }}</span
-                >
-              </li>
-            </ul>
-            <button @click="downloadJobReport">Download Job Report</button>
+                  <strong
+                    >{{ application.applicant.first_name }}
+                    {{ application.applicant.last_name }}</strong
+                  >
+                  <span
+                    ><strong>Course:</strong>
+                    {{ application.applicant.course }}</span
+                  >
+                  <span
+                    ><strong>Phone:</strong>
+                    {{ application.applicant.phone_number }}</span
+                  >
+                  <span
+                    ><strong>Email:</strong>
+                    {{ application.user.email }}</span
+                  >
+                </li>
+              </ul>
+            </template>
+            <template v-else>
+              <div class="no-hired-message">
+                <p>No hired applicants for this job yet.</p>
+              </div>
+            </template>
           </div>
         </div>
 
@@ -317,52 +323,6 @@ function formatType(type) {
   }
 }
 
-const downloadJobReport = async () => {
-  if (!selectedJob.value) {
-    createToast('Please select a job first', {
-      type: 'warning',
-      position: 'top-right',
-      timeout: 3000,
-      showIcon: true,
-            toastBackgroundColor: "#045d56",
-
-    });
-    return;
-  }
-
-  try {
-    const response = await axios.get(`/report/job/${selectedJob.value.id}/download`, {
-      responseType: "blob",
-    });
-
-    const blob = new Blob([response.data], { type: "application/pdf" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `${selectedJob.value.job_title}_report.pdf`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    createToast('Report downloaded successfully!', {
-      type: 'success',
-      position: 'top-right',
-      timeout: 3000,
-      showIcon: true,
-            toastBackgroundColor: "#045d56",
-
-    });
-  } catch (error) {
-    console.error("Error downloading job report:", error);
-    createToast('Failed to download report', {
-      type: 'danger',
-      position: 'top-right',
-      timeout: 3000,
-      showIcon: true
-    });
-  }
-};
-
 //Fetch Jobs
 async function fetchPostedJobs() {
   try {
@@ -402,36 +362,23 @@ async function fetchApplicants(jobId) {
       (applicant) => applicant.status === "hired"
     );
 
-    jobApplicants.value = acceptedApplicants;
-
-    for (const app of acceptedApplicants) {
+    // Fetch user data for each applicant and attach to application.user
+    await Promise.all(acceptedApplicants.map(async (app) => {
       const applicantId = app.applicant.user_id;
       if (applicantId) {
         try {
           const userResponse = await axios.get(`user/applicant/${applicantId}`);
-          applicantUsers.value[applicantId] = userResponse.data;
-
-          console.log(`Fetched user ${applicantId}:`, userResponse.data);
+          app.user = userResponse.data && userResponse.data.user ? userResponse.data.user : userResponse.data;
         } catch (err) {
-          console.error(`Failed to fetch user ${applicantId}`, err);
-          createToast('Failed to fetch some applicant details', {
-            type: 'warning',
-            position: 'top-right',
-            timeout: 3000,
-            showIcon: true
-          });
+          app.user = { email: 'N/A' };
         }
+      } else {
+        app.user = { email: 'N/A' };
       }
-    }
+    }));
 
+    jobApplicants.value = acceptedApplicants;
   } catch (error) {
-    console.error("Failed to fetch applicants", error);
-    createToast('Failed to fetch applicants', {
-      type: 'danger',
-      position: 'top-right',
-      timeout: 3000,
-      showIcon: true
-    });
     jobApplicants.value = [];
   }
 }

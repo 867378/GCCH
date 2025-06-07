@@ -10,9 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class ReportController extends Controller
 {
     public function downloadReport($jobId){
-        $job = Job::with(['applications' => function ($query) {
-            $query->where('status', 'hired')->with('applicant.user');
-        }])->findOrFail($jobId);
+        $job = Job::with(['applications.applicant.user'])->findOrFail($jobId);
 
         $pdf = Pdf::loadView('reports.job_report', compact('job'));
         return $pdf->download("job_report_{$job->id}.pdf");
@@ -21,10 +19,7 @@ class ReportController extends Controller
     public function previewJobReport(Job $job)
     {
         // Load relationships needed for the report
-        $job->load(['applications' => function ($query) {
-            $query->where('status', 'hired');
-        }, 'applications.applicant.user']);
-
+        $job->load(['applications.applicant.user']);
         return view('reports.job_report', compact('job'));
     }
 
