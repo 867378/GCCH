@@ -231,8 +231,10 @@
               <p><strong>Date Posted:</strong> {{ job.date_posted }}</p>
               <p><strong>Status:</strong> {{ job.status }}</p>
               <p>
-                <strong>Slots: </strong> {{ job.filled_slots }}/{{ job.total_slots }}
-              </p> 
+                <strong>Slots: </strong> {{ job.filled_slots }}/{{
+                  job.total_slots
+                }}
+              </p>
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
 
@@ -287,33 +289,58 @@
                 v-for="application in paginatedApplicants"
                 :key="application.id"
                 class="application-item"
-                :class="{ 'expanded': expandedItems.has(application.id) }"
+                :class="{ expanded: expandedItems.has(application.id) }"
                 @click="toggleItem(application.id)"
               >
                 <!-- Always visible header -->
                 <div class="application-header">
                   <strong>
-                    {{ application.applicant.first_name }} {{ application.applicant.last_name }}'s Application
+                    {{ application.applicant.first_name }}
+                    {{ application.applicant.last_name }}'s Application
                   </strong>
                   <span class="status-badge" :class="application.status">
                     {{ statusDescription(application.status) }}
                   </span>
                   <span class="expand-icon">
-                    {{ expandedItems.has(application.id) ? '▼' : '▶' }}
+                    {{ expandedItems.has(application.id) ? "▼" : "▶" }}
                   </span>
                 </div>
 
                 <!-- Collapsible content -->
-                <div class="application-details" v-if="expandedItems.has(application.id)">
-                  <span><strong>Course:</strong> {{ application.applicant.course }}</span>
-                  <span><strong>Expertise:</strong> {{ application.applicant.expertise }}</span>
-                  <span><strong>Phone:</strong> {{ application.applicant.phone_number }}</span>
-                  <span><strong>Date Applied:</strong> {{ application.date_applied }}</span>
-                  <span><strong>Status:</strong> {{ formatType(application.status) }}</span>
-                  <span><strong>Schedule: </strong>{{ application.scheduled_at }}</span>
+                <div
+                  class="application-details"
+                  v-if="expandedItems.has(application.id)"
+                >
+                  <span
+                    ><strong>Course:</strong>
+                    {{ application.applicant.course }}</span
+                  >
+                  <span
+                    ><strong>Expertise:</strong>
+                    {{ application.applicant.expertise }}</span
+                  >
+                  <span
+                    ><strong>Phone:</strong>
+                    {{ application.applicant.phone_number }}</span
+                  >
+                  <span
+                    ><strong>Date Applied:</strong>
+                    {{ application.date_applied }}</span
+                  >
+                  <span
+                    ><strong>Status:</strong>
+                    {{ formatType(application.status) }}</span
+                  >
+                  <span
+                    ><strong>Schedule: </strong
+                    >{{ application.scheduled_at }}</span
+                  >
 
                   <div class="application-documents">
-                    <a :href="application.cover_letter.embed_url" target="_blank">
+                    <a
+                      :href="application.cover_letter.embed_url"
+                      target="_blank"
+                    >
                       📄 View Cover Letter
                     </a>
                     <div v-if="application.resume">
@@ -325,7 +352,10 @@
 
                   <div class="application-actions">
                     <div v-if="!showStatusOptions">
-                      <button class="message-btn" @click.stop="sendMessage(application.applicant.user_id)">
+                      <button
+                        class="message-btn"
+                        @click.stop="sendMessage(application.applicant.user_id)"
+                      >
                         Send Message
                       </button>
 
@@ -350,20 +380,28 @@
                       <!-- Show Accept/Reject only if status is interviewed -->
                       <template v-if="application.status === 'interviewed'">
                         <button
-                          @click.stop="openConfirmModal(application.id, 'accepted')"
+                          @click.stop="
+                            openConfirmModal(application.id, 'accepted')
+                          "
                           class="accept-btn"
                         >
                           ✅ Offer Job
                         </button>
                         <button
-                          @click.stop="openConfirmModal(application.id, 'rejected')"
+                          @click.stop="
+                            openConfirmModal(application.id, 'rejected')
+                          "
                           class="reject-btn"
                         >
                           ❌ Reject
                         </button>
                       </template>
-                      <p v-if="application.status === 'accepted'" class="waiting-response">
-                        The application has been accepted. Waiting for the applicant's response.
+                      <p
+                        v-if="application.status === 'accepted'"
+                        class="waiting-response"
+                      >
+                        The application has been accepted. Waiting for the
+                        applicant's response.
                       </p>
                     </div>
 
@@ -381,7 +419,16 @@
                       >
                         Cancel
                       </button>
-                      <button @click="confirmUpdate(selectedApplicationId, decisionType, scheduledAt, comment)">
+                      <button
+                        @click="
+                          confirmUpdate(
+                            selectedApplicationId,
+                            decisionType,
+                            scheduledAt,
+                            comment
+                          )
+                        "
+                      >
                         Submit Update
                       </button>
                     </div>
@@ -432,7 +479,7 @@
     </div>
   </div>
 
-    <!-- Message Function -->
+  <!-- Message Function -->
   <div
     v-if="showMessagePopup"
     class="popup-overlay"
@@ -454,20 +501,56 @@
     </div>
   </div>
 
-  <div v-if="showConfirmUpdatePopup" class="popup-overlay" @click.self="showConfirmUpdatePopup = false">
-    <div class="popup">
+  <div
+    v-if="showConfirmUpdatePopup"
+    class="popup-overlay"
+    @click.self="showConfirmUpdatePopup = false"
+  >
+    <div class="confirm-update-popup">
       <h3>Confirm Update</h3>
       <ul>
         <li><strong>Status:</strong> {{ formatType(pendingUpdate.status) }}</li>
-        <li v-if="pendingUpdate.scheduled_at"><strong>Schedule:</strong> {{ pendingUpdate.scheduled_at }}</li>
-        <li v-if="pendingUpdate.comment"><strong>Comment:</strong> {{ pendingUpdate.comment }}</li>
+        <li v-if="pendingUpdate.scheduled_at">
+          <strong>Schedule:</strong> {{ pendingUpdate.scheduled_at }}
+        </li>
+        <li v-if="pendingUpdate.comment">
+          <strong>Comment:</strong> {{ pendingUpdate.comment }}
+        </li>
       </ul>
       <div class="popup-actions">
-        <button @click="showConfirmUpdatePopup = false" class="cancel-btn">Cancel</button>
-        <button
-          @click="submitConfirmedUpdate"
-          class="confirm-btn"
-        >Confirm</button>
+        <button @click="showConfirmUpdatePopup = false" class="cancel-btn">
+          Cancel
+        </button>
+        <button @click="submitConfirmedUpdate" class="confirm-btn">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schedule Interview Popup -->
+  <div
+    v-if="showScheduleInterviewPopup"
+    class="popup-overlay"
+    @click.self="closeScheduleInterviewPopup"
+  >
+    <div class="popup">
+      <h3>📅 Schedule Interview</h3>
+      <label for="interview-date">Interview Date & Time</label>
+      <input
+        id="interview-date"
+        v-model="scheduleInterviewDate"
+        type="datetime-local"
+        class="schedule-input"
+        style="margin: 10px 0 20px 0; width: 100%"
+      />
+      <div class="popup-actions">
+        <button class="cancel-btn" @click="closeScheduleInterviewPopup">
+          Cancel
+        </button>
+        <button class="submit-btn" @click="submitScheduleInterview">
+          Set Schedule
+        </button>
       </div>
     </div>
   </div>
@@ -520,21 +603,33 @@ async function fetchNotifications() {
 
 const getNotificationIcon = (type) => {
   switch (type) {
-    case "job_application": return "/public/resume.png";
-    case "inquiry": return "/public/question.png";
-    case "application_update": return "/public/updates.png";
-    case "message": return "/public/mail.png";
-    default: return "/public/notification.png";
+    case "job_application":
+      return "/public/resume.png";
+    case "inquiry":
+      return "/public/question.png";
+    case "application_update":
+      return "/public/updates.png";
+    case "message":
+      return "/public/mail.png";
+    default:
+      return "/public/notification.png";
   }
 };
 
 // --- SIGN OUT ---
-function toggleSignOut() { showSignOut.value = !showSignOut.value; }
+function toggleSignOut() {
+  showSignOut.value = !showSignOut.value;
+}
 function confirmSignOut() {
-  axios.post("/logout")
+  axios
+    .post("/logout")
     .then(() => {
       createToast("Successfully signed out!", {
-        type: "success", position: "top-right", timeout: 2000, showIcon: true, toastBackgroundColor: "#045d56",
+        type: "success",
+        position: "top-right",
+        timeout: 2000,
+        showIcon: true,
+        toastBackgroundColor: "#045d56",
       });
       localStorage.clear();
       router.push("/login");
@@ -542,7 +637,10 @@ function confirmSignOut() {
     .catch((error) => {
       console.error("Error signing out:", error);
       createToast("Failed to sign out. Please try again.", {
-        type: "danger", position: "top-right", timeout: 3000, showIcon: true,
+        type: "danger",
+        position: "top-right",
+        timeout: 3000,
+        showIcon: true,
       });
     });
 }
@@ -556,28 +654,44 @@ const expandedItems = ref(new Set());
 // Pagination for jobs
 const jobsPerPage = ref(3);
 const currentJobPage = ref(1);
-const totalJobPages = computed(() => Math.ceil(postedJobs.value.length / jobsPerPage.value));
+const totalJobPages = computed(() =>
+  Math.ceil(postedJobs.value.length / jobsPerPage.value)
+);
 const paginatedPostedJobs = computed(() => {
   const start = (currentJobPage.value - 1) * jobsPerPage.value;
   return postedJobs.value.slice(start, start + jobsPerPage.value);
 });
-function nextJobPage() { if (currentJobPage.value < totalJobPages.value) currentJobPage.value++; }
-function previousJobPage() { if (currentJobPage.value > 1) currentJobPage.value--; }
-function goToJobPage(page) { currentJobPage.value = page; }
+function nextJobPage() {
+  if (currentJobPage.value < totalJobPages.value) currentJobPage.value++;
+}
+function previousJobPage() {
+  if (currentJobPage.value > 1) currentJobPage.value--;
+}
+function goToJobPage(page) {
+  currentJobPage.value = page;
+}
 
 // Pagination for applicants
 const applicantsPerPage = ref(2);
 const currentPage = ref(1);
-const totalPages = computed(() => Math.ceil(jobApplicants.value.length / applicantsPerPage.value));
+const totalPages = computed(() =>
+  Math.ceil(jobApplicants.value.length / applicantsPerPage.value)
+);
 
 const paginatedApplicants = computed(() => {
   const start = (currentPage.value - 1) * applicantsPerPage.value;
   return jobApplicants.value.slice(start, start + applicantsPerPage.value);
 });
 
-function previousPage() { if (currentPage.value > 1) currentPage.value--; }
-function nextPage() { if (currentPage.value < totalPages.value) currentPage.value++; }
-function goToPage(page) { currentPage.value = page; }
+function previousPage() {
+  if (currentPage.value > 1) currentPage.value--;
+}
+function nextPage() {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+}
+function goToPage(page) {
+  currentPage.value = page;
+}
 
 function selectJob(job) {
   selectedJob.value = job;
@@ -715,8 +829,12 @@ function togglePostPopup() {
     selectedExpertise.value = [];
   }
 }
-function toggleCourseDropdown() { showCourseDropdown.value = !showCourseDropdown.value; }
-function toggleExpertiseDropdown() { showExpertiseDropdown.value = !showExpertiseDropdown.value; }
+function toggleCourseDropdown() {
+  showCourseDropdown.value = !showCourseDropdown.value;
+}
+function toggleExpertiseDropdown() {
+  showExpertiseDropdown.value = !showExpertiseDropdown.value;
+}
 const handleCheckboxChange = (event, course) => {
   if (event.target.checked) {
     if (selectedCourses.value.length < 3) {
@@ -738,7 +856,9 @@ const handleExpertiseCheckboxChange = (event, expertise) => {
       selectedExpertise.value.push(expertise);
     }
   } else {
-    selectedExpertise.value = selectedExpertise.value.filter((e) => e !== expertise);
+    selectedExpertise.value = selectedExpertise.value.filter(
+      (e) => e !== expertise
+    );
   }
 };
 async function postJob() {
@@ -751,7 +871,11 @@ async function postJob() {
     jobData.value.recommended_expertise_3 = selectedExpertise.value[2] || null;
     const response = await axios.post("/company/postjob", { ...jobData.value });
     createToast(response.data.message, {
-      type: "success", position: "top-right", timeout: 3000, showIcon: true, toastBackgroundColor: "#045d56",
+      type: "success",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
     jobData.value = {
       job_title: "",
@@ -769,12 +893,18 @@ async function postJob() {
       const errors = error.response.data.error;
       let errorMessages = Object.values(errors).flat().join("\n");
       createToast(errorMessages, {
-        type: "danger", position: "top-right", timeout: 5000, showIcon: true,
+        type: "danger",
+        position: "top-right",
+        timeout: 5000,
+        showIcon: true,
       });
     } else {
       console.error("Unexpected error:", error);
       createToast("An unexpected error occurred.", {
-        type: "danger", position: "top-right", timeout: 3000, showIcon: true,
+        type: "danger",
+        position: "top-right",
+        timeout: 3000,
+        showIcon: true,
       });
     }
   }
@@ -785,7 +915,8 @@ async function fetchApplicants(jobId) {
   try {
     const response = await axios.get(`/job/${jobId}/applications`);
     jobApplicants.value = response.data.applications.filter(
-      (applicant) => applicant.status !== "rejected" && applicant.status !== "hired"
+      (applicant) =>
+        applicant.status !== "rejected" && applicant.status !== "hired"
     );
   } catch (error) {
     console.error("Failed to fetch applicants", error);
@@ -796,7 +927,9 @@ const toggleItem = async (applicationId) => {
   if (expandedItems.value.has(applicationId)) {
     expandedItems.value.delete(applicationId);
   } else {
-    const application = jobApplicants.value.find(app => app.id === applicationId);
+    const application = jobApplicants.value.find(
+      (app) => app.id === applicationId
+    );
     if (application && application.status === "applied") {
       await setApplicationToScreening(applicationId);
     }
@@ -805,8 +938,12 @@ const toggleItem = async (applicationId) => {
 };
 async function setApplicationToScreening(applicationId) {
   try {
-    await axios.post(`/company/job-applications/${applicationId}/assess`, { status: "screening" });
-    const idx = jobApplicants.value.findIndex(app => app.id === applicationId);
+    await axios.post(`/company/job-applications/${applicationId}/assess`, {
+      status: "screening",
+    });
+    const idx = jobApplicants.value.findIndex(
+      (app) => app.id === applicationId
+    );
     if (idx !== -1) {
       jobApplicants.value[idx].status = "screening";
     }
@@ -823,9 +960,15 @@ function canMarkAsInterviewed(application) {
 }
 function handleMarkAsInterviewed(application) {
   if (!canMarkAsInterviewed(application)) {
-    createToast("You can only mark as interviewed after the scheduled date/time.", {
-      type: "warning", position: "top-right", timeout: 3000, showIcon: true,
-    });
+    createToast(
+      "You can only mark as interviewed after the scheduled date/time.",
+      {
+        type: "warning",
+        position: "top-right",
+        timeout: 3000,
+        showIcon: true,
+      }
+    );
     return;
   }
   markAsInterviewed(application.id);
@@ -834,7 +977,11 @@ async function markAsInterviewed(applicationId) {
   try {
     await assessApplication(applicationId, "interviewed");
     createToast("Application marked as interviewed!", {
-      type: "success", position: "top-right", timeout: 3000, showIcon: true, toastBackgroundColor: "#045d56",
+      type: "success",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
     await fetchApplicants(selectedJob.value.id);
   } catch (error) {
@@ -845,31 +992,66 @@ async function markAsInterviewed(applicationId) {
 
 // --- INTERVIEW SCHEDULING ---
 const scheduledAt = ref(null);
-async function scheduleInterview(applicationId) {
-  const date = prompt("Enter interview date (YYYY-MM-DD HH:MM:SS):");
-  if (date) {
-    const inputDate = new Date(date.replace(" ", "T"));
-    const now = new Date();
-    if (isNaN(inputDate.getTime())) {
-      createToast("Invalid date format. Please use YYYY-MM-DD HH:MM:SS", {
-        type: "danger", position: "top-right", timeout: 3000, showIcon: true,
-      });
-      return;
-    }
-    if (inputDate <= now) {
-      createToast("Interview date must be in the future.", {
-        type: "warning", position: "top-right", timeout: 3000, showIcon: true,
-      });
-      return;
-    }
-    selectedApplicationId.value = applicationId;
-    decisionType.value = "for_interview";
-    scheduledAt.value = date;
-    showStatusOptions.value = true;
-    createToast("Interview scheduled successfully", {
-      type: "success", position: "top-right", timeout: 3000, showIcon: true, toastBackgroundColor: "#045d56",
+const showScheduleInterviewPopup = ref(false);
+const scheduleInterviewDate = ref("");
+let scheduleInterviewAppId = null;
+
+function closeScheduleInterviewPopup() {
+  showScheduleInterviewPopup.value = false;
+  scheduleInterviewDate.value = "";
+  scheduleInterviewAppId = null;
+}
+
+function scheduleInterview(applicationId) {
+  scheduleInterviewAppId = applicationId;
+  scheduleInterviewDate.value = "";
+  showScheduleInterviewPopup.value = true;
+}
+
+async function submitScheduleInterview() {
+  const date = scheduleInterviewDate.value;
+  if (!date) {
+    createToast("Please select a date and time.", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
     });
+    return;
   }
+  const inputDate = new Date(date);
+  const now = new Date();
+  if (isNaN(inputDate.getTime())) {
+    createToast("Invalid date format. Please use the date picker.", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+    return;
+  }
+  if (inputDate <= now) {
+    createToast("Interview date must be in the future.", {
+      type: "warning",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+    return;
+  }
+  selectedApplicationId.value = scheduleInterviewAppId;
+  decisionType.value = "for_interview";
+  const formattedDate = date.replace("T", " ") + ":00";
+  scheduledAt.value = formattedDate;
+  showStatusOptions.value = true;
+  closeScheduleInterviewPopup();
+  createToast("Interview scheduled successfully", {
+    type: "success",
+    position: "top-right",
+    timeout: 3000,
+    showIcon: true,
+    toastBackgroundColor: "#045d56",
+  });
 }
 
 // --- STATUS UPDATE & CONFIRMATION POPUP ---
@@ -897,24 +1079,33 @@ async function submitConfirmedUpdate() {
     pendingUpdate.value.comment
   );
 
-    showStatusOptions.value = false;
-    comment.value = "";
-    pendingUpdate.value = {
-      status: "",
-      scheduled_at: "",
-      comment: "",
-      applicationId: null
-    };
+  showStatusOptions.value = false;
+  comment.value = "";
+  pendingUpdate.value = {
+    status: "",
+    scheduled_at: "",
+    comment: "",
+    applicationId: null,
+  };
 }
 function openConfirmModal(applicationId, status) {
   selectedApplicationId.value = applicationId;
   decisionType.value = status;
   showStatusOptions.value = true;
 }
-async function submitApplicationDecision(applicationId, status, scheduled_at, comment) {
+async function submitApplicationDecision(
+  applicationId,
+  status,
+  scheduled_at,
+  comment
+) {
   if (!applicationId || !status) {
     createToast("Please choose an applicant and a decision", {
-      type: "warning", position: "top-right", timeout: 3000, showIcon: true, toastBackgroundColor: "#045d56",
+      type: "warning",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
     return;
   }
@@ -925,19 +1116,29 @@ async function submitApplicationDecision(applicationId, status, scheduled_at, co
   comment.value = "";
   showStatusOptions.value = false;
 }
-async function assessApplication(applicationId, status, scheduleAt = null, comment = "") {
+async function assessApplication(
+  applicationId,
+  status,
+  scheduleAt = null,
+  comment = ""
+) {
   try {
     const payload = { status, scheduled_at: scheduleAt, comment };
-    await axios.post(`/company/job-applications/${applicationId}/assess`, payload);
-    
+    await axios.post(
+      `/company/job-applications/${applicationId}/assess`,
+      payload
+    );
+
     // Update the specific application in the current list
-    const applicationIndex = jobApplicants.value.findIndex(app => app.id === applicationId);
+    const applicationIndex = jobApplicants.value.findIndex(
+      (app) => app.id === applicationId
+    );
     if (applicationIndex !== -1) {
       jobApplicants.value[applicationIndex] = {
         ...jobApplicants.value[applicationIndex],
         status,
         scheduled_at: scheduleAt,
-        comment
+        comment,
       };
     }
 
@@ -961,21 +1162,25 @@ async function assessApplication(applicationId, status, scheduleAt = null, comme
         });
       } catch (offerError) {
         console.error("Error sending job offer:", offerError);
-        createToast(offerError.response?.data?.error || "Failed to send job offer", {
-          type: "danger",
-          position: "top-right",
-          timeout: 3000,
-          showIcon: true,
-        });
+        createToast(
+          offerError.response?.data?.error || "Failed to send job offer",
+          {
+            type: "danger",
+            position: "top-right",
+            timeout: 3000,
+            showIcon: true,
+          }
+        );
       }
     }
 
     const jobResponse = await axios.get(`/company/job/${selectedJob.value.id}`);
-    const jobIndex = postedJobs.value.findIndex(job => job.id === selectedJob.value.id);
+    const jobIndex = postedJobs.value.findIndex(
+      (job) => job.id === selectedJob.value.id
+    );
     if (jobIndex !== -1) {
       postedJobs.value[jobIndex] = jobResponse.data.job;
     }
-
   } catch (error) {
     console.error("Error updating application status:", error);
     createToast(error.response?.data?.error || "Failed to update application", {
@@ -1004,12 +1209,19 @@ async function sendActualMessage() {
     showMessagePopup.value = false;
     messageContent.value = "";
     createToast("Message sent successfully!", {
-      type: "success", position: "top-right", timeout: 3000, showIcon: true, toastBackgroundColor: "#045d56",
+      type: "success",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
     });
   } catch (error) {
     console.error("Error sending message:", error);
     createToast("Failed to send message. Please try again.", {
-      type: "danger", position: "top-right", timeout: 3000, showIcon: true,
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
     });
   }
 }
@@ -1017,27 +1229,44 @@ async function sendActualMessage() {
 // --- STATUS & DESCRIPTION HELPERS ---
 function formatType(type) {
   switch (type) {
-    case "job_application": return "Job Application";
-    case "inquiry": return "Inquiry";
-    case "application_update": return "Application Update";
-    case "message": return "Message";
-    case "other": return "Other";
-    case "for_interview": return "For Interview";
-    case "accepted": return "Accepted";
-    case "applied": return "Applied";
-    case "screening": return "Screening";
-    default: return type;
+    case "job_application":
+      return "Job Application";
+    case "inquiry":
+      return "Inquiry";
+    case "application_update":
+      return "Application Update";
+    case "message":
+      return "Message";
+    case "other":
+      return "Other";
+    case "for_interview":
+      return "For Interview";
+    case "accepted":
+      return "Accepted";
+    case "applied":
+      return "Applied";
+    case "screening":
+      return "Screening";
+    default:
+      return type;
   }
 }
 function statusDescription(status) {
   switch (status) {
-    case "applied": return "Awaiting Review";
-    case "screening": return "Under Screening";
-    case "for_interview": return "Interview Scheduled";
-    case "accepted": return "Job Offered";
-    case "rejected": return "Application Rejected";
-    case "hired": return "Hired";
-    default: return status;
+    case "applied":
+      return "Awaiting Review";
+    case "screening":
+      return "Under Screening";
+    case "for_interview":
+      return "Interview Scheduled";
+    case "accepted":
+      return "Job Offered";
+    case "rejected":
+      return "Application Rejected";
+    case "hired":
+      return "Hired";
+    default:
+      return status;
   }
 }
 
@@ -1049,7 +1278,9 @@ onMounted(() => {
 async function fetchPostedJobs() {
   try {
     const response = await axios.get("/company/jobdisplay");
-    postedJobs.value = response.data.jobs.sort((a, b) => new Date(b.date_posted) - new Date(a.date_posted));
+    postedJobs.value = response.data.jobs.sort(
+      (a, b) => new Date(b.date_posted) - new Date(a.date_posted)
+    );
     if (postedJobs.value.length > 0) {
       selectedJob.value = postedJobs.value[0];
       await fetchApplicants(selectedJob.value.id);
@@ -1307,6 +1538,87 @@ body,
   }
 }
 
+.confirm-update-popup {
+  background: #fff;
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  border-radius: 18px;
+  min-width: 340px;
+  max-width: 95vw;
+  box-shadow: 0 8px 32px rgba(4, 93, 86, 0.18);
+  animation: popIn 0.25s;
+  font-family: 'Work Sans', sans-serif;
+}
+
+.confirm-update-popup h3 {
+  margin-bottom: 18px;
+  font-size: 26px;
+  color: #045d56;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.confirm-update-popup ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 18px 0;
+}
+
+.confirm-update-popup ul li {
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e6ed;
+  font-size: 16px;
+  color: #222;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.confirm-update-popup ul li:last-child {
+  border-bottom: none;
+}
+
+.confirm-update-popup ul strong {
+  min-width: 90px;
+  color: #045d56;
+  font-weight: 600;
+}
+
+.confirm-update-popup .popup-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.confirm-update-popup .cancel-btn,
+.confirm-update-popup .confirm-btn {
+  padding: 8px 22px;
+  border-radius: 8px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+
+.confirm-update-popup .cancel-btn {
+  background: #b0b0b0;
+  color: #fff;
+}
+
+.confirm-update-popup .cancel-btn:hover {
+  background: #888;
+}
+
+.confirm-update-popup .confirm-btn {
+  background: #045d56;
+  color: #fff;
+}
+
+.confirm-update-popup .confirm-btn:hover {
+  background: #033f3a;
+}
+
 .content {
   padding: 20px;
   display: flex;
@@ -1418,6 +1730,14 @@ body,
 .post-box button:hover {
   color: #045d56;
   background: #f1f1f1;
+}
+
+.schedule-input {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 16px;
+  background: #f9f9f9;
 }
 
 .form-row {
@@ -1602,7 +1922,6 @@ body,
   margin-right: 5vh;
 }
 
-
 .application-item {
   background-color: #ffffff;
   padding: 16px 20px;
@@ -1759,7 +2078,6 @@ body,
     transform: translateY(0);
   }
 }
-
 
 .button-group {
   display: flex;
