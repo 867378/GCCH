@@ -215,8 +215,7 @@
       </div>
 
       <div class="content">
-
-                <div class="right-content">
+        <div class="right-content">
           <h3>POSTED JOBS</h3>
           <div class="posted-jobs">
             <div
@@ -233,13 +232,13 @@
               <p><strong>Status:</strong> {{ job.status }}</p>
               <p>
                 <strong>Slots: </strong> {{ job.filled_slots }}/{{ job.total_slots }}
-              </p>
+              </p> 
             </div>
             <p v-if="postedJobs.length === 0">No jobs posted yet.</p>
-            
+
             <div v-if="postedJobs.length > 0" class="pagination">
-              <button 
-                class="pagination-btn" 
+              <button
+                class="pagination-btn"
                 :disabled="currentJobPage === 1"
                 @click="previousJobPage"
               >
@@ -248,8 +247,8 @@
               <span class="page-info">
                 Page {{ currentJobPage }} of {{ totalJobPages }}
               </span>
-              <button 
-                class="pagination-btn" 
+              <button
+                class="pagination-btn"
                 :disabled="currentJobPage === totalJobPages"
                 @click="nextJobPage"
               >
@@ -293,9 +292,12 @@
               >
                 <!-- Always visible header -->
                 <div class="application-header">
-                  <strong>{{ application.applicant.first_name }}
-                    {{ application.applicant.last_name }}</strong
-                  >
+                  <strong>
+                    {{ application.applicant.first_name }} {{ application.applicant.last_name }}'s Application
+                  </strong>
+                  <span class="status-badge" :class="application.status">
+                    {{ statusDescription(application.status) }}
+                  </span>
                   <span class="expand-icon">
                     {{ expandedItems.has(application.id) ? '▼' : '▶' }}
                   </span>
@@ -304,9 +306,10 @@
                 <!-- Collapsible content -->
                 <div class="application-details" v-if="expandedItems.has(application.id)">
                   <span><strong>Course:</strong> {{ application.applicant.course }}</span>
+                  <span><strong>Expertise:</strong> {{ application.applicant.expertise }}</span>
                   <span><strong>Phone:</strong> {{ application.applicant.phone_number }}</span>
                   <span><strong>Date Applied:</strong> {{ application.date_applied }}</span>
-                  <span><strong>Status:</strong> {{ application.status }}</span>
+                  <span><strong>Status:</strong> {{ formatType(application.status) }}</span>
                   <span><strong>Schedule: </strong>{{ application.scheduled_at }}</span>
 
                   <div class="application-documents">
@@ -322,50 +325,49 @@
 
                   <div class="application-actions">
                     <div v-if="!showStatusOptions">
-                      <button class="message-btn" @click.stop="sendMessage(application.applicant.id)">
+                      <button class="message-btn" @click.stop="sendMessage(application.applicant.user_id)">
                         Send Message
                       </button>
-                      <button v-if="application.status !== 'accepted'"
-                              @click.stop="showStatusOptions = true">
-                        Select Status
+
+                      <!-- Show Set Schedule for Interview only if status is screening -->
+                      <button
+                        v-if="application.status === 'screening'"
+                        @click.stop="scheduleInterview(application.id)"
+                        class="interviewed-btn"
+                      >
+                        📅 Set Schedule for Interview
                       </button>
-                      <span v-else class="italic text-gray-600">
-                        ⏳ Waiting for the applicant's response to the job offer
-                      </span>
+
+                      <!-- Show Mark as Interviewed only if status is for_interview -->
+                      <button
+                        v-if="application.status === 'for_interview'"
+                        @click.stop="handleMarkAsInterviewed(application)"
+                        class="interviewed-btn"
+                      >
+                        ✅ Mark as Interviewed
+                      </button>
+
+                      <!-- Show Accept/Reject only if status is interviewed -->
+                      <template v-if="application.status === 'interviewed'">
+                        <button
+                          @click.stop="openConfirmModal(application.id, 'accepted')"
+                          class="accept-btn"
+                        >
+                          ✅ Offer Job
+                        </button>
+                        <button
+                          @click.stop="openConfirmModal(application.id, 'rejected')"
+                          class="reject-btn"
+                        >
+                          ❌ Reject
+                        </button>
+                      </template>
+                      <p v-if="application.status === 'accepted'" class="waiting-response">
+                        The application has been accepted. Waiting for the applicant's response.
+                      </p>
                     </div>
 
                     <div v-else @click.stop>
-                      <div class="button-group">
-                        <label>
-                          <input
-                            type="checkbox"
-                            @change="openConfirmModal(application.id, 'accepted')"
-                          />
-                          ✅ Accept
-                        </label>
-                        <label>
-                          <input
-                            type="checkbox"
-                            @change="openConfirmModal(application.id, 'rejected')"
-                          />
-                          ❌ Reject
-                        </label>
-                        <label>
-                          <input
-                            type="checkbox"
-                            @change="scheduleInterview(application.id)"
-                          />
-                          📅 Schedule an Interview
-                        </label>
-                        <label>
-                          <input
-                            type="checkbox"
-                            @change="screening(application.id)"
-                          />
-                          📝 Ongoing Screening
-                        </label>
-                      </div>
-
                       <textarea
                         v-model="comment"
                         placeholder="Add a comment (optional)"
@@ -379,7 +381,7 @@
                       >
                         Cancel
                       </button>
-                      <button @click="submitApplicationDecision">
+                      <button @click="confirmUpdate(selectedApplicationId, decisionType, scheduledAt, comment)">
                         Submit Update
                       </button>
                     </div>
@@ -429,6 +431,46 @@
       </div>
     </div>
   </div>
+
+    <!-- Message Function -->
+  <div
+    v-if="showMessagePopup"
+    class="popup-overlay"
+    @click.self="showMessagePopup = false"
+  >
+    <div class="popup">
+      <h3>✉️ Message</h3>
+      <textarea
+        v-model="messageContent"
+        placeholder="Type your message here..."
+        rows="5"
+        style="width: 100%; padding: 8px; resize: none"
+      ></textarea>
+      <br /><br />
+      <button @click="sendActualMessage">Send</button>
+      <button @click="showMessagePopup = false" class="cancel-btn">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <div v-if="showConfirmUpdatePopup" class="popup-overlay" @click.self="showConfirmUpdatePopup = false">
+    <div class="popup">
+      <h3>Confirm Update</h3>
+      <ul>
+        <li><strong>Status:</strong> {{ formatType(pendingUpdate.status) }}</li>
+        <li v-if="pendingUpdate.scheduled_at"><strong>Schedule:</strong> {{ pendingUpdate.scheduled_at }}</li>
+        <li v-if="pendingUpdate.comment"><strong>Comment:</strong> {{ pendingUpdate.comment }}</li>
+      </ul>
+      <div class="popup-actions">
+        <button @click="showConfirmUpdatePopup = false" class="cancel-btn">Cancel</button>
+        <button
+          @click="submitConfirmedUpdate"
+          class="confirm-btn"
+        >Confirm</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -438,134 +480,30 @@ import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
 
+// --- ROUTER & UI STATE ---
 const router = useRouter();
-
+const isSidenavOpen = ref(true);
 const showNotif = ref(false);
 const showSignOut = ref(false);
 const newNotifications = ref(0);
-const isSidenavOpen = ref(true);
 
-const selectedJob = ref(null);
-const jobApplicants = ref([]);
-
+// --- NOTIFICATIONS ---
 const notifications = ref([]);
-const postedJobs = ref([]);
-// Dummy data for messages
-
-const showStatusOptions = ref(false);
-const comment = ref("");
-
-const showPostPopup = ref(false);
-const isPostBoxCollapsed = ref(false);
-
-//popup confirmation
-const showConfirmModal = ref(false);
-const selectedApplicationId = ref(null);
-const decisionType = ref("");
-const scheduledAt = ref(null);
-
-//message variables
-const selectedApplicantId = ref(null);
-const showMessagePopup = ref(false);
-
-function sendMessage(applicationId) {
-  selectedApplicantId.value = applicationId;
-  showMessagePopup.value = true;
-}
-
-function openConfirmModal(applicationId, type) {
-  selectedApplicationId.value = applicationId;
-  decisionType.value = type; // e.g. 'accepted', 'rejected'
-  showStatusOptions.value = true; // show status section if hidden
-}
-
-async function scheduleInterview(applicationId) {
-  const date = prompt("Enter interview date (YYYY-MM-DD HH:MM:SS):");
-  if (date) {
-    selectedApplicationId.value = applicationId;
-    decisionType.value = "for_interview";
-    scheduledAt.value = date;
-    showStatusOptions.value = true;
-    createToast("Interview scheduled successfully", {
-      type: "success",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-      toastBackgroundColor: "#045d56",
-    });
-  }
-}
-
-async function screening(applicationId) {
-  const date = prompt("Enter assessment date (YYYY-MM-DD HH:MM:SS):");
-  if (date) {
-    selectedApplicationId.value = applicationId;
-    decisionType.value = "screening";
-    scheduledAt.value = date;
-    showStatusOptions.value = true;
-    createToast("Assessment scheduled successfully", {
-      type: "success",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-      toastBackgroundColor: "#045d56",
-    });
-  }
-}
-
 function toggleNotif() {
   showNotif.value = !showNotif.value;
-  if (showNotif.value) {
-    newNotifications.value = 0;
-  }
-}
-
-function toggleSignOut() {
-  showSignOut.value = !showSignOut.value;
-}
-
-function confirmSignOut() {
-  axios
-    .post("/logout")
-    .then(() => {
-      createToast("Successfully signed out!", {
-        type: "success",
-        position: "top-right",
-        timeout: 2000,
-        showIcon: true,
-        toastBackgroundColor: "#045d56",
-      });
-      localStorage.clear();
-      router.push("/login");
-    })
-    .catch((error) => {
-      console.error("Error signing out:", error);
-      createToast("Failed to sign out. Please try again.", {
-        type: "danger",
-        position: "top-right",
-        timeout: 3000,
-        showIcon: true,
-      });
-    });
+  if (showNotif.value) newNotifications.value = 0;
 }
 
 async function fetchNotifications() {
   try {
     const response = await axios.get("/notifications");
     const rawNotifications = response.data.notifications || [];
-
     const grouped = new Map();
-
     rawNotifications.forEach((notif) => {
       if (!notif || !notif.type) return;
-
       const key = `${notif.sender_id || "system"}_${notif.type}`;
       if (!grouped.has(key)) {
-        grouped.set(key, {
-          ...notif,
-          count: 1,
-          latestContent: notif.content,
-        });
+        grouped.set(key, { ...notif, count: 1, latestContent: notif.content });
       } else {
         const existing = grouped.get(key);
         existing.count += 1;
@@ -573,189 +511,94 @@ async function fetchNotifications() {
         grouped.set(key, existing);
       }
     });
-
     notifications.value = Array.from(grouped.values());
     newNotifications.value = notifications.value.length;
-
-    console.log("Fetched notifications:", rawNotifications);
   } catch (error) {
     console.error("Error fetching notifications:", error);
   }
 }
 
-//Get Applicants of a Certain Job
-async function fetchApplicants(jobId) {
-  try {
-    const response = await axios.get(`/job/${jobId}/applications`);
-    jobApplicants.value = response.data.applications.filter(
-      (applicant) =>
-        applicant.status !== "rejected" && applicant.status !== "hired"
-    );
-    console.log(response.data);
-  } catch (error) {
-    console.error("Failed to fetch applicants", error);
-    jobApplicants.value = [];
-  }
-}
-
-//Fetch Jobs
-async function fetchPostedJobs() {
-  try {
-    const response = await axios.get("/company/jobdisplay");
-    postedJobs.value = response.data.jobs.sort((a, b) => {
-      return new Date(b.date_posted) - new Date(a.date_posted);
-    });
-    console.log(response.data);
-
-    if (postedJobs.value.length > 0) {
-      selectedJob.value = postedJobs.value[0];
-      await fetchApplicants(selectedJob.value.id);
-    } else {
-      jobApplicants.value = [];
-    }
-  } catch (error) {
-    console.error("Error fetching posted jobs:", error);
-  }
-}
-
-async function submitApplicationDecision() {
-  if (!selectedApplicationId.value || !decisionType.value) {
-    createToast("Please choose an applicant and a decision", {
-      type: "warning",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-      toastBackgroundColor: "#045d56",
-    });
-    return;
-  }
-
-  await assessApplication(
-    selectedApplicationId.value,
-    decisionType.value,
-    scheduledAt.value,
-    comment.value
-  );
-
-  // Reset form
-  selectedApplicationId.value = null;
-  decisionType.value = null;
-  scheduledAt.value = null;
-  comment.value = "";
-  showStatusOptions.value = false;
-}
-
-async function assessApplication(
-  applicationId,
-  status,
-  scheduleAt = null,
-  comment = ""
-) {
-  try {
-    const payload = {
-      status,
-      scheduled_at: scheduleAt,
-      comment,
-    };
-
-    await axios.post(
-      `/company/job-applications/${applicationId}/assess`,
-      payload
-    );
-
-    createToast("Application status updated successfully", {
-      type: "success",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-      toastBackgroundColor: "#045d56",
-    });
-
-    if (status === "accepted") {
-      try {
-        const offerResponse = await axios.post(
-          `/company/offer-job/${applicationId}`
-        );
-        createToast("Job offer sent successfully", {
-          type: "success",
-          position: "top-right",
-          timeout: 3000,
-          showIcon: true,
-          toastBackgroundColor: "#045d56",
-        });
-      } catch (offerError) {
-        console.error("Error sending job offer:", offerError);
-        createToast(
-          offerError.response?.data?.error || "Failed to send job offer",
-          {
-            type: "danger",
-            position: "top-right",
-            timeout: 3000,
-            showIcon: true,
-          }
-        );
-      }
-    }
-
-    await fetchApplicants(selectedJob.value.id);
-    await fetchPostedJobs();
-  } catch (error) {
-    console.error("Error updating application status:", error);
-    createToast(error.response?.data?.error || "Failed to update application", {
-      type: "danger",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-    });
-  }
-}
-
-function formatType(type) {
+const getNotificationIcon = (type) => {
   switch (type) {
-    case "job_application":
-      return "Job Application";
-    case "inquiry":
-      return "Inquiry";
-    case "application_update":
-      return "Application Update";
-    case "message":
-      return "Message";
-    case "other":
-      return "Other";
-    default:
-      return type;
+    case "job_application": return "/public/resume.png";
+    case "inquiry": return "/public/question.png";
+    case "application_update": return "/public/updates.png";
+    case "message": return "/public/mail.png";
+    default: return "/public/notification.png";
   }
+};
+
+// --- SIGN OUT ---
+function toggleSignOut() { showSignOut.value = !showSignOut.value; }
+function confirmSignOut() {
+  axios.post("/logout")
+    .then(() => {
+      createToast("Successfully signed out!", {
+        type: "success", position: "top-right", timeout: 2000, showIcon: true, toastBackgroundColor: "#045d56",
+      });
+      localStorage.clear();
+      router.push("/login");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error);
+      createToast("Failed to sign out. Please try again.", {
+        type: "danger", position: "top-right", timeout: 3000, showIcon: true,
+      });
+    });
 }
 
-onMounted(() => {
-  fetchPostedJobs();
-  fetchNotifications();
+// --- JOBS & APPLICANTS ---
+const postedJobs = ref([]);
+const selectedJob = ref(null);
+const jobApplicants = ref([]);
+const expandedItems = ref(new Set());
+
+// Pagination for jobs
+const jobsPerPage = ref(3);
+const currentJobPage = ref(1);
+const totalJobPages = computed(() => Math.ceil(postedJobs.value.length / jobsPerPage.value));
+const paginatedPostedJobs = computed(() => {
+  const start = (currentJobPage.value - 1) * jobsPerPage.value;
+  return postedJobs.value.slice(start, start + jobsPerPage.value);
 });
+function nextJobPage() { if (currentJobPage.value < totalJobPages.value) currentJobPage.value++; }
+function previousJobPage() { if (currentJobPage.value > 1) currentJobPage.value--; }
+function goToJobPage(page) { currentJobPage.value = page; }
+
+// Pagination for applicants
+const applicantsPerPage = ref(2);
+const currentPage = ref(1);
+const totalPages = computed(() => Math.ceil(jobApplicants.value.length / applicantsPerPage.value));
+
+const paginatedApplicants = computed(() => {
+  const start = (currentPage.value - 1) * applicantsPerPage.value;
+  return jobApplicants.value.slice(start, start + applicantsPerPage.value);
+});
+
+function previousPage() { if (currentPage.value > 1) currentPage.value--; }
+function nextPage() { if (currentPage.value < totalPages.value) currentPage.value++; }
+function goToPage(page) { currentPage.value = page; }
 
 function selectJob(job) {
   selectedJob.value = job;
   fetchApplicants(job.id);
 }
 
-const showCourseDropdown = ref(false);
-const selectedCourses = ref([]);
-const selectedExpertise = ref([]);
-const filteredExpertise = computed(() => {
-  const expertiseSet = new Set();
-
-  selectedCourses.value.forEach((course) => {
-    const expertiseList = expertiseMap[course] || [];
-    expertiseList.forEach((expertise) => expertiseSet.add(expertise));
-  });
-
-  return Array.from(expertiseSet);
+// --- JOB POSTING ---
+const showPostPopup = ref(false);
+const jobData = ref({
+  job_title: "",
+  job_description: "",
+  job_location: "",
+  monthly_salary: "",
+  job_type: "",
+  total_slots: "",
 });
 
+const selectedCourses = ref([]);
+const selectedExpertise = ref([]);
+const showCourseDropdown = ref(false);
 const showExpertiseDropdown = ref(false);
-
-function toggleExpertiseDropdown() {
-  showExpertiseDropdown.value = !showExpertiseDropdown.value;
-}
 
 const courseOptions = [
   "BSIT",
@@ -850,40 +693,30 @@ const expertiseMap = {
   Other: ["Other"],
 };
 
-const jobData = ref({
-  job_title: "",
-  job_description: "",
-  job_location: "",
-  monthly_salary: "",
-  job_type: "",
-  recommended_course: "",
-  recommended_course_2: "",
-  recommended_course_3: "",
-  recommeded_expertise: "",
-  recommended_expertise_2: "",
-  recommended_expertise_3: "",
-  total_slots: "",
+const filteredExpertise = computed(() => {
+  const set = new Set();
+  selectedCourses.value.forEach((course) => {
+    (expertiseMap[course] || []).forEach((exp) => set.add(exp));
+  });
+  return Array.from(set);
 });
-
-function toggleCourseDropdown() {
-  showCourseDropdown.value = !showCourseDropdown.value;
-}
-
-const handleExpertiseCheckboxChange = (event, expertise) => {
-  if (event.target.checked) {
-    if (selectedExpertise.value.length < 3) {
-      selectedExpertise.value.push(expertise);
-    } else {
-      selectedExpertise.value.shift();
-      selectedExpertise.value.push(expertise);
-    }
-  } else {
-    selectedExpertise.value = selectedExpertise.value.filter(
-      (e) => e !== expertise
-    );
+function togglePostPopup() {
+  showPostPopup.value = !showPostPopup.value;
+  if (!showPostPopup.value) {
+    jobData.value = {
+      job_title: "",
+      job_description: "",
+      job_location: "",
+      monthly_salary: "",
+      job_type: "",
+      total_slots: "",
+    };
+    selectedCourses.value = [];
+    selectedExpertise.value = [];
   }
-};
-
+}
+function toggleCourseDropdown() { showCourseDropdown.value = !showCourseDropdown.value; }
+function toggleExpertiseDropdown() { showExpertiseDropdown.value = !showExpertiseDropdown.value; }
 const handleCheckboxChange = (event, course) => {
   if (event.target.checked) {
     if (selectedCourses.value.length < 3) {
@@ -896,7 +729,18 @@ const handleCheckboxChange = (event, course) => {
     selectedCourses.value = selectedCourses.value.filter((c) => c !== course);
   }
 };
-
+const handleExpertiseCheckboxChange = (event, expertise) => {
+  if (event.target.checked) {
+    if (selectedExpertise.value.length < 3) {
+      selectedExpertise.value.push(expertise);
+    } else {
+      selectedExpertise.value.shift();
+      selectedExpertise.value.push(expertise);
+    }
+  } else {
+    selectedExpertise.value = selectedExpertise.value.filter((e) => e !== expertise);
+  }
+};
 async function postJob() {
   try {
     jobData.value.recommended_course = selectedCourses.value[0] || null;
@@ -905,31 +749,10 @@ async function postJob() {
     jobData.value.recommended_expertise = selectedExpertise.value[0] || null;
     jobData.value.recommended_expertise_2 = selectedExpertise.value[1] || null;
     jobData.value.recommended_expertise_3 = selectedExpertise.value[2] || null;
-
-    const response = await axios.post("/company/postjob", {
-      job_title: jobData.value.job_title,
-      job_description: jobData.value.job_description,
-      job_location: jobData.value.job_location,
-      monthly_salary: jobData.value.monthly_salary,
-      job_type: jobData.value.job_type,
-      recommended_course: jobData.value.recommended_course,
-      recommended_course_2: jobData.value.recommended_course_2 || null,
-      recommended_course_3: jobData.value.recommended_course_3 || null,
-      recommended_expertise: jobData.value.recommended_expertise,
-      recommended_expertise_2: jobData.value.recommended_expertise_2 || null,
-      recommended_expertise_3: jobData.value.recommended_expertise_3 || null,
-      total_slots: jobData.value.total_slots,
-    });
-
+    const response = await axios.post("/company/postjob", { ...jobData.value });
     createToast(response.data.message, {
-      type: "success",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-      toastBackgroundColor: "#045d56",
+      type: "success", position: "top-right", timeout: 3000, showIcon: true, toastBackgroundColor: "#045d56",
     });
-
-    // Reset form
     jobData.value = {
       job_title: "",
       job_description: "",
@@ -938,7 +761,6 @@ async function postJob() {
       job_type: "",
       total_slots: "",
     };
-
     selectedCourses.value = [];
     selectedExpertise.value = [];
     await fetchPostedJobs();
@@ -947,110 +769,297 @@ async function postJob() {
       const errors = error.response.data.error;
       let errorMessages = Object.values(errors).flat().join("\n");
       createToast(errorMessages, {
-        type: "danger",
-        position: "top-right",
-        timeout: 5000,
-        showIcon: true,
+        type: "danger", position: "top-right", timeout: 5000, showIcon: true,
       });
     } else {
       console.error("Unexpected error:", error);
       createToast("An unexpected error occurred.", {
-        type: "danger",
-        position: "top-right",
-        timeout: 3000,
-        showIcon: true,
+        type: "danger", position: "top-right", timeout: 3000, showIcon: true,
       });
     }
   }
 }
 
-// Add to the existing refs
-const currentPage = ref(1);
-const applicantsPerPage = ref(2);
-
-const totalPages = computed(() => {
-  return Math.ceil(jobApplicants.value.length / applicantsPerPage.value);
-});
-
-const paginatedApplicants = computed(() => {
-  const start = (currentPage.value - 1) * applicantsPerPage.value;
-  const end = start + applicantsPerPage.value;
-  return jobApplicants.value.slice(start, end);
-});
-
-// Add these refs
-const jobsPerPage = ref(3); // Number of jobs to show per page
-const currentJobPage = ref(1);
-
-// Add these computed properties
-const totalJobPages = computed(() => Math.ceil(postedJobs.value.length / jobsPerPage.value));
-
-const paginatedPostedJobs = computed(() => {
-  const start = (currentJobPage.value - 1) * jobsPerPage.value;
-  const end = start + jobsPerPage.value;
-  return postedJobs.value.slice(start, end);
-});
-
-// Add these methods for job pagination
-function nextJobPage() {
-  if (currentJobPage.value < totalJobPages.value) {
-    currentJobPage.value++;
+// --- APPLICANT ACTIONS ---
+async function fetchApplicants(jobId) {
+  try {
+    const response = await axios.get(`/job/${jobId}/applications`);
+    jobApplicants.value = response.data.applications.filter(
+      (applicant) => applicant.status !== "rejected" && applicant.status !== "hired"
+    );
+  } catch (error) {
+    console.error("Failed to fetch applicants", error);
+    jobApplicants.value = [];
   }
 }
-
-function previousJobPage() {
-  if (currentJobPage.value > 1) {
-    currentJobPage.value--;
-  }
-}
-
-function goToJobPage(page) {
-  currentJobPage.value = page;
-}
-
-function togglePostPopup() {
-  showPostPopup.value = !showPostPopup.value;
-  if (!showPostPopup.value) {
-    // Reset form when closing
-    jobData.value = {
-      job_title: "",
-      job_description: "",
-      job_location: "",
-      monthly_salary: "",
-      job_type: "",
-      total_slots: "",
-    };
-    selectedCourses.value = [];
-    selectedExpertise.value = [];
-  }
-}
-
-const getNotificationIcon = (type) => {
-  switch (type) {
-    case 'job_application':
-      return '/public/resume.png';
-    case 'inquiry':
-      return '/public/question.png';
-    case 'application_update':
-      return '/public/updates.png';
-    case 'message':
-      return '/public/mail.png';
-    default:
-      return '/public/notification.png';
-  }
-};
-
-// Add this in your script setup section after other refs
-const expandedItems = ref(new Set());
-
-// Add this function to toggle item expansion
-const toggleItem = (applicationId) => {
+const toggleItem = async (applicationId) => {
   if (expandedItems.value.has(applicationId)) {
     expandedItems.value.delete(applicationId);
   } else {
+    const application = jobApplicants.value.find(app => app.id === applicationId);
+    if (application && application.status === "applied") {
+      await setApplicationToScreening(applicationId);
+    }
     expandedItems.value.add(applicationId);
   }
 };
+async function setApplicationToScreening(applicationId) {
+  try {
+    await axios.post(`/company/job-applications/${applicationId}/assess`, { status: "screening" });
+    const idx = jobApplicants.value.findIndex(app => app.id === applicationId);
+    if (idx !== -1) {
+      jobApplicants.value[idx].status = "screening";
+    }
+  } catch (error) {
+    console.error("Failed to update status to screening", error);
+    createToast("Failed to update status", { type: "danger" });
+  }
+}
+function canMarkAsInterviewed(application) {
+  if (!application.scheduled_at) return false;
+  const now = new Date();
+  const scheduled = new Date(application.scheduled_at.replace(" ", "T"));
+  return now >= scheduled;
+}
+function handleMarkAsInterviewed(application) {
+  if (!canMarkAsInterviewed(application)) {
+    createToast("You can only mark as interviewed after the scheduled date/time.", {
+      type: "warning", position: "top-right", timeout: 3000, showIcon: true,
+    });
+    return;
+  }
+  markAsInterviewed(application.id);
+}
+async function markAsInterviewed(applicationId) {
+  try {
+    await assessApplication(applicationId, "interviewed");
+    createToast("Application marked as interviewed!", {
+      type: "success", position: "top-right", timeout: 3000, showIcon: true, toastBackgroundColor: "#045d56",
+    });
+    await fetchApplicants(selectedJob.value.id);
+  } catch (error) {
+    console.error("Failed to mark as interviewed", error);
+    createToast("Failed to update status", { type: "danger" });
+  }
+}
+
+// --- INTERVIEW SCHEDULING ---
+const scheduledAt = ref(null);
+async function scheduleInterview(applicationId) {
+  const date = prompt("Enter interview date (YYYY-MM-DD HH:MM:SS):");
+  if (date) {
+    const inputDate = new Date(date.replace(" ", "T"));
+    const now = new Date();
+    if (isNaN(inputDate.getTime())) {
+      createToast("Invalid date format. Please use YYYY-MM-DD HH:MM:SS", {
+        type: "danger", position: "top-right", timeout: 3000, showIcon: true,
+      });
+      return;
+    }
+    if (inputDate <= now) {
+      createToast("Interview date must be in the future.", {
+        type: "warning", position: "top-right", timeout: 3000, showIcon: true,
+      });
+      return;
+    }
+    selectedApplicationId.value = applicationId;
+    decisionType.value = "for_interview";
+    scheduledAt.value = date;
+    showStatusOptions.value = true;
+    createToast("Interview scheduled successfully", {
+      type: "success", position: "top-right", timeout: 3000, showIcon: true, toastBackgroundColor: "#045d56",
+    });
+  }
+}
+
+// --- STATUS UPDATE & CONFIRMATION POPUP ---
+const showStatusOptions = ref(false);
+const comment = ref("");
+const showConfirmUpdatePopup = ref(false);
+const pendingUpdate = ref({
+  status: "",
+  scheduled_at: "",
+  comment: "",
+  applicationId: null,
+});
+const selectedApplicationId = ref(null);
+const decisionType = ref("");
+function confirmUpdate(applicationId, status, scheduled_at, comment) {
+  pendingUpdate.value = { applicationId, status, scheduled_at, comment };
+  showConfirmUpdatePopup.value = true;
+}
+async function submitConfirmedUpdate() {
+  showConfirmUpdatePopup.value = false;
+  await submitApplicationDecision(
+    pendingUpdate.value.applicationId,
+    pendingUpdate.value.status,
+    pendingUpdate.value.scheduled_at,
+    pendingUpdate.value.comment
+  );
+
+    showStatusOptions.value = false;
+    comment.value = "";
+    pendingUpdate.value = {
+      status: "",
+      scheduled_at: "",
+      comment: "",
+      applicationId: null
+    };
+}
+function openConfirmModal(applicationId, status) {
+  selectedApplicationId.value = applicationId;
+  decisionType.value = status;
+  showStatusOptions.value = true;
+}
+async function submitApplicationDecision(applicationId, status, scheduled_at, comment) {
+  if (!applicationId || !status) {
+    createToast("Please choose an applicant and a decision", {
+      type: "warning", position: "top-right", timeout: 3000, showIcon: true, toastBackgroundColor: "#045d56",
+    });
+    return;
+  }
+  await assessApplication(applicationId, status, scheduled_at, comment);
+  selectedApplicationId.value = null;
+  decisionType.value = null;
+  scheduledAt.value = null;
+  comment.value = "";
+  showStatusOptions.value = false;
+}
+async function assessApplication(applicationId, status, scheduleAt = null, comment = "") {
+  try {
+    const payload = { status, scheduled_at: scheduleAt, comment };
+    await axios.post(`/company/job-applications/${applicationId}/assess`, payload);
+    
+    // Update the specific application in the current list
+    const applicationIndex = jobApplicants.value.findIndex(app => app.id === applicationId);
+    if (applicationIndex !== -1) {
+      jobApplicants.value[applicationIndex] = {
+        ...jobApplicants.value[applicationIndex],
+        status,
+        scheduled_at: scheduleAt,
+        comment
+      };
+    }
+
+    createToast("Application status updated successfully", {
+      type: "success",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
+    });
+
+    if (status === "accepted") {
+      try {
+        await axios.post(`/company/offer-job/${applicationId}`);
+        createToast("Job offer sent successfully", {
+          type: "success",
+          position: "top-right",
+          timeout: 3000,
+          showIcon: true,
+          toastBackgroundColor: "#045d56",
+        });
+      } catch (offerError) {
+        console.error("Error sending job offer:", offerError);
+        createToast(offerError.response?.data?.error || "Failed to send job offer", {
+          type: "danger",
+          position: "top-right",
+          timeout: 3000,
+          showIcon: true,
+        });
+      }
+    }
+
+    const jobResponse = await axios.get(`/company/job/${selectedJob.value.id}`);
+    const jobIndex = postedJobs.value.findIndex(job => job.id === selectedJob.value.id);
+    if (jobIndex !== -1) {
+      postedJobs.value[jobIndex] = jobResponse.data.job;
+    }
+
+  } catch (error) {
+    console.error("Error updating application status:", error);
+    createToast(error.response?.data?.error || "Failed to update application", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+  }
+}
+
+// --- MESSAGING ---
+const selectedApplicantId = ref(null);
+const showMessagePopup = ref(false);
+function sendMessage(applicationId) {
+  selectedApplicantId.value = applicationId;
+  showMessagePopup.value = true;
+}
+const messageContent = ref("");
+async function sendActualMessage() {
+  try {
+    const response = await axios.post("/message/send", {
+      receiver_id: selectedApplicantId.value,
+      message: messageContent.value,
+    });
+    showMessagePopup.value = false;
+    messageContent.value = "";
+    createToast("Message sent successfully!", {
+      type: "success", position: "top-right", timeout: 3000, showIcon: true, toastBackgroundColor: "#045d56",
+    });
+  } catch (error) {
+    console.error("Error sending message:", error);
+    createToast("Failed to send message. Please try again.", {
+      type: "danger", position: "top-right", timeout: 3000, showIcon: true,
+    });
+  }
+}
+
+// --- STATUS & DESCRIPTION HELPERS ---
+function formatType(type) {
+  switch (type) {
+    case "job_application": return "Job Application";
+    case "inquiry": return "Inquiry";
+    case "application_update": return "Application Update";
+    case "message": return "Message";
+    case "other": return "Other";
+    case "for_interview": return "For Interview";
+    case "accepted": return "Accepted";
+    case "applied": return "Applied";
+    case "screening": return "Screening";
+    default: return type;
+  }
+}
+function statusDescription(status) {
+  switch (status) {
+    case "applied": return "Awaiting Review";
+    case "screening": return "Under Screening";
+    case "for_interview": return "Interview Scheduled";
+    case "accepted": return "Job Offered";
+    case "rejected": return "Application Rejected";
+    case "hired": return "Hired";
+    default: return status;
+  }
+}
+
+// --- INIT ---
+onMounted(() => {
+  fetchPostedJobs();
+  fetchNotifications();
+});
+async function fetchPostedJobs() {
+  try {
+    const response = await axios.get("/company/jobdisplay");
+    postedJobs.value = response.data.jobs.sort((a, b) => new Date(b.date_posted) - new Date(a.date_posted));
+    if (postedJobs.value.length > 0) {
+      selectedJob.value = postedJobs.value[0];
+      await fetchApplicants(selectedJob.value.id);
+    } else {
+      jobApplicants.value = [];
+    }
+  } catch (error) {
+    console.error("Error fetching posted jobs:", error);
+  }
+}
 </script>
 
 <style scoped>
@@ -1241,25 +1250,20 @@ body,
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
 }
 
 .popup {
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  width: 350px;
-  max-height: 400px;
-  overflow-y: auto;
-  text-align: left;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  animation: popIn 0.3s ease;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  min-width: 300px;
 }
 
 .popup h3 {
@@ -1361,10 +1365,10 @@ body,
 }
 
 .popup-actions {
+  margin-top: 1rem;
   display: flex;
+  gap: 1rem;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
 }
 
 .submit-btn {
@@ -1630,6 +1634,34 @@ body,
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-badge.applied {
+  background-color: #e0f7fa;
+  color: #00695c;
+}
+
+.status-badge.screening {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.status-badge.accepted {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.rejected {
+  background-color: #ffebee;
+  color: #c62828;
 }
 
 .expand-icon {
@@ -2272,5 +2304,35 @@ textarea {
     height: 40px;
     margin-left: 7.5vh;
   }
+}
+.accept-btn {
+  background-color: #1976d2;
+  color: white;
+  margin-right: 8px;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.accept-btn:hover {
+  background-color: #1565c0;
+}
+.reject-btn {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.reject-btn:hover {
+  background-color: #b71c1c;
+}
+
+.waiting-response {
+  margin-top: 12px;
+  color: #1976d2;
+  font-style: italic;
+  font-weight: 500;
 }
 </style>
