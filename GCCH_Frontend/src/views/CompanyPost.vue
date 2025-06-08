@@ -329,6 +329,10 @@
                     ><strong>Schedule: </strong
                     >{{ application.scheduled_at }}</span
                   >
+                  <span
+                    ><strong>Venue: </strong
+                    >{{ application.venue }}</span
+                  >
 
                   <div class="application-documents">
                     <a
@@ -507,6 +511,9 @@
         <li v-if="pendingUpdate.scheduled_at">
           <strong>Schedule:</strong> {{ pendingUpdate.scheduled_at }}
         </li>
+        <li v-if="pendingUpdate.venue">
+          <strong>Venue:</strong> {{ pendingUpdate.venue }}
+        </li>
         <li v-if="pendingUpdate.comment">
           <strong>Comment:</strong> {{ pendingUpdate.comment }}
         </li>
@@ -538,6 +545,8 @@
         class="schedule-input"
         style="margin: 10px 0 20px 0; width: 100%"
       />
+      <label for="venue">Venue:</label>
+      <input v-model="interviewVenue" id="venue" type="text" placeholder="Enter venue" />
       <div class="popup-actions">
         <button class="cancel-btn" @click="closeScheduleInterviewPopup">
           Cancel
@@ -1052,11 +1061,13 @@ async function markAsInterviewed(applicationId) {
 const scheduledAt = ref(null);
 const showScheduleInterviewPopup = ref(false);
 const scheduleInterviewDate = ref("");
+const interviewVenue = ref("");
 let scheduleInterviewAppId = null;
 
 function closeScheduleInterviewPopup() {
   showScheduleInterviewPopup.value = false;
   scheduleInterviewDate.value = "";
+  interviewVenue.value = "";
   scheduleInterviewAppId = null;
 }
 
@@ -1068,8 +1079,18 @@ function scheduleInterview(applicationId) {
 
 async function submitScheduleInterview() {
   const date = scheduleInterviewDate.value;
+  const venue = interviewVenue.value;
   if (!date) {
     createToast("Please select a date and time.", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+    return;
+  }
+  if (!venue) {
+    createToast("Please enter the interview venue.", {
       type: "danger",
       position: "top-right",
       timeout: 3000,
@@ -1101,15 +1122,17 @@ async function submitScheduleInterview() {
   decisionType.value = "for_interview";
   const formattedDate = date.replace("T", " ") + ":00";
   scheduledAt.value = formattedDate;
-  showStatusOptions.value = true;
+
+  pendingUpdate.value = {
+    applicationId: scheduleInterviewAppId,
+    status: "for_interview",
+    scheduled_at: formattedDate,
+    venue: venue,
+    comment: comment.value
+  };
+
+  showConfirmUpdatePopup.value = true;
   closeScheduleInterviewPopup();
-  createToast("Interview scheduled successfully", {
-    type: "success",
-    position: "top-right",
-    timeout: 3000,
-    showIcon: true,
-    toastBackgroundColor: "#045d56",
-  });
 }
 
 // --- STATUS UPDATE & CONFIRMATION POPUP ---
@@ -1119,13 +1142,14 @@ const showConfirmUpdatePopup = ref(false);
 const pendingUpdate = ref({
   status: "",
   scheduled_at: "",
+  venue:"",
   comment: "",
   applicationId: null,
 });
 const selectedApplicationId = ref(null);
 const decisionType = ref("");
-function confirmUpdate(applicationId, status, scheduled_at, comment) {
-  pendingUpdate.value = { applicationId, status, scheduled_at, comment };
+function confirmUpdate(applicationId, status, scheduled_at, comment, venue) {
+  pendingUpdate.value = { applicationId, status, scheduled_at, comment,venue };
   showConfirmUpdatePopup.value = true;
 }
 async function submitConfirmedUpdate() {
@@ -1134,15 +1158,18 @@ async function submitConfirmedUpdate() {
     pendingUpdate.value.applicationId,
     pendingUpdate.value.status,
     pendingUpdate.value.scheduled_at,
-    pendingUpdate.value.comment
+    pendingUpdate.value.comment,
+    pendingUpdate.value.venue  // Add this line
   );
 
+  // Reset all states after submission
   showStatusOptions.value = false;
   comment.value = "";
   pendingUpdate.value = {
     status: "",
     scheduled_at: "",
     comment: "",
+    venue: "",     // Add this line
     applicationId: null,
   };
 }
@@ -1155,7 +1182,8 @@ async function submitApplicationDecision(
   applicationId,
   status,
   scheduled_at,
-  comment
+  comment,
+  venue
 ) {
   if (!applicationId || !status) {
     createToast("Please choose an applicant and a decision", {
@@ -1167,36 +1195,30 @@ async function submitApplicationDecision(
     });
     return;
   }
-  await assessApplication(applicationId, status, scheduled_at, comment);
-  selectedApplicationId.value = null;
-  decisionType.value = null;
-  scheduledAt.value = null;
-  comment.value = "";
+  await assessApplication(applicationId, status, scheduled_at, comment,venue);
   showStatusOptions.value = false;
+  comment.value = "";
+  pendingUpdate.value = {
+    status: "",
+    scheduled_at: "",
+    comment: "",
+    applicationId: null,
+  };
 }
-async function assessApplication(
-  applicationId,
-  status,
-  scheduleAt = null,
-  comment = ""
-) {
+async function assessApplication(applicationId, status, scheduleAt = null, comment = "", venue = "") {
   try {
-    const payload = { status, scheduled_at: scheduleAt, comment };
-    await axios.post(
-      `/company/job-applications/${applicationId}/assess`,
-      payload
-    );
+    const payload = { status, scheduled_at: scheduleAt, comment, venue };
+    await axios.post(`/company/job-applications/${applicationId}/assess`, payload);
 
     // Update the specific application in the current list
-    const applicationIndex = jobApplicants.value.findIndex(
-      (app) => app.id === applicationId
-    );
+    const applicationIndex = jobApplicants.value.findIndex(app => app.id === applicationId);
     if (applicationIndex !== -1) {
       jobApplicants.value[applicationIndex] = {
         ...jobApplicants.value[applicationIndex],
         status,
         scheduled_at: scheduleAt,
         comment,
+        venue,
       };
     }
 
@@ -1208,6 +1230,7 @@ async function assessApplication(
       toastBackgroundColor: "#045d56",
     });
 
+    // Only do the job offer logic if needed, remove fetchApplicants
     if (status === "accepted") {
       try {
         await axios.post(`/company/offer-job/${applicationId}`);
@@ -1220,25 +1243,22 @@ async function assessApplication(
         });
       } catch (offerError) {
         console.error("Error sending job offer:", offerError);
-        createToast(
-          offerError.response?.data?.error || "Failed to send job offer",
-          {
-            type: "danger",
-            position: "top-right",
-            timeout: 3000,
-            showIcon: true,
-          }
-        );
+        createToast(offerError.response?.data?.error || "Failed to send job offer", {
+          type: "danger",
+          position: "top-right",
+          timeout: 3000,
+          showIcon: true,
+        });
       }
     }
 
+    // Update job counts without fetching all applicants again
     const jobResponse = await axios.get(`/company/job/${selectedJob.value.id}`);
-    const jobIndex = postedJobs.value.findIndex(
-      (job) => job.id === selectedJob.value.id
-    );
+    const jobIndex = postedJobs.value.findIndex(job => job.id === selectedJob.value.id);
     if (jobIndex !== -1) {
       postedJobs.value[jobIndex] = jobResponse.data.job;
     }
+
   } catch (error) {
     console.error("Error updating application status:", error);
     createToast(error.response?.data?.error || "Failed to update application", {

@@ -115,6 +115,10 @@
                     {{ application.schedule || "To be announced" }}
                   </p>
                   <p>
+                    <strong>Venue:</strong>
+                    {{ application.venue || "To be announced" }}
+                  </p>
+                  <p>
                     <strong>Comments:</strong>
                     {{ application.comment || "No comments yet." }}
                   </p>
