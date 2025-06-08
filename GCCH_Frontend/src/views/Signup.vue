@@ -126,6 +126,7 @@
                 accept="image/*"
                 required
               />
+              <small class="file-note">Note: Photo size limit is 2MB</small>
               <div v-if="previewUrl" class="photo-preview">
                 <button
                   type="button"
@@ -204,6 +205,7 @@
                 accept="image/*"
                 required
               />
+              <small class="file-note">Note: Photo size limit is 2MB</small>
               <div v-if="previewUrl" class="photo-preview">
                 <button
                   type="button"
@@ -448,7 +450,20 @@ const submitCompanyForm = async () => {
 
 const handlePhotoUpload = (event) => {
   const file = event.target.files[0];
+  const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+
   if (file) {
+    if (file.size > maxSize) {
+      createToast("Photo size must be less than 2MB", {
+        type: "error",
+        position: "top-right",
+        timeout: 3000,
+        showIcon: true,
+        toastBackgroundColor: "#FF0000"
+      });
+      event.target.value = ''; 
+      return;
+    }
     form.value.photo = file;
     previewUrl.value = URL.createObjectURL(file);
   }
@@ -579,6 +594,14 @@ const submitPhotoForm = async () => {
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 1rem;
+}
+
+.file-note {
+  display: block;
+  color: #f50b0b;
+  font-size: 12px;
+  margin-top: 4px;
+  font-style: italic;
 }
 
 .bday {
