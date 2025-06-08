@@ -168,7 +168,7 @@
               <input
                 type="number"
                 v-model="jobData.monthly_salary"
-                placeholder="Enter Monthly Salary (in Php)"
+                placeholder="Enter Estimated Monthly Salary (in Php)"
                 class="salary-input"
               />
               <div class="dropdown-checkbox">
