@@ -58,28 +58,28 @@
             />
             <select v-model="form.course" required>
               <option value="" disabled selected>Select Program</option>
-              <option value="BSIT">BSIT</option>
-              <option value="BSCS">BSCS</option>
-              <option value="BSEMC">BSEMC</option>
-              <option value="BSN">BSN</option>
-              <option value="BSM">BSM</option>
-              <option value="BSA">BSA</option>
-              <option value="BSBA-FM">BSBA-FM</option>
-              <option value="BSBA-HRM">BSBA-HRM</option>
-              <option value="BSBA-MM">BSBA-MM</option>
-              <option value="BSCA">BSCA</option>
-              <option value="BSHM">BSHM</option>
-              <option value="BSTM">BSTM</option>
-              <option value="BAComm">BAComm</option>
-              <option value="BECEd">BECEd</option>
-              <option value="BCAEd">BCAEd</option>
-              <option value="BPEd">BPEd</option>
-              <option value="BEED">BEED</option>
-              <option value="BSEd-Eng">BSEd-Eng</option>
-              <option value="BSEd-Math">BSEd-Math</option>
-              <option value="BSEd-Fil">BSEd-Fil</option>
-              <option value="BSEd-SS">BSEd-SS</option>
-              <option value="BSEd-Sci">BSEd-Sci</option>
+              <option value="BSIT">Bachelor of Science in Information Technology</option>
+              <option value="BSCS">Bachelor of Science in Computer Science</option>
+              <option value="BSEMC">Bachelor of Science in Entertainment and Multimedia Computing</option>
+              <option value="BSN">Bachelor of Science in Nursing</option>
+              <option value="BSM">Bachelor of Science in Midwifery</option>
+              <option value="BSA">Bachelor of Science in Accountancy</option>
+              <option value="BSBA-FM">Bachelor of Science in Business Administration major in Financial Management</option>
+              <option value="BSBA-HRM">Bachelor of Science in Business Administration major in Human Resource Management</option>
+              <option value="BSBA-MM">Bachelor of Science in Business Administration major in Marketing Management</option>
+              <option value="BSCA">Bachelor of Science in Customs Administration</option>
+              <option value="BSHM">Bachelor of Science in Hospitality Management</option>
+              <option value="BSTM">Bachelor of Science in Tourism Management</option>
+              <option value="BAComm">Bachelor of Arts in Communication</option>
+              <option value="BECEd">Bachelor of Early Childhood Education</option>
+              <option value="BCAEd">Bachelor of Culture and Arts Education</option>
+              <option value="BPEd">Bachelor of Physical Education</option>
+              <option value="BEED">Bachelor of Elementary Education</option>
+              <option value="BSEd-Eng">Bachelor of Secondary Education major in English</option>
+              <option value="BSEd-Math">Bachelor of Secondary Education major in Mathematics</option>
+              <option value="BSEd-Fil">Bachelor of Secondary Education major in Filipino</option>
+              <option value="BSEd-SS">Bachelor of Secondary Education major in Social Studies</option>
+              <option value="BSEd-Sci">Bachelor of Secondary Education major in Science</option>
               <option value="Other">Other</option>
             </select>
 
@@ -296,6 +296,7 @@ const validateAge = () => {
       position: "top-right",
       timeout: 3000,
       showIcon: true,
+      toastBackgroundColor: "#FF0000",
     });
     form.value.birthday = "";
   } else if (birthDate < minDateObj) {
@@ -304,6 +305,7 @@ const validateAge = () => {
       position: "top-right",
       timeout: 3000,
       showIcon: true,
+      toastBackgroundColor: "#FF0000",
     });
     form.value.birthday = "";
   }

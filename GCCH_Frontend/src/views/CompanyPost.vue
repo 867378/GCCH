@@ -709,95 +709,159 @@ const showCourseDropdown = ref(false);
 const showExpertiseDropdown = ref(false);
 
 const courseOptions = [
-  "BSIT",
-  "BSCS",
-  "BSEMC",
-  "BSN",
-  "BSM",
-  "BSA",
-  "BSBA-FM",
-  "BSBA-HRM",
-  "BSBA-MM",
-  "BSCA",
-  "BSHM",
-  "BSTM",
-  "BAComm",
-  "BECEd",
-  "BCAEd",
-  "BPEd",
-  "BEED",
-  "BSEd-Eng",
-  "BSEd-Math",
-  "BSEd-Fil",
-  "BSEd-SS",
-  "BSEd-Sci",
+  "Bachelor of Science in Information Technology",
+  "Bachelor of Science in Computer Science",
+  "Bachelor of Science in Entertainment and Multimedia Computing",
+  "Bachelor of Science in Nursing",
+  "Bachelor of Science in Midwifery",
+  "Bachelor of Science in Accountancy",
+  "Bachelor of Science in Business Administration major in Financial Management",
+  "Bachelor of Science in Business Administration major in Human Resource Management",
+  "Bachelor of Science in Business Administration major in Marketing Management",
+  "Bachelor of Science in Customs Administration",
+  "Bachelor of Science in Hospitality Management",
+  "Bachelor of Science in Tourism Management",
+  "Bachelor of Arts in Communication",
+  "Bachelor of Early Childhood Education",
+  "Bachelor of Culture and Arts Education",
+  "Bachelor of Physical Education",
+  "Bachelor of Elementary Education",
+  "Bachelor of Secondary Education major in English",
+  "Bachelor of Secondary Education major in Mathematics",
+  "Bachelor of Secondary Education major in Filipino",
+  "Bachelor of Secondary Education major in Social Studies",
+  "Bachelor of Secondary Education major in Science",
   "Other",
 ];
 
 const expertiseMap = {
-  BSIT: [
+  "Bachelor of Science in Information Technology": [
     "Web Development",
     "Networking",
     "Cybersecurity",
     "System Administration",
     "Other",
   ],
-  BSCS: ["Data Science", "AI", "Software Engineering", "Algorithms", "Other"],
-  BSEMC: ["Multimedia Arts", "Animation", "Game Development", "Other"],
-  BSN: [
+  "Bachelor of Science in Computer Science": [
+    "Data Science",
+    "AI",
+    "Software Engineering",
+    "Algorithms",
+    "Other",
+  ],
+  "Bachelor of Science in Entertainment and Multimedia Computing": [
+    "Multimedia Arts",
+    "Animation",
+    "Game Development",
+    "Other",
+  ],
+  "Bachelor of Science in Nursing": [
     "Clinical Nursing",
     "Community Health",
     "Medical-Surgical Nursing",
     "Other",
   ],
-  BSM: [
+  "Bachelor of Science in Midwifery": [
     "Strategic Management",
     "Operations Management",
     "Entrepreneurship",
     "Other",
   ],
-  BSA: ["Financial Accounting", "Auditing", "Taxation", "Other"],
-  "BSBA-FM": ["Corporate Finance", "Investment Analysis", "Banking", "Other"],
-  "BSBA-HRM": [
-    "Human Resources",
-    "Talent Management",
-    "Organizational Development",
+  "Bachelor of Science in Accountancy": [
+    "Financial Accounting",
+    "Auditing",
+    "Taxation",
     "Other",
   ],
-  "BSBA-MM": ["Marketing Strategy", "Advertising", "Sales Management", "Other"],
-  BSCA: ["Customs Brokerage", "Trade Compliance", "Logistics", "Other"],
-  BSHM: [
+  "Bachelor of Science in Business Administration major in Financial Management":
+    ["Corporate Finance", "Investment Analysis", "Banking", "Other"],
+  "Bachelor of Science in Business Administration major in Human Resource Management":
+    [
+      "Human Resources",
+      "Talent Management",
+      "Organizational Development",
+      "Other",
+    ],
+  "Bachelor of Science in Business Administration major in Marketing Management":
+    ["Marketing Strategy", "Advertising", "Sales Management", "Other"],
+  "Bachelor of Science in Customs Administration": [
+    "Customs Brokerage",
+    "Trade Compliance",
+    "Logistics",
+    "Other",
+  ],
+  "Bachelor of Science in Hospitality Management": [
     "Hotel Management",
     "Food & Beverage Service",
     "Customer Relations",
     "Other",
   ],
-  BSTM: ["Tourism Planning", "Event Management", "Travel Services", "Other"],
-  BAComm: ["Journalism", "Public Relations", "Media Production", "Other"],
-  BECEd: ["Early Childhood Development", "Preschool Education", "Other"],
-  BCAEd: ["Arts Education", "Cultural Studies", "Creative Expression", "Other"],
-  BPEd: ["Sports Science", "Physical Fitness", "Coaching", "Other"],
-  BEED: [
+  "Bachelor of Science in Tourism Management": [
+    "Tourism Planning",
+    "Event Management",
+    "Travel Services",
+    "Other",
+  ],
+  "Bachelor of Arts in Communication": [
+    "Journalism",
+    "Public Relations",
+    "Media Production",
+    "Other",
+  ],
+  "Bachelor of Early Childhood Education": [
+    "Early Childhood Development",
+    "Preschool Education",
+    "Other",
+  ],
+  "Bachelor of Culture and Arts Education": [
+    "Arts Education",
+    "Cultural Studies",
+    "Creative Expression",
+    "Other",
+  ],
+  "Bachelor of Physical Education": [
+    "Sports Science",
+    "Physical Fitness",
+    "Coaching",
+    "Other",
+  ],
+  "Bachelor of Elementary Education": [
     "Elementary Teaching",
     "Child Psychology",
     "Classroom Management",
     "Other",
   ],
-  "BSEd-Eng": ["English Education", "Literature", "Language Teaching", "Other"],
-  "BSEd-Math": ["Mathematics Education", "Algebra", "Calculus", "Other"],
-  "BSEd-Fil": [
+  "Bachelor of Secondary Education major in English": [
+    "English Education",
+    "Literature",
+    "Language Teaching",
+    "Other",
+  ],
+  "Bachelor of Secondary Education major in Mathematics": [
+    "Mathematics Education",
+    "Algebra",
+    "Calculus",
+    "Other",
+  ],
+  "Bachelor of Secondary Education major in Filipino": [
     "Filipino Language",
     "Philippine Literature",
     "Language Teaching",
     "Other",
   ],
-  "BSEd-SS": [
+  "Bachelor of Secondary Education major in Social Studies": [
     "Social Studies",
     "Philippine History",
     "Civics & Culture",
     "Other",
   ],
-  "BSEd-Sci": ["General Science", "Biology", "Chemistry", "Physics", "Other"],
+  "Bachelor of Secondary Education major in Science": [
+    "General Science",
+    "Biology",
+    "Chemistry",
+    "Physics",
+    "Other",
+  ],
   Other: ["Other"],
 };
 
@@ -1715,8 +1779,8 @@ body,
 }
 
 .post-popup {
-  width: 80%;
-  max-width: 105vh;
+  width: 100%;
+  max-width: 125vh;
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -1855,8 +1919,9 @@ body,
   left: 0;
   background: white;
   border: 1px solid #ccc;
-  width: 80%;
-  max-height: 200px;
+  width: 90%;
+  margin-left: 2vh;
+  max-height: 400px;
   overflow-y: auto;
   z-index: 10;
 }

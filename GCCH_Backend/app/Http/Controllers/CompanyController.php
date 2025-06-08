@@ -246,6 +246,7 @@ class CompanyController extends Controller
             $validated = $request->validate([
                 'status' => 'required|in:applied,for_interview,screening,interviewed,rejected,accepted,hired',
                 'scheduled_at' => 'nullable|date_format:Y-m-d H:i:s',
+                'venue' => 'nullable|string|max:255',
                 'comment' => 'nullable|string',
             ]);
 

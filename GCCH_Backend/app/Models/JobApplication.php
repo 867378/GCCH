@@ -16,6 +16,7 @@ class JobApplication extends Model
         'scheduled_at', // for interview or assessment
         'offer_status',
         'finalized',
+        'venue', // e.g., remote, on-site, hybrid
         'comment', // for feedback or notes
     ];
 
