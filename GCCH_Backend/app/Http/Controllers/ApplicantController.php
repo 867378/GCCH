@@ -282,6 +282,7 @@ class ApplicantController extends Controller
                     'status' => $application->status,
                     'comment' => $application->comment,
                     'schedule' => $application->scheduled_at,
+                    'venue' => $application->venue,
                     'updated_at' => $application->created_at,
                 ];
             });

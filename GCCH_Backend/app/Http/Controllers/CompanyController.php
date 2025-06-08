@@ -219,6 +219,8 @@ class CompanyController extends Controller
                     'status' => $application->status,
                     'scheduled_at' => $application->scheduled_at,
                     'date_applied' => $application->date_applied,
+                    'venue' => $application->venue,
+                    'comment' => $application->comment,
                 ];
             });
 
@@ -269,9 +271,15 @@ class CompanyController extends Controller
                 if (empty($validated['scheduled_at'])) {
                     return response()->json(['error' => 'Scheduled date is required for interview or assessment'], 422);
                 }
+                if (empty($validated['venue'])) {
+                    return response()->json(['error' => 'Venue is required for interview or assessment'], 422);
+                }
+                $application->venue = $validated['venue'];
                 $application->scheduled_at = $validated['scheduled_at'];
             } else {
+                $application->venue = null;
                 $application->scheduled_at = null;
+            
             }
 
             if ($validated['status'] === 'hired') {

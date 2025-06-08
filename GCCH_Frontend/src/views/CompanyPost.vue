@@ -329,10 +329,7 @@
                     ><strong>Schedule: </strong
                     >{{ application.scheduled_at }}</span
                   >
-                  <span
-                    ><strong>Venue: </strong
-                    >{{ application.venue }}</span
-                  >
+                  <span><strong>Venue: </strong>{{ application.venue }}</span>
 
                   <div class="application-documents">
                     <a
@@ -391,7 +388,7 @@
                           "
                           class="reject-btn"
                         >
-                          ❌ Reject
+                          ❌ Decline
                         </button>
                       </template>
                       <p
@@ -530,31 +527,36 @@
   </div>
 
   <!-- Schedule Interview Popup -->
-  <div
-    v-if="showScheduleInterviewPopup"
-    class="popup-overlay"
-    @click.self="closeScheduleInterviewPopup"
-  >
-    <div class="popup">
-      <h3>📅 Schedule Interview</h3>
-      <label for="interview-date">Interview Date & Time</label>
-      <input
-        id="interview-date"
-        v-model="scheduleInterviewDate"
-        type="datetime-local"
-        class="schedule-input"
-        style="margin: 10px 0 20px 0; width: 100%"
-      />
-      <label for="venue">Venue:</label>
-      <input v-model="interviewVenue" id="venue" type="text" placeholder="Enter venue" />
-      <div class="popup-actions">
-        <button class="cancel-btn" @click="closeScheduleInterviewPopup">
-          Cancel
-        </button>
-        <button class="submit-btn" @click="submitScheduleInterview">
-          Set Schedule
-        </button>
-      </div>
+<div v-if="showScheduleInterviewPopup" class="popup-overlay" @click.self="closeScheduleInterviewPopup">
+  <div class="popup">
+    <h3>📅 Schedule Interview</h3>
+    <label for="interview-date">Interview Date & Time</label>
+    <input
+      id="interview-date"
+      v-model="scheduleInterviewDate"
+      type="datetime-local"
+      class="schedule-input"
+    />
+    <label for="venue">Venue:</label>
+    <input
+      v-model="interviewVenue"
+      id="venue"
+      type="text"
+      placeholder="Enter venue"
+    />
+    <!-- Add this textarea for comments -->
+    <label for="comment">Additional Notes:</label>
+    <textarea
+      v-model="comment"
+      id="comment"
+      placeholder="Add any additional instructions or notes..."
+      rows="3"
+      class="form-input"
+    ></textarea>
+    <div class="popup-actions">
+      <button class="cancel-btn" @click="closeScheduleInterviewPopup">Cancel</button>
+      <button class="submit-btn" @click="submitScheduleInterview">Set Schedule</button>
+    </div>
     </div>
   </div>
 </template>
@@ -1128,7 +1130,7 @@ async function submitScheduleInterview() {
     status: "for_interview",
     scheduled_at: formattedDate,
     venue: venue,
-    comment: comment.value
+    comment: comment.value,
   };
 
   showConfirmUpdatePopup.value = true;
@@ -1142,76 +1144,78 @@ const showConfirmUpdatePopup = ref(false);
 const pendingUpdate = ref({
   status: "",
   scheduled_at: "",
-  venue:"",
+  venue: "",
   comment: "",
   applicationId: null,
 });
 const selectedApplicationId = ref(null);
 const decisionType = ref("");
 function confirmUpdate(applicationId, status, scheduled_at, comment, venue) {
-  pendingUpdate.value = { applicationId, status, scheduled_at, comment,venue };
+  pendingUpdate.value = { applicationId, status, scheduled_at, comment, venue };
   showConfirmUpdatePopup.value = true;
 }
 async function submitConfirmedUpdate() {
   showConfirmUpdatePopup.value = false;
-  await submitApplicationDecision(
-    pendingUpdate.value.applicationId,
-    pendingUpdate.value.status,
-    pendingUpdate.value.scheduled_at,
-    pendingUpdate.value.comment,
-    pendingUpdate.value.venue  // Add this line
-  );
+  try {
+    const payload = {
+      status: pendingUpdate.value.status,
+      scheduled_at: pendingUpdate.value.scheduled_at,
+      comment: pendingUpdate.value.comment,
+      venue: pendingUpdate.value.venue,
+    };
 
-  // Reset all states after submission
-  showStatusOptions.value = false;
-  comment.value = "";
-  pendingUpdate.value = {
-    status: "",
-    scheduled_at: "",
-    comment: "",
-    venue: "",     // Add this line
-    applicationId: null,
-  };
+    await axios.post(
+      `/company/job-applications/${pendingUpdate.value.applicationId}/assess`,
+      payload
+    );
+
+    createToast("Application status updated successfully", {
+      type: "success",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#045d56",
+    });
+    comment.value = ""; // Clear the comment
+        showStatusOptions.value = false; // Hide status options
+
+
+    // Update local state
+    await fetchApplicants(selectedJob.value.id);
+  } catch (error) {
+    console.error("Error updating application:", error);
+    createToast("Failed to update application", {
+      type: "error",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+    });
+  }
 }
 function openConfirmModal(applicationId, status) {
   selectedApplicationId.value = applicationId;
   decisionType.value = status;
   showStatusOptions.value = true;
 }
-async function submitApplicationDecision(
+
+async function assessApplication(
   applicationId,
   status,
-  scheduled_at,
-  comment,
-  venue
+  scheduleAt = null,
+  comment = "",
+  venue = ""
 ) {
-  if (!applicationId || !status) {
-    createToast("Please choose an applicant and a decision", {
-      type: "warning",
-      position: "top-right",
-      timeout: 3000,
-      showIcon: true,
-      toastBackgroundColor: "#045d56",
-    });
-    return;
-  }
-  await assessApplication(applicationId, status, scheduled_at, comment,venue);
-  showStatusOptions.value = false;
-  comment.value = "";
-  pendingUpdate.value = {
-    status: "",
-    scheduled_at: "",
-    comment: "",
-    applicationId: null,
-  };
-}
-async function assessApplication(applicationId, status, scheduleAt = null, comment = "", venue = "") {
   try {
     const payload = { status, scheduled_at: scheduleAt, comment, venue };
-    await axios.post(`/company/job-applications/${applicationId}/assess`, payload);
+    await axios.post(
+      `/company/job-applications/${applicationId}/assess`,
+      payload
+    );
 
     // Update the specific application in the current list
-    const applicationIndex = jobApplicants.value.findIndex(app => app.id === applicationId);
+    const applicationIndex = jobApplicants.value.findIndex(
+      (app) => app.id === applicationId
+    );
     if (applicationIndex !== -1) {
       jobApplicants.value[applicationIndex] = {
         ...jobApplicants.value[applicationIndex],
@@ -1243,22 +1247,26 @@ async function assessApplication(applicationId, status, scheduleAt = null, comme
         });
       } catch (offerError) {
         console.error("Error sending job offer:", offerError);
-        createToast(offerError.response?.data?.error || "Failed to send job offer", {
-          type: "danger",
-          position: "top-right",
-          timeout: 3000,
-          showIcon: true,
-        });
+        createToast(
+          offerError.response?.data?.error || "Failed to send job offer",
+          {
+            type: "danger",
+            position: "top-right",
+            timeout: 3000,
+            showIcon: true,
+          }
+        );
       }
     }
 
     // Update job counts without fetching all applicants again
-    const jobResponse = await axios.get(`/company/job/${selectedJob.value.id}`);
-    const jobIndex = postedJobs.value.findIndex(job => job.id === selectedJob.value.id);
-    if (jobIndex !== -1) {
-      postedJobs.value[jobIndex] = jobResponse.data.job;
-    }
-
+    // const jobResponse = await axios.get(`/company/job/${selectedJob.value.id}`);
+    // const jobIndex = postedJobs.value.findIndex(
+    //   (job) => job.id === selectedJob.value.id
+    // );
+    // if (jobIndex !== -1) {
+    //   postedJobs.value[jobIndex] = jobResponse.data.job;
+    // }
   } catch (error) {
     console.error("Error updating application status:", error);
     createToast(error.response?.data?.error || "Failed to update application", {
@@ -1862,13 +1870,48 @@ body,
 }
 
 .schedule-input {
-  border: 1px solid #ccc;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e6ed;
   border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 16px;
-  background: #f9f9f9;
+  font-size: 14px;
+  color: #333;
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
 }
 
+.schedule-input:focus {
+  outline: none;
+  border-color: #045d56;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(4, 93, 86, 0.1);
+}
+
+#venue {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0 20px 0;
+  border: 1px solid #e0e6ed;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+#venue:focus {
+  outline: none;
+  border-color: #045d56;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(4, 93, 86, 0.1);
+}
+
+#venue::placeholder {
+  color: #999;
+  font-size: 14px;
+}
 .form-row {
   display: grid;
   grid-template-columns: repeat(2, 3fr);
@@ -1972,7 +2015,7 @@ body,
   border-radius: 3vh;
   border-left: #045d56 4px solid;
   width: 95%;
-  max-height: 80vh;
+  max-height: 100vh;
   margin-left: 3vh;
   overflow-y: auto;
   text-transform: capitalize;
@@ -2032,7 +2075,6 @@ body,
 }
 
 .selected-job-box button {
-  margin-top: 2vh;
   margin-bottom: 2vh;
   padding: 5px 24px;
   font-size: 10px;
@@ -2282,7 +2324,7 @@ textarea {
   border-radius: 8px;
   font-size: 14px;
   width: 100%;
-  height: 20vh;
+  height:11vh;    
   resize: none;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
