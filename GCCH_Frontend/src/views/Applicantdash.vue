@@ -462,6 +462,9 @@
             class="file-input"
             required
           />
+          <small class="file-note"
+            >Note: File size limit is 2MB (PDF only)</small
+          >
         </div>
         <div class="form-group">
           <label>Cover Letter</label>
@@ -472,6 +475,9 @@
             class="file-input"
             required
           />
+          <small class="file-note"
+            >Note: File size limit is 2MB (PDF only)</small
+          >
         </div>
         <div class="popup-buttons">
           <button @click="previousStep" class="back-btn">Back</button>
@@ -481,7 +487,7 @@
 
       <!-- Step 3: Work Experience -->
       <div v-if="applicationStep === 3" class="work-experience-section">
-        <h3>💼 Lastest Work Experience</h3>
+        <h3>💼 Lastest Work Experience (Optional)</h3>
         <div class="form-group">
           <label>Company Name</label>
           <input
@@ -947,7 +953,9 @@ function nextStep() {
 }
 
 function previousStep() {
-  applicationStep.value = 1;
+  if (applicationStep.value > 1) {
+    applicationStep.value--;
+  }
 }
 
 async function submitApplication() {
@@ -1004,11 +1012,39 @@ async function submitApplication() {
 }
 
 function handleFileUploadResume(event) {
-  resumeFile.value = event.target.files[0];
+  const file = event.target.files[0];
+  const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+
+  if (file.size > maxSize) {
+    createToast("Resume file must be less than 2MB", {
+      type: "error",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#FF0000",
+    });
+    event.target.value = ""; // Clear the input
+    return;
+  }
+  resumeFile.value = file;
 }
 
 function handleFileUploadCoverLetter(event) {
-  coverLetterFile.value = event.target.files[0];
+  const file = event.target.files[0];
+  const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+
+  if (file.size > maxSize) {
+    createToast("Cover letter file must be less than 2MB", {
+      type: "error",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true,
+      toastBackgroundColor: "#FF0000",
+    });
+    event.target.value = ""; // Clear the input
+    return;
+  }
+  coverLetterFile.value = file;
 }
 
 function closeApplyPopup() {
@@ -2046,7 +2082,13 @@ body,
   border-radius: 8px;
   margin-top: 5px;
 }
-
+.file-note {
+  display: block;
+  color: #f50b0b;
+  font-size: 12px;
+  margin-top: 4px;
+  font-style: italic;
+}
 .popup-buttons {
   display: flex;
   justify-content: space-between;
@@ -2711,16 +2753,6 @@ label {
 
   .sidebar.active {
     transform: translateX(0);
-  }
-
-  .ikon {
-    height: 15px;
-    width: 15px;
-  }
-
-  .icon img {
-    width: 20px;
-    height: 20px;
   }
 
   .logo {

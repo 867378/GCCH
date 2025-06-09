@@ -218,6 +218,8 @@ class CompanyController extends Controller
                     'status' => $application->status,
                     'scheduled_at' => $application->scheduled_at,
                     'date_applied' => $application->date_applied,
+                    'venue' => $application->venue,
+                    'comment' => $application->comment,
                 ];
             });
 
@@ -276,6 +278,7 @@ class CompanyController extends Controller
             } else {
                 $application->venue = null;
                 $application->scheduled_at = null;
+            
             }
 
             if ($validated['status'] === 'hired') {
