@@ -302,6 +302,9 @@ class CompanyController extends Controller
             }
 
             $application->status = $validated['status'];
+            if ($validated['status'] === 'accepted') {
+                $application->offer_status = 'offered';
+            }
 
             if (isset($validated['comment'])) {
                 $application->comment = $validated['comment'];
