@@ -160,7 +160,7 @@
                       :checked="selectedCourses.includes(course)"
                       @change="handleCheckboxChange($event, course)"
                     />
-                    {{ course }}
+                    {{ courseAcronymMap[course] || course }}
                   </label>
                 </div>
               </div>
@@ -730,30 +730,56 @@ const selectedExpertise = ref([]);
 const showCourseDropdown = ref(false);
 const showExpertiseDropdown = ref(false);
 
+const courseAcronymMap = {
+  BSIT: "Bachelor of Science in Information Technology",
+  BSCS: "Bachelor of Science in Computer Science",
+  BSEMC: "Bachelor of Science in Entertainment and Multimedia Computing",
+  BSN: "Bachelor of Science in Nursing",
+  BSM: "Bachelor of Science in Midwifery",
+  BSA: "Bachelor of Science in Accountancy",
+  "BSBA-FM": "Bachelor of Science in Business Administration major in Financial Management",
+  "BSBA-MM": "Bachelor of Science in Business Administration major in Marketing Management",
+  "BSBA-MHRM": "Bachelor of Science in Business Administration major in Human Resource Management",
+  BSCA: "Bachelor of Science in Customs Administration",
+  BSHM: "Bachelor of Science in Hospitality Management",
+  BSTM: "Bachelor of Science in Tourism Management",
+  BAComm: "Bachelor of Arts in Communication",
+  BECEd: "Bachelor of Early Childhood Education",
+  BCAEd: "Bachelor of Culture and Arts Education",
+  BPEd: "Bachelor of Physical Education",
+  BEEd: "Bachelor of Elementary Education",
+  "BSEd-Eng": "Bachelor of Secondary Education major in English",
+  "BSEd-Math": "Bachelor of Secondary Education major in Mathematics",
+  "BSEd-Fil": "Bachelor of Secondary Education major in Filipino",
+  "BSEd-SS": "Bachelor of Secondary Education major in Social Studies",
+  "BSEd-Sci": "Bachelor of Secondary Education major in Science",
+  Other: "Other"
+};
+
 const courseOptions = [
-  "Bachelor of Science in Information Technology",
-  "Bachelor of Science in Computer Science",
-  "Bachelor of Science in Entertainment and Multimedia Computing",
-  "Bachelor of Science in Nursing",
-  "Bachelor of Science in Midwifery",
-  "Bachelor of Science in Accountancy",
-  "Bachelor of Science in Business Administration major in Financial Management",
-  "Bachelor of Science in Business Administration major in Human Resource Management",
-  "Bachelor of Science in Business Administration major in Marketing Management",
-  "Bachelor of Science in Customs Administration",
-  "Bachelor of Science in Hospitality Management",
-  "Bachelor of Science in Tourism Management",
-  "Bachelor of Arts in Communication",
-  "Bachelor of Early Childhood Education",
-  "Bachelor of Culture and Arts Education",
-  "Bachelor of Physical Education",
-  "Bachelor of Elementary Education",
-  "Bachelor of Secondary Education major in English",
-  "Bachelor of Secondary Education major in Mathematics",
-  "Bachelor of Secondary Education major in Filipino",
-  "Bachelor of Secondary Education major in Social Studies",
-  "Bachelor of Secondary Education major in Science",
-  "Other",
+  "BSIT",
+  "BSCS",
+  "BSEMC",
+  "BSN",
+  "BSM",
+  "BSA",
+  "BSBA-FM",
+  "BSBA-MM",
+  "BSBA-HRM",
+  "BSCA",
+  "BSHM",
+  "BSTM",
+  "BAComm",
+  "BECEd",
+  "BCAEd",
+  "BPEd",
+  "BEEd",
+  "BSEd-Eng",
+  "BSEd-Math",
+  "BSEd-Fil",
+  "BSEd-SS",
+  "BSEd-Sci",
+  "Other"
 ];
 
 const expertiseMap = {
@@ -890,7 +916,8 @@ const expertiseMap = {
 const filteredExpertise = computed(() => {
   const set = new Set();
   selectedCourses.value.forEach((course) => {
-    (expertiseMap[course] || []).forEach((exp) => set.add(exp));
+    const fullname = courseAcronymMap[course] || course;
+    (expertiseMap[fullname] || []).forEach((exp) => set.add(exp));
   });
   return Array.from(set);
 });
@@ -1175,7 +1202,7 @@ async function submitConfirmedUpdate() {
       venue: pendingUpdate.value.venue,
     };
 
-    await axios.post(
+    await axiosInstance.post(
       `/company/job-applications/${pendingUpdate.value.applicationId}/assess`,
       payload
     );
@@ -1347,6 +1374,9 @@ function formatType(type) {
       return type;
   }
 }
+function formatCourse(course){
+  return courseAcronymMap[course] || course;
+};
 function statusDescription(status) {
   switch (status) {
     case "applied":

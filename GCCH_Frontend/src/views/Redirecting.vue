@@ -14,7 +14,6 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 onMounted(async () => {
-  // Extract payload from URL
   const params = new URLSearchParams(window.location.search);
   const payloadRaw = params.get('payload');
   let payload = {};
@@ -24,24 +23,29 @@ onMounted(async () => {
     router.push('/login');
     return;
   }
-
-  // Store token in localStorage
-  if (payload.token) {
-    localStorage.setItem('token', payload.token);
+  if (!payload.user.role) {
+    localStorage.setItem('onboarding_in_progress', 'true');
   }
 
-  // Store user info if needed
+  // Store token and user info
+  if (payload.token) localStorage.setItem('token', payload.token);
   if (payload.user && payload.user.id) {
     localStorage.setItem('user_id', payload.user.id);
     if (payload.user.role) {
       localStorage.setItem('user_role', payload.user.role);
+      localStorage.removeItem('onboarding_in_progress');
+    } else {
+      localStorage.setItem('onboarding_in_progress', 'true');
     }
   }
 
-  // Redirect user based on payload
+  // Debug logs
+  console.log('Payload:', payload);
+  console.log('Redirect:', payload.redirect);
+
   await new Promise(resolve => setTimeout(resolve, 1000));
   if (payload.redirect) {
-    router.push(payload.redirect);
+    router.push(payload.redirect.replace(/\\/g, ''));
   } else {
     router.push('/login');
   }
