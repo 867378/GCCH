@@ -192,8 +192,8 @@
 
 <script setup>
 import { ref, onMounted, computed, nextTick } from "vue";
+import axiosInstance from '../plugins/axios'; 
 import { useRouter } from "vue-router";
-import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
 
@@ -244,29 +244,39 @@ function toggleSignOut() {
   showSignOut.value = !showSignOut.value;
 }
 
-function confirmSignOut() {
-  axios
-    .post("/logout")
-    .then(() => {
-      createToast("Successfully signed out!", {
-        type: "success",
-        position: "top-right",
-        timeout: 2000,
-        showIcon: true,
-        toastBackgroundColor: "#045d56",
-      });
-      localStorage.clear();
-      router.push("/login");
-    })
-    .catch((error) => {
-      console.error("Error signing out:", error);
-      createToast("Failed to sign out. Please try again.", {
-        type: "danger",
-        position: "top-right",
-        timeout: 3000,
-        showIcon: true,
-      });
+async function confirmSignOut() {
+  try {
+    const token = localStorage.getItem('token');
+    await axiosInstance.post("/logout", {}, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
+
+    localStorage.clear();
+    delete axiosInstance.defaults.headers.common['Authorization'];
+
+    createToast("Successfully signed out", {
+      type: "success",
+      position: "top-right",
+      timeout: 2000,
+      showIcon: true
+    });
+
+    // Wait a moment for the toast to show, then redirect
+    setTimeout(() => {
+      router.push("/login");
+    }, 500);
+
+  } catch (error) {
+    console.error("Error signing out:", error);
+    createToast("Failed to sign out", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true
+    });
+  }
 }
 
 async function openChat(obj) {
@@ -298,7 +308,7 @@ async function openChat(obj) {
 
 async function markMessageAsRead(messageId) {
   try {
-    await axios.post(`/message/mark-as-read/${messageId}`);
+    await axiosInstance.post(`/message/mark-as-read/${messageId}`);
     console.log(`Message ${messageId} marked as read`);
   } catch (error) {
     console.error("Error marking message as read:", error);
@@ -307,7 +317,7 @@ async function markMessageAsRead(messageId) {
 
 async function fetchConversation(senderId) {
   try {
-    const response = await axios.get(`/message/conversation/${senderId}`);
+    const response = await axiosInstance.get(`/message/conversation/${senderId}`);
     const data = Array.isArray(response.data) ? response.data : [];
 
     // Format the conversation with "You" or "Them"
@@ -351,7 +361,7 @@ async function sendReply() {
   }
 
   try {
-    await axios.post("/message/send", {
+    await axiosInstance.post("/message/send", {
       receiver_id: selectedUserId.value,
       message: newReply.value.trim(),
     });
@@ -415,7 +425,7 @@ function extractSenderName(content) {
 
 async function fetchMessageNotifications() {
   try {
-    const response = await axios.get("/notifications");
+    const response = await axiosInstance.get("/notifications");
     const rawNotifications = response.data.notifications || [];
 
     const grouped = new Map();

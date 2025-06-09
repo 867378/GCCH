@@ -213,8 +213,8 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import axiosInstance from '../plugins/axios'; 
 import { useRouter } from "vue-router";
-import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
 
@@ -250,35 +250,45 @@ function toggleNotif() {
 function toggleSignOut() {
   showSignOut.value = !showSignOut.value;
 }
-function confirmSignOut() {
-  axios
-    .post("/logout")
-    .then(() => {
-      createToast("Successfully signed out!", {
-        type: "success",
-        position: "top-right",
-        timeout: 2000,
-        showIcon: true,
-        toastBackgroundColor: "#045d56",
-      });
-      localStorage.clear();
-      router.push("/login");
-    })
-    .catch((error) => {
-      console.error("Error signing out:", error);
-      createToast("Failed to sign out. Please try again.", {
-        type: "danger",
-        position: "top-right",
-        timeout: 3000,
-        showIcon: true,
-      });
+async function confirmSignOut() {
+  try {
+    const token = localStorage.getItem('token');
+    await axiosInstance.post("/logout", {}, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
+
+    localStorage.clear();
+    delete axiosInstance.defaults.headers.common['Authorization'];
+
+    createToast("Successfully signed out", {
+      type: "success",
+      position: "top-right",
+      timeout: 2000,
+      showIcon: true
+    });
+
+    // Wait a moment for the toast to show, then redirect
+    setTimeout(() => {
+      router.push("/login");
+    }, 500);
+
+  } catch (error) {
+    console.error("Error signing out:", error);
+    createToast("Failed to sign out", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true
+    });
+  }
 }
 
 async function fetchUserData() {
   try {
     const userId = localStorage.getItem("user_id");
-    const response = await axios.get(`user/company/${userId}`);
+    const response = await axiosInstance.get(`user/company/${userId}`);
     company.value = response.data;
     console.log("Fetched User Data", response.data);
     createToast("Profile loaded successfully", {
@@ -301,7 +311,7 @@ async function fetchUserData() {
 
 async function fetchNotifications() {
   try {
-    const response = await axios.get("/notifications");
+    const response = await axiosInstance.get("/notifications");
     const rawNotifications = response.data.notifications || [];
 
     const grouped = new Map();
@@ -375,7 +385,7 @@ async function onImageChange(event) {
     const formData = new FormData();
     formData.append("profile_image", file);
 
-    await axios.post("/upload/profile-image", formData, {
+    await axiosInstance.post("/upload/profile-image", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -403,7 +413,7 @@ async function onImageChange(event) {
 
 async function updateProfile() {
   try {
-    const response = await axios.put(`/company/profile/update`, {
+    const response = await axiosInstance.put(`/company/profile/update`, {
       company_name: fullName.value,
       industry_type: type.value,
       company_telephone: telephone.value,

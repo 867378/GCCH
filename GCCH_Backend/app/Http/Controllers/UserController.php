@@ -28,6 +28,10 @@ class UserController extends Controller
     public function getRole(){
         $user = auth()->user();
 
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
         return response()->json([
             'id' => $user->id,
             'role' => $user->role,
@@ -53,27 +57,27 @@ class UserController extends Controller
             ]
         );
 
-        // Registration logic
-        if (empty($user->role)) {
-            Auth::login($user, true);
-            return redirect('http://localhost:5173/redirecting');
-        }
-
-        //Login Logic
-        Auth::login($user, true);
         $token = $user->createToken('auth_token')->plainTextToken;
-        
-        $redirectUrl = match ($user->role) {
-            'applicant' => '/applicantdash',
-            'company' => '/companydash',
-            default => null,
-        };
 
-        if ($redirectUrl) {
-            return redirect('http://localhost:5173/redirecting');
-        }
+        // Only send necessary user info
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => $user->role,
+        ];
 
-        return response()->json(['error' => 'Unexpected role value'], 422);
+        $payload = [
+            'token' => $token,
+            'user' => $userData,
+            'redirect' => $user->role
+                ? ($user->role === 'applicant' ? '/applicantdash' : '/companydash')
+                : "/signup/{$user->id}"
+        ];
+
+        return redirect()->away(
+            env('FRONTEND_URL') . '/redirecting?payload=' . urlencode(json_encode($payload))
+        );
     }
 
     public function selectRole($userId){
@@ -84,24 +88,44 @@ class UserController extends Controller
         ]);
     }
 
+
     public function setRole(Request $request, $userId)
     {
-        $request->validate([
-            'role' => 'required|in:applicant,company',
-        ]);
+        try {
+            $request->validate([
+                'role' => 'required|in:applicant,company',
+            ]);
 
-        $user = User::findOrFail($userId);
+            $user = User::findOrFail($userId);
 
-        $user->role = $request->role;
-        $user->save();
+            // Update user role
+            $user->role = $request->role;
+            $user->save();
 
-        return response()->json([
-            'message' => 'Role set successfully',
-            'user' => $user,
-        ]);
+            // Generate new token
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Role set successfully',
+                'user' => $user,
+                'token' => $token,
+                'redirect' => $request->role === 'applicant' ? '/applicantdash' : '/companydash'
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json(['error' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to set role: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function completeApplicantProfile(Request $request, User $user){
+        if (auth()->id() !== $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'first_name' => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
@@ -155,6 +179,10 @@ class UserController extends Controller
     }
 
     public function completeCompanyProfile(Request $request, User $user){
+        if (auth()->id() !== $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'company_name' => 'required|string|max:255',
             'company_telephone' => 'required|string|max:15',
@@ -230,15 +258,28 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    
+
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $user = $request->user();
+        $token = $user ? $user->currentAccessToken() : null;
+
+        // Only delete if it's a real token (not a TransientToken)
+        if ($token && method_exists($token, 'delete')) {
+            $token->delete();
+        }
 
         return response()->json([
-            'message' => 'Logged out successfully',
+            'message' => 'Logged out successfully'
+        ]);
+    }
+
+    // Add a new method to check token validity
+    public function checkAuth(Request $request)
+    {
+        return response()->json([
+            'user' => $request->user(),
+            'message' => 'Token is valid'
         ]);
     }
 

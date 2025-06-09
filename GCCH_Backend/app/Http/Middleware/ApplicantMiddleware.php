@@ -15,10 +15,10 @@ class ApplicantMiddleware
      */
     public function handle($request, Closure $next)
     {   
-        if(Auth::check() && Auth::user()->role === 'applicant'){
+        $user = $request->user();
+        if ($user && $user->role === 'applicant') {
             return $next($request);
         }
-
         return response()->json(['error' => 'Unauthorized'], 403);
     }
 

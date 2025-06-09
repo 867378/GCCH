@@ -611,8 +611,8 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
+import axiosInstance from '../plugins/axios'; // Adjust the path as necessary
 import { useRouter } from "vue-router";
-import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
 import Chart from "chart.js/auto";
@@ -658,11 +658,38 @@ const applicantProgram = ref(null);
 
 onMounted(async () => {
   try {
-    const applicantId = localStorage.getItem("user_id");
-    const response = await axios.get(`/user/applicant/${applicantId}`); // Or your actual endpoint
-    applicantProgram.value = response.data.applicant.course || null;
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    // Set token in axios headers
+    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+    // Fetch all data in parallel
+    await Promise.all([
+      fetchJobs(),
+      fetchHiredApplication(),
+      fetchNotifications(),
+      fetchDashboardCounts()
+    ]);
+
+    setTimeout(() => {
+      updateChart();
+    }, 100);
   } catch (error) {
-    console.error("Failed to get applicant program", error);
+    console.error('Error during initialization:', error);
+    if (!error.response) {
+      createToast('Connection error. Please check your network.', {
+        type: 'error',
+        position: 'top-right',
+        timeout: 5000
+      });
+    } else if (error.response.status === 401) {
+      localStorage.removeItem('token');
+      router.push('/login');
+    }
   }
 });
 
@@ -707,67 +734,115 @@ function toggleNotif() {
 function toggleSignOut() {
   showSignOut.value = !showSignOut.value;
 }
-function confirmSignOut() {
-  axios
-    .post("/logout")
-    .then(() => {
-      createToast("Successfully signed out", {
-        type: "success",
-        position: "top-right",
-        timeout: 2000,
-        showIcon: true,
-      });
-      localStorage.clear();
-      router.push("/login");
-    })
-    .catch((error) => {
-      console.error("Error signing out:", error);
-      createToast("Failed to sign out", {
-        type: "danger",
-        position: "top-right",
-        timeout: 3000,
-        showIcon: true,
-      });
-    });
-}
-
-async function fetchDashboardCounts() {
+async function confirmSignOut() {
   try {
-    const [totalApplied, matchingJobs, acceptedApplied] = await Promise.all([
-      axios.get("/applicant/ongoing-applications"),
-      axios.get("/applicant/matched-jobs"),
-      axios.get("/applicant/accepted-applications"),
-    ]);
+    const token = localStorage.getItem('token');
+    await axiosInstance.post("/logout", {}, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
 
-    ongoingApplicationsCount.value = totalApplied.data.total_jobs_applied;
-    matchedJobCount.value = matchingJobs.data.matched_jobs_count;
-    acceptedApplicationsCount.value = acceptedApplied.data.accepted_jobs_count;
+    localStorage.clear();
+    delete axiosInstance.defaults.headers.common['Authorization'];
+
+    createToast("Successfully signed out", {
+      type: "success",
+      position: "top-right",
+      timeout: 2000,
+      showIcon: true
+    });
+
+    // Wait a moment for the toast to show, then redirect
+    setTimeout(() => {
+      router.push("/login");
+    }, 500);
+
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error signing out:", error);
+    createToast("Failed to sign out", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true
+    });
   }
 }
 
 const fetchJobs = async (filters = {}) => {
   try {
-    const response = await axios.get("/applicant/jobdisplay", {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('No token found');
+
+    const response = await axiosInstance.get("/applicant/jobdisplay", {
       params: filters,
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
-    // Sort jobs by date before assigning to recommendedJobs
-    recommendedJobs.value = response.data.jobs.sort((a, b) => {
-      const dateA = new Date(a.date_posted);
-      const dateB = new Date(b.date_posted);
-      return dateB - dateA;
+
+    if (response.data.jobs) {
+      recommendedJobs.value = response.data.jobs.sort((a, b) => {
+        const dateA = new Date(a.date_posted);
+        const dateB = new Date(b.date_posted);
+        return dateB - dateA;
+      });
+    }
+  } catch (error) {
+    console.error("Failed to fetch jobs:", error);
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      router.push('/login');
+    } else {
+      createToast("Failed to fetch jobs. Please try again.", {
+        type: "error",
+        position: "top-right",
+        timeout: 3000
+      });
+    }
+  }
+};
+
+const fetchDashboardCounts = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('No token found');
+
+    const [ongoingResponse, matchedResponse, acceptedResponse] = await Promise.all([
+      axiosInstance.get('/applicant/ongoing-applications'),
+      axiosInstance.get('/applicant/matched-jobs'),
+      axiosInstance.get('/applicant/accepted-applications')
+    ]);
+
+    ongoingApplicationsCount.value = ongoingResponse.data.total_jobs_applied || 0;
+    matchedJobCount.value = matchedResponse.data.matched_jobs_count || 0;
+    acceptedApplicationsCount.value = acceptedResponse.data.accepted_jobs_count || 0;
+
+    console.log('Dashboard counts fetched:', {
+      ongoingApplicationsCount: ongoingApplicationsCount.value,
+      matchedJobCount: matchedJobCount.value,
+      acceptedApplicationsCount: acceptedApplicationsCount.value
     });
-    console.log("Recommended Jobs:", recommendedJobs.value);
-  } catch {
-    alert("Failed to fetch jobs. Please try again later.");
+
+  } catch (error) {
+    console.error('Error fetching dashboard counts:', error);
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      router.push('/login');
+    } else {
+      createToast('Failed to fetch dashboard data', {
+        type: 'error',
+        position: 'top-right',
+        timeout: 5000
+      });
+    }
   }
 };
 
 async function fetchUserData() {
   try {
     const userId = localStorage.getItem("user_id");
-    const response = await axios.get(`user/applicant/${userId}`);
+    const response = await axiosInstance.get(`user/applicant/${userId}`);
     applicant.value = response.data;
     console.log("Fetched User Data", response.data);
     createToast("Profile loaded successfully", {
@@ -891,7 +966,7 @@ async function submitApplication() {
   }
 
   try {
-    const response = await axios.post("/applicant/jobapply", formData, {
+    const response = await axiosInstance.post("/applicant/jobapply", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -959,7 +1034,7 @@ function closeApplyPopup() {
 
 async function fetchNotifications() {
   try {
-    const response = await axios.get("/notifications");
+    const response = await axiosInstance.get("/notifications");
     const rawNotifications = response.data.notifications || [];
 
     const grouped = new Map();
@@ -1025,7 +1100,7 @@ function formatDate(dateString) {
 
 async function fetchHiredApplication() {
   try {
-    const response = await axios.get("/applicant/applications");
+    const response = await axiosInstance.get("/applicant/applications");
     console.log("Applications:", response.data.applications);
 
     hiredApplication.value =
@@ -1057,7 +1132,7 @@ const downloadCertificate = async () => {
   }
 
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `/certificate/download/${hiredApplication.value.id}`,
       {
         responseType: "blob",
@@ -1102,7 +1177,7 @@ async function sendActualMessage() {
         `[Job Inquiry: ${selectedJobForMessage.value.job_title}] ` +
         messageToSend;
     }
-    const response = await axios.post("/message/send", {
+    const response = await axiosInstance.post("/message/send", {
       receiver_id: selectedCompanyId.value,
       message: messageToSend,
     });
@@ -1224,8 +1299,8 @@ watch(
 onMounted(async () => {
   await fetchJobs();
   await fetchHiredApplication();
-  fetchNotifications();
-  fetchDashboardCounts();
+  await fetchNotifications();
+  await fetchDashboardCounts();
 
   setTimeout(() => {
     updateChart();

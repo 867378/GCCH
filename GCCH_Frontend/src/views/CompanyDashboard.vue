@@ -197,8 +197,8 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
+import axiosInstance from '../plugins/axios'; 
 import { useRouter } from "vue-router";
-import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
 import Chart from "chart.js/auto";
@@ -233,37 +233,47 @@ function toggleSignOut() {
   showSignOut.value = !showSignOut.value;
 }
 
-function confirmSignOut() {
-  axios
-    .post("/logout")
-    .then(() => {
-      createToast("Successfully signed out!", {
-        type: "success",
-        position: "top-right",
-        timeout: 2000,
-        showIcon: true,
-        toastBackgroundColor: "#045d56",
-      });
-      localStorage.clear();
-      router.push("/login");
-    })
-    .catch((error) => {
-      console.error("Error signing out:", error);
-      createToast("Failed to sign out. Please try again.", {
-        type: "danger",
-        position: "top-right",
-        timeout: 3000,
-        showIcon: true,
-      });
+async function confirmSignOut() {
+  try {
+    const token = localStorage.getItem('token');
+    await axiosInstance.post("/logout", {}, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
+
+    localStorage.clear();
+    delete axiosInstance.defaults.headers.common['Authorization'];
+
+    createToast("Successfully signed out", {
+      type: "success",
+      position: "top-right",
+      timeout: 2000,
+      showIcon: true
+    });
+
+    // Wait a moment for the toast to show, then redirect
+    setTimeout(() => {
+      router.push("/login");
+    }, 500);
+
+  } catch (error) {
+    console.error("Error signing out:", error);
+    createToast("Failed to sign out", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true
+    });
+  }
 }
 
 async function fetchDashboardCounts() {
   try {
     const [clientsRes, jobsRes, pendingRes] = await Promise.all([
-      axios.get("/company/total-clients"),
-      axios.get("/company/total-jobs"),
-      axios.get("/company/pending-applications"),
+      axiosInstance.get("/company/total-clients"),
+      axiosInstance.get("/company/total-jobs"),
+      axiosInstance.get("/company/pending-applications"),
     ]);
 
     hiredApplicants.value = clientsRes.data.count;
@@ -297,7 +307,7 @@ async function fetchDashboardCounts() {
 // Notification Logic
 async function fetchNotifications() {
   try {
-    const response = await axios.get("/notifications");
+    const response = await axiosInstance.get("/notifications");
     notifications.value = response.data.notifications;
   } catch (error) {
     console.error("Error fetching notifications:", error);
@@ -325,7 +335,7 @@ function formatType(type) {
 
 async function fetchJobs() {
   try {
-    const response = await axios.get("/company/jobdisplay");
+    const response = await axiosInstance.get("/company/jobdisplay");
     jobs.value = response.data.jobs;
     console.log("Jobs fetched successfully:", jobs.value);
   } catch (error) {

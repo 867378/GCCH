@@ -14,10 +14,10 @@ class CompanyMiddleware
      */
     public function handle($request, Closure $next)
     {
-        if(Auth::check() && Auth::user()->role === 'company'){
+        $user = $request->user();
+        if ($user && $user->role === 'company') {
             return $next($request);
         }
-
         return response()->json(['error' => 'Unauthorized'], 403);
     }
 }

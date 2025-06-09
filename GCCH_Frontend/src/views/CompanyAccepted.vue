@@ -188,8 +188,8 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
+import axiosInstance from '../plugins/axios'; 
 import { useRouter } from "vue-router";
-import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
 
@@ -240,34 +240,44 @@ function toggleSignOut() {
   showSignOut.value = !showSignOut.value;
 }
 
-function confirmSignOut() {
-  axios
-    .post("/logout")
-    .then(() => {
-      createToast("Successfully signed out!", {
-        type: "success",
-        position: "top-right",
-        timeout: 2000,
-        showIcon: true,
-        toastBackgroundColor: "#045d56",
-      });
-      localStorage.clear();
-      router.push("/login");
-    })
-    .catch((error) => {
-      console.error("Error signing out:", error);
-      createToast("Failed to sign out. Please try again.", {
-        type: "danger",
-        position: "top-right",
-        timeout: 3000,
-        showIcon: true,
-      });
+async function confirmSignOut() {
+  try {
+    const token = localStorage.getItem('token');
+    await axiosInstance.post("/logout", {}, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
+
+    localStorage.clear();
+    delete axiosInstance.defaults.headers.common['Authorization'];
+
+    createToast("Successfully signed out", {
+      type: "success",
+      position: "top-right",
+      timeout: 2000,
+      showIcon: true
+    });
+
+    // Wait a moment for the toast to show, then redirect
+    setTimeout(() => {
+      router.push("/login");
+    }, 500);
+
+  } catch (error) {
+    console.error("Error signing out:", error);
+    createToast("Failed to sign out", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true
+    });
+  }
 }
 
 async function fetchNotifications() {
   try {
-    const response = await axios.get("/notifications");
+    const response = await axiosInstance.get("/notifications");
     const rawNotifications = response.data.notifications || [];
 
     const grouped = new Map();
@@ -325,7 +335,7 @@ function formatType(type) {
 //Fetch Jobs
 async function fetchPostedJobs() {
   try {
-    const response = await axios.get("/company/jobdisplay");
+    const response = await axiosInstance.get("/company/jobdisplay");
     postedJobs.value = response.data.jobs;
     console.log(response.data);
 
@@ -355,7 +365,7 @@ async function fetchPostedJobs() {
 
 async function fetchApplicants(jobId) {
   try {
-    const response = await axios.get(`/job/${jobId}/applications`);
+    const response = await axiosInstance.get(`/job/${jobId}/applications`);
     const acceptedApplicants = response.data.applications.filter(
       (applicant) => applicant.status === "hired"
     );
@@ -366,7 +376,7 @@ async function fetchApplicants(jobId) {
         const applicantId = app.applicant.user_id;
         if (applicantId) {
           try {
-            const userResponse = await axios.get(
+            const userResponse = await axiosInstance.get(
               `user/applicant/${applicantId}`
             );
             app.user =

@@ -8,44 +8,42 @@
 </template>
 
 <script setup>
-import axios from 'axios';
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
 onMounted(async () => {
+  // Extract payload from URL
+  const params = new URLSearchParams(window.location.search);
+  const payloadRaw = params.get('payload');
+  let payload = {};
   try {
-    const { data: user } = await axios.get('/user');
-    console.log(user);
-
-    localStorage.setItem('user_id', user.id);
-
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-
-    if (!user.role) {
-      localStorage.setItem('onboarding_in_progress', 'true');
-      router.push(`/signup/${user.id}`);
-    } else {
-      localStorage.setItem('user_role', user.role);
-      localStorage.removeItem('onboarding_in_progress'); // ✅ done onboarding
-
-      switch (user.role) {
-        case 'applicant':
-          router.push('/applicantdash');
-          break;
-        case 'company':
-          router.push('/companydash');
-          break;
-        default:
-          router.push('/login');
-          break;
-      }
-    }
+    payload = JSON.parse(payloadRaw);
   } catch (e) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-    router.push('/login'); // fallback
+    router.push('/login');
+    return;
+  }
+
+  // Store token in localStorage
+  if (payload.token) {
+    localStorage.setItem('token', payload.token);
+  }
+
+  // Store user info if needed
+  if (payload.user && payload.user.id) {
+    localStorage.setItem('user_id', payload.user.id);
+    if (payload.user.role) {
+      localStorage.setItem('user_role', payload.user.role);
+    }
+  }
+
+  // Redirect user based on payload
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  if (payload.redirect) {
+    router.push(payload.redirect);
+  } else {
+    router.push('/login');
   }
 });
 </script>

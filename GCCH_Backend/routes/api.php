@@ -25,6 +25,9 @@ Route::prefix('user')->name('api.')->group(function () {
     Route::get('/company/{id}',[CompanyController::class, 'fetchCompanyData'])->name('company.data');
     Route::get('select-role/{user}', [UserController::class, 'selectRole'])->name('select-role');
     Route::post('set-role/{userId}', [UserController::class, 'setRole'])->name('set-role');
+});
+
+Route::middleware(['auth:sanctum'])->prefix('user')->group(function () {
     Route::get('applicant/profile/{user}', [UserController::class, 'showApplicantProfileForm'])->name('applicant-form');
     Route::post('applicant/profile/{user}', [UserController::class, 'completeApplicantProfile'])->name('applicant-profile');
     Route::get('company/profile/{user}', [UserController::class, 'showCompanyProfileForm'])->name('company-form');
