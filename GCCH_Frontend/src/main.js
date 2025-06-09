@@ -1,25 +1,33 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import { initializeCsrfCookie } from './plugins/sanctum';
-
+import axiosInstance from './plugins/axios';
 import App from "./App.vue";
 import router from "./router";
-import axios from "axios";
-
-axios.defaults.baseURL = "http://localhost:8000/api";
-axios.defaults.withCredentials = true;
-axios.defaults.withXSRFToken = true;
 
 const app = createApp(App);
 
-async function bootstrap(){
+async function bootstrap() {
     try {
+        // Initialize CSRF cookie before setting up the app
         await initializeCsrfCookie();
+        console.log('CSRF cookie initialized successfully');
+
+        app.config.globalProperties.$axios = axiosInstance;
         app.use(createPinia());
         app.use(router);
-        app.mount("#app");
+        
+        await app.mount("#app");
+        console.log('App mounted successfully');
     } catch (error) {
-        console.error("Failed to initialize CSRF cookie", error);
+        console.error("Bootstrap error:", error);
+        document.body.innerHTML = `
+            <div style="color: red; padding: 20px;">
+                Failed to initialize application. 
+                Please ensure the backend server is running.
+                Error: ${error.message}
+            </div>
+        `;
     }
 }
 

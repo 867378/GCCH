@@ -238,7 +238,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import axios from "axios";
+import axiosInstance from '../plugins/axios'; 
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
 import { computed } from "vue";
@@ -405,7 +405,7 @@ if (!userId) {
 
 async function continueAction() {
   try {
-    await axios.post(
+    await axiosInstance.post(
       `user/set-role/${userId}`,
       {
         role: selectedRole.value,
@@ -509,7 +509,7 @@ const submitPhotoForm = async () => {
     // POST to a single unified endpoint (you may want to create this backend route)
     const endpoint = `user/${selectedRole.value}/profile/${userId}`;
 
-    await axios.post(endpoint, formData, {
+    await axiosInstance.post(endpoint, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

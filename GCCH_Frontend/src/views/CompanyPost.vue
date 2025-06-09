@@ -563,13 +563,14 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import axiosInstance from '../plugins/axios'; 
 import { useRouter } from "vue-router";
-import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
 
 // --- ROUTER & UI STATE ---
 const router = useRouter();
+
 const isSidenavOpen = ref(true);
 const showNotif = ref(false);
 const showSignOut = ref(false);
@@ -584,7 +585,7 @@ function toggleNotif() {
 
 async function fetchNotifications() {
   try {
-    const response = await axios.get("/notifications");
+    const response = await axiosInstance.get("/notifications");
     const rawNotifications = response.data.notifications || [];
     const grouped = new Map();
     rawNotifications.forEach((notif) => {
@@ -625,29 +626,39 @@ const getNotificationIcon = (type) => {
 function toggleSignOut() {
   showSignOut.value = !showSignOut.value;
 }
-function confirmSignOut() {
-  axios
-    .post("/logout")
-    .then(() => {
-      createToast("Successfully signed out!", {
-        type: "success",
-        position: "top-right",
-        timeout: 2000,
-        showIcon: true,
-        toastBackgroundColor: "#045d56",
-      });
-      localStorage.clear();
-      router.push("/login");
-    })
-    .catch((error) => {
-      console.error("Error signing out:", error);
-      createToast("Failed to sign out. Please try again.", {
-        type: "danger",
-        position: "top-right",
-        timeout: 3000,
-        showIcon: true,
-      });
+async function confirmSignOut() {
+  try {
+    const token = localStorage.getItem('token');
+    await axiosInstance.post("/logout", {}, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
+
+    localStorage.clear();
+    delete axiosInstance.defaults.headers.common['Authorization'];
+
+    createToast("Successfully signed out", {
+      type: "success",
+      position: "top-right",
+      timeout: 2000,
+      showIcon: true
+    });
+
+    // Wait a moment for the toast to show, then redirect
+    setTimeout(() => {
+      router.push("/login");
+    }, 500);
+
+  } catch (error) {
+    console.error("Error signing out:", error);
+    createToast("Failed to sign out", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true
+    });
+  }
 }
 
 // --- JOBS & APPLICANTS ---
@@ -938,7 +949,7 @@ async function postJob() {
     jobData.value.recommended_expertise = selectedExpertise.value[0] || null;
     jobData.value.recommended_expertise_2 = selectedExpertise.value[1] || null;
     jobData.value.recommended_expertise_3 = selectedExpertise.value[2] || null;
-    const response = await axios.post("/company/postjob", { ...jobData.value });
+    const response = await axiosInstance.post("/company/postjob", { ...jobData.value });
     createToast(response.data.message, {
       type: "success",
       position: "top-right",
@@ -982,7 +993,7 @@ async function postJob() {
 // --- APPLICANT ACTIONS ---
 async function fetchApplicants(jobId) {
   try {
-    const response = await axios.get(`/job/${jobId}/applications`);
+    const response = await axiosInstance.get(`/job/${jobId}/applications`);
     jobApplicants.value = response.data.applications.filter(
       (applicant) =>
         applicant.status !== "rejected" && applicant.status !== "hired"
@@ -1007,7 +1018,7 @@ const toggleItem = async (applicationId) => {
 };
 async function setApplicationToScreening(applicationId) {
   try {
-    await axios.post(`/company/job-applications/${applicationId}/assess`, {
+    await axiosInstance.post(`/company/job-applications/${applicationId}/assess`, {
       status: "screening",
     });
     const idx = jobApplicants.value.findIndex(
@@ -1207,10 +1218,8 @@ async function assessApplication(
 ) {
   try {
     const payload = { status, scheduled_at: scheduleAt, comment, venue };
-    await axios.post(
-      `/company/job-applications/${applicationId}/assess`,
-      payload
-    );
+    await axiosInstance.post(`/company/job-applications/${applicationId}/assess`, payload);
+
 
     // Update the specific application in the current list
     const applicationIndex = jobApplicants.value.findIndex(
@@ -1237,7 +1246,7 @@ async function assessApplication(
     // Only do the job offer logic if needed, remove fetchApplicants
     if (status === "accepted") {
       try {
-        await axios.post(`/company/offer-job/${applicationId}`);
+        await axiosInstance.post(`/company/offer-job/${applicationId}`);
         createToast("Job offer sent successfully", {
           type: "success",
           position: "top-right",
@@ -1260,6 +1269,7 @@ async function assessApplication(
     }
 
     // Update job counts without fetching all applicants again
+
     // const jobResponse = await axios.get(`/company/job/${selectedJob.value.id}`);
     // const jobIndex = postedJobs.value.findIndex(
     //   (job) => job.id === selectedJob.value.id
@@ -1288,7 +1298,7 @@ function sendMessage(applicationId) {
 const messageContent = ref("");
 async function sendActualMessage() {
   try {
-    await axios.post("/message/send", {
+    await axiosInstance.post("/message/send", {
       receiver_id: selectedApplicantId.value,
       message: messageContent.value,
     });
@@ -1375,7 +1385,7 @@ const downloadJobReport = async (job) => {
   }
 
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `/report/job/${jobToDownload.id}/download`,
       {
         responseType: "blob",
@@ -1410,7 +1420,7 @@ const downloadJobReport = async (job) => {
 };
 async function fetchPostedJobs() {
   try {
-    const response = await axios.get("/company/jobdisplay");
+    const response = await axiosInstance.get("/company/jobdisplay");
     postedJobs.value = response.data.jobs.sort(
       (a, b) => new Date(b.date_posted) - new Date(a.date_posted)
     );

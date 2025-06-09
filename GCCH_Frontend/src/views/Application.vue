@@ -215,10 +215,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import axiosInstance from '../plugins/axios'; 
 import { useRouter } from "vue-router";
-import axios from "axios";
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
+
+const router = useRouter();
 
 const isSidenavOpen = ref(true);
 const showNotif = ref(false);
@@ -237,8 +239,6 @@ const confirmApplicationId = ref(null);
 
 const showDownloadButton = ref(new Map());
 
-const router = useRouter();
-
 //Methods for Nav Bars
 
 function toggleNotif() {
@@ -251,34 +251,44 @@ function toggleSignOut() {
   showSignOut.value = !showSignOut.value;
 }
 
-function confirmSignOut() {
-  axios
-    .post("/logout")
-    .then(() => {
-      createToast("Successfully signed out!", {
-        type: "success",
-        position: "top-right",
-        timeout: 2000,
-        showIcon: true,
-        toastBackgroundColor: "#045d56",
-      });
-      localStorage.clear();
-      router.push("/login");
-    })
-    .catch((error) => {
-      console.error("Error signing out:", error);
-      createToast("Failed to sign out. Please try again.", {
-        type: "danger",
-        position: "top-right",
-        timeout: 3000,
-        showIcon: true,
-      });
+async function confirmSignOut() {
+  try {
+    const token = localStorage.getItem('token');
+    await axiosInstance.post("/logout", {}, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     });
+
+    localStorage.clear();
+    delete axiosInstance.defaults.headers.common['Authorization'];
+
+    createToast("Successfully signed out", {
+      type: "success",
+      position: "top-right",
+      timeout: 2000,
+      showIcon: true
+    });
+
+    // Wait a moment for the toast to show, then redirect
+    setTimeout(() => {
+      router.push("/login");
+    }, 500);
+
+  } catch (error) {
+    console.error("Error signing out:", error);
+    createToast("Failed to sign out", {
+      type: "danger",
+      position: "top-right",
+      timeout: 3000,
+      showIcon: true
+    });
+  }
 }
 
 async function fetchNotifications() {
   try {
-    const response = await axios.get("/notifications");
+    const response = await axiosInstance.get("/notifications");
     const rawNotifications = response.data.notifications || [];
 
     const grouped = new Map();
@@ -335,7 +345,7 @@ function formatType(type) {
 
 async function fetchJobApplications() {
   try {
-    const response = await axios.get("/applicant/applications");
+    const response = await axiosInstance.get("/applicant/applications");
     applications.value = response.data.applications;
     acceptedApplications.value = applications.value.filter(
       (app) => app.status === "accepted"
@@ -366,7 +376,7 @@ function openConfirmPopup(applicationId, action) {
 
 async function respondToOffer(applicationId, response) {
   try {
-    const res = await axios.post(
+    const res = await axiosInstance.post(
       `/applicant/job-application/respond-offer/${applicationId}`,
       {
         offer_status: response,
@@ -395,7 +405,7 @@ async function respondToOffer(applicationId, response) {
 
 async function downloadCertificate(applicationId) {
   try {
-    const response = await axios.get(`/certificate/download/${applicationId}`, {
+    const response = await axiosInstance.get(`/certificate/download/${applicationId}`, {
       responseType: "blob",
     });
 
