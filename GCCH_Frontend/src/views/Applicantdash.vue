@@ -616,8 +616,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
-import axiosInstance from '../plugins/axios'; // Adjust the path as necessary
+import { ref, onMounted, computed, watch, nextTick } from "vue";
+import axiosInstance from "../plugins/axios"; // Adjust the path as necessary
 import { useRouter } from "vue-router";
 import { createToast } from "mosha-vue-toastify";
 import "mosha-vue-toastify/dist/style.css";
@@ -664,37 +664,38 @@ const applicantProgram = ref(null);
 
 onMounted(async () => {
   try {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
     // Set token in axios headers
-    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
     // Fetch all data in parallel
     await Promise.all([
       fetchJobs(),
       fetchHiredApplication(),
       fetchNotifications(),
-      fetchDashboardCounts()
+      fetchDashboardCounts(),
     ]);
 
+    // Use longer delay to ensure DOM is ready
     setTimeout(() => {
       updateChart();
-    }, 100);
+    }, 500);
   } catch (error) {
-    console.error('Error during initialization:', error);
+    console.error("Error during initialization:", error);
     if (!error.response) {
-      createToast('Connection error. Please check your network.', {
-        type: 'error',
-        position: 'top-right',
-        timeout: 5000
+      createToast("Connection error. Please check your network.", {
+        type: "error",
+        position: "top-right",
+        timeout: 5000,
       });
     } else if (error.response.status === 401) {
-      localStorage.removeItem('token');
-      router.push('/login');
+      localStorage.removeItem("token");
+      router.push("/login");
     }
   }
 });
@@ -742,49 +743,52 @@ function toggleSignOut() {
 }
 async function confirmSignOut() {
   try {
-    const token = localStorage.getItem('token');
-    await axiosInstance.post("/logout", {}, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+    const token = localStorage.getItem("token");
+    await axiosInstance.post(
+      "/logout",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
 
     localStorage.clear();
-    delete axiosInstance.defaults.headers.common['Authorization'];
+    delete axiosInstance.defaults.headers.common["Authorization"];
 
     createToast("Successfully signed out", {
       type: "success",
       position: "top-right",
       timeout: 2000,
-      showIcon: true
+      showIcon: true,
     });
 
     // Wait a moment for the toast to show, then redirect
     setTimeout(() => {
       router.push("/login");
     }, 500);
-
   } catch (error) {
     console.error("Error signing out:", error);
     createToast("Failed to sign out", {
       type: "danger",
       position: "top-right",
       timeout: 3000,
-      showIcon: true
+      showIcon: true,
     });
   }
 }
 
 const fetchJobs = async (filters = {}) => {
   try {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('No token found');
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
 
     const response = await axiosInstance.get("/applicant/jobdisplay", {
       params: filters,
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (response.data.jobs) {
@@ -797,13 +801,13 @@ const fetchJobs = async (filters = {}) => {
   } catch (error) {
     console.error("Failed to fetch jobs:", error);
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      router.push('/login');
+      localStorage.removeItem("token");
+      router.push("/login");
     } else {
       createToast("Failed to fetch jobs. Please try again.", {
         type: "error",
         position: "top-right",
-        timeout: 3000
+        timeout: 3000,
       });
     }
   }
@@ -811,35 +815,37 @@ const fetchJobs = async (filters = {}) => {
 
 const fetchDashboardCounts = async () => {
   try {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('No token found');
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
 
-    const [ongoingResponse, matchedResponse, acceptedResponse] = await Promise.all([
-      axiosInstance.get('/applicant/ongoing-applications'),
-      axiosInstance.get('/applicant/matched-jobs'),
-      axiosInstance.get('/applicant/accepted-applications')
-    ]);
+    const [ongoingResponse, matchedResponse, acceptedResponse] =
+      await Promise.all([
+        axiosInstance.get("/applicant/ongoing-applications"),
+        axiosInstance.get("/applicant/matched-jobs"),
+        axiosInstance.get("/applicant/accepted-applications"),
+      ]);
 
-    ongoingApplicationsCount.value = ongoingResponse.data.total_jobs_applied || 0;
+    ongoingApplicationsCount.value =
+      ongoingResponse.data.total_jobs_applied || 0;
     matchedJobCount.value = matchedResponse.data.matched_jobs_count || 0;
-    acceptedApplicationsCount.value = acceptedResponse.data.accepted_jobs_count || 0;
+    acceptedApplicationsCount.value =
+      acceptedResponse.data.accepted_jobs_count || 0;
 
-    console.log('Dashboard counts fetched:', {
+    console.log("Dashboard counts fetched:", {
       ongoingApplicationsCount: ongoingApplicationsCount.value,
       matchedJobCount: matchedJobCount.value,
-      acceptedApplicationsCount: acceptedApplicationsCount.value
+      acceptedApplicationsCount: acceptedApplicationsCount.value,
     });
-
   } catch (error) {
-    console.error('Error fetching dashboard counts:', error);
+    console.error("Error fetching dashboard counts:", error);
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      router.push('/login');
+      localStorage.removeItem("token");
+      router.push("/login");
     } else {
-      createToast('Failed to fetch dashboard data', {
-        type: 'error',
-        position: 'top-right',
-        timeout: 5000
+      createToast("Failed to fetch dashboard data", {
+        type: "error",
+        position: "top-right",
+        timeout: 5000,
       });
     }
   }
@@ -1260,73 +1266,77 @@ function goToPage(page) {
 const chartInstance = ref(null);
 
 const updateChart = () => {
-  if (chartInstance.value) {
-    chartInstance.value.destroy();
-  }
+  nextTick(() => {
+    const ctx = document.getElementById("statsChart");
+    if (!ctx) {
+      console.error("Chart canvas element not found");
+      return;
+    }
 
-  const ctx = document.getElementById("statsChart");
-  if (!ctx) {
-    // Canvas not yet rendered
-    return;
-  }
+    if (chartInstance.value) {
+      chartInstance.value.data.datasets[0].data = [
+        ongoingApplicationsCount.value,
+        matchedJobCount.value,
+        acceptedApplicationsCount.value,
+      ];
+      chartInstance.value.update();
+      return;
+    }
 
-  chartInstance.value = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["Ongoing Applications", "Matching Jobs", "Offered Jobs"],
-      datasets: [
-        {
-          label: "Application Statistics",
-          data: [
-            ongoingApplicationsCount.value,
-            matchedJobCount.value,
-            acceptedApplicationsCount.value,
-          ],
-          backgroundColor: [
-            "rgba(4, 93, 86, 0.7)",
-            "rgba(4, 93, 86, 0.5)",
-            "rgba(4, 93, 86, 0.3)",
-          ],
-          borderColor: [
-            "rgba(4, 93, 86, 1)",
-            "rgba(4, 93, 86, 1)",
-            "rgba(4, 93, 86, 1)",
-          ],
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            stepSize: 1,
+    chartInstance.value = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Ongoing Applications", "Matching Jobs", "Offered Jobs"],
+        datasets: [
+          {
+            label: "Application Statistics",
+            data: [
+              ongoingApplicationsCount.value,
+              matchedJobCount.value,
+              acceptedApplicationsCount.value,
+            ],
+            backgroundColor: [
+              "rgba(4, 93, 86, 0.7)",
+              "rgba(4, 93, 86, 0.5)",
+              "rgba(4, 93, 86, 0.3)",
+            ],
+            borderColor: [
+              "rgba(4, 93, 86, 1)",
+              "rgba(4, 93, 86, 1)",
+              "rgba(4, 93, 86, 1)",
+            ],
+            borderWidth: 1,
           },
-          max: 100,
-          grid: {
-            color: "rgba(0, 0, 0, 0.1)",
-            drawBorder: false,
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max:100,
+            ticks: {
+              stepSize: 1,
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            display: false,
+          },
+          title: {
+            display: true,
+            text: "JOB STATISTICS",
+            color: "#045d56",
+            font: {
+              size: 16,
+              weight: "bold",
+            },
           },
         },
       },
-      plugins: {
-        legend: {
-          display: false,
-        },
-        title: {
-          display: true,
-          text: "JOB STATISTICS",
-          color: "#045d56",
-          font: {
-            size: 16,
-            weight: "bold",
-          },
-        },
-      },
-    },
+    });
   });
 };
 
@@ -1336,17 +1346,6 @@ watch(
     updateChart();
   }
 );
-
-onMounted(async () => {
-  await fetchJobs();
-  await fetchHiredApplication();
-  await fetchNotifications();
-  await fetchDashboardCounts();
-
-  setTimeout(() => {
-    updateChart();
-  }, 100);
-});
 
 const searchQuery = ref("");
 
@@ -2659,7 +2658,7 @@ label {
   border-radius: 50%;
   display: flex;
   align-items: center;
-   justify-content: center;
+  justify-content: center;
 }
 
 .notif-icon {
