@@ -214,7 +214,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import axiosInstance from '../plugins/axios'; 
 import { useRouter } from "vue-router";
 import { createToast } from "mosha-vue-toastify";
@@ -340,6 +340,8 @@ function formatType(type) {
       return "  Applied";
     case "accepted":
       return "Offered";
+    case "rejected":
+      return "Declined";
     case "other":
       return "Other";
   }

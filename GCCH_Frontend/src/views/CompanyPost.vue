@@ -329,7 +329,13 @@
                     ><strong>Schedule: </strong
                     >{{ application.scheduled_at }}</span
                   >
-                  <span><strong>Venue: </strong>{{ application.venue }}</span>
+                  <span><strong>Venue: </strong
+                    >{{ application.venue }}</span>
+                  <span>
+
+                    <strong>Comment: </strong
+                      >{{ application.comment || "No comment provided" }}
+                  </span>
 
                   <div class="application-documents">
                     <a
