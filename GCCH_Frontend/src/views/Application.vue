@@ -332,6 +332,8 @@ function formatType(type) {
       return "Message";
     case "for_interview":
       return "For Interview";
+    case "interviewed":
+      return "Interviewed";
     case "screening":
       return "For Screening";
     case "applied":
