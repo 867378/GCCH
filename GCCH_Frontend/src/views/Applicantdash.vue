@@ -1265,6 +1265,11 @@ const updateChart = () => {
   }
 
   const ctx = document.getElementById("statsChart");
+  if (!ctx) {
+    // Canvas not yet rendered
+    return;
+  }
+
   chartInstance.value = new Chart(ctx, {
     type: "bar",
     data: {
@@ -2654,7 +2659,7 @@ label {
   border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-content: center;
+   justify-content: center;
 }
 
 .notif-icon {
