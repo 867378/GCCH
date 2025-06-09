@@ -410,7 +410,6 @@ async function continueAction() {
       {
         role: selectedRole.value,
       },
-      { withCredentials: true }
     );
 
     localStorage.setItem("onboarding_in_progress", "true");
@@ -513,7 +512,6 @@ const submitPhotoForm = async () => {
       headers: {
         "Content-Type": "multipart/form-data",
       },
-      withCredentials: true,
     });
 
     createToast("Profile completed successfully!", {

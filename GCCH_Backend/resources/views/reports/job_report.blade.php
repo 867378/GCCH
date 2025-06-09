@@ -85,7 +85,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($job->applications as $idx => $app)
+            @forelse ($job->applications as $idx => $app)
                 <tr>
                     <td>{{ $idx + 1 }}</td>
                     <td>{{ $app->applicant->first_name }} {{ $app->applicant->last_name }}</td>
@@ -98,9 +98,9 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align:center;">No applicants yet.</td>
+                    <td colspan="8" style="text-align:center;">No applicants yet.</td>
                 </tr>
-            @endforeach
+            @endforelse
         </tbody>
     </table>
 

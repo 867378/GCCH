@@ -1,6 +1,6 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
-import { initializeCsrfCookie } from './plugins/sanctum';
+// import { initializeCsrfCookie } from './plugins/sanctum';
 import axiosInstance from './plugins/axios';
 import App from "./App.vue";
 import router from "./router";
@@ -9,9 +9,9 @@ const app = createApp(App);
 
 async function bootstrap() {
     try {
-        // Initialize CSRF cookie before setting up the app
-        await initializeCsrfCookie();
-        console.log('CSRF cookie initialized successfully');
+        // // Initialize CSRF cookie before setting up the app
+        // await initializeCsrfCookie();
+        // console.log('CSRF cookie initialized successfully');
 
         app.config.globalProperties.$axios = axiosInstance;
         app.use(createPinia());

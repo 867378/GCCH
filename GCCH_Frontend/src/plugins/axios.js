@@ -1,13 +1,12 @@
 import axios from 'axios';
 import router from '../router';
 import { createToast } from 'mosha-vue-toastify';
-import { refreshCsrfToken } from './sanctum';
 import 'mosha-vue-toastify/dist/style.css';
 
 const axiosInstance = axios.create({
     baseURL: 'http://localhost:8000/api', // Changed from localhost to 127.0.0.1
-    withCredentials: true,
-    withXSRFToken: true,
+    // baseUrl: 'https://gcch-backend.onrender.com/api', // Use this for production
+    withCredentials: false,
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -21,11 +20,6 @@ axiosInstance.interceptors.request.use(
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
-        }
-
-        // Check for CSRF token
-        if (!document.cookie.includes('XSRF-TOKEN')) {
-            await refreshCsrfToken();
         }
 
         return config;
@@ -63,17 +57,6 @@ axiosInstance.interceptors.response.use(
                 localStorage.removeItem('token');
                 delete axiosInstance.defaults.headers.common['Authorization'];
                 router.push('/login');
-                break;
-            case 419: // CSRF token mismatch
-                try {
-                    const refreshed = await refreshCsrfToken();
-                    if (refreshed && error.config) {
-                        // Retry the original request
-                        return axiosInstance(error.config);
-                    }
-                } catch (retryError) {
-                    console.error('Failed to refresh CSRF token:', retryError);
-                }
                 break;
             case 429:
                 createToast('Too many requests. Please try again later.', {
